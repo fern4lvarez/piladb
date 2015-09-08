@@ -4,8 +4,8 @@ import "testing"
 
 func TestNewStack(t *testing.T) {
 	stack := NewStack()
-	if stack.Head != nil {
-		t.Error("stack.Head is not nil")
+	if stack.head != nil {
+		t.Error("stack.head is not nil")
 	}
 	if stack.size != 0 {
 		t.Errorf("stack.size is %v, expected 0", stack.size)
@@ -16,10 +16,10 @@ func TestStackPush(t *testing.T) {
 	stack := NewStack()
 	stack.Push(8)
 
-	if stack.Head == nil {
-		t.Error("stack.Head is nil")
-	} else if stack.Head.data != 8 {
-		t.Errorf("stack.Head data is %v, expected 8", stack.Head.data)
+	if stack.head == nil {
+		t.Error("stack.head is nil")
+	} else if stack.head.data != 8 {
+		t.Errorf("stack.head data is %v, expected 8", stack.head.data)
 	}
 	if stack.size != 1 {
 		t.Errorf("stack.size is %v, expected %v", stack.size, 1)
@@ -38,10 +38,10 @@ func TestStackPop(t *testing.T) {
 	if element != 8 {
 		t.Errorf("element is %v, expected %v", element, 8)
 	}
-	if stack.Head == nil {
-		t.Error("stack.Head is nil")
-	} else if stack.Head.data != "test" {
-		t.Errorf("stack.Head data is %v, expected %v", stack.Head.data, "test")
+	if stack.head == nil {
+		t.Error("stack.head is nil")
+	} else if stack.head.data != "test" {
+		t.Errorf("stack.head data is %v, expected %v", stack.head.data, "test")
 	}
 	if stack.size != 1 {
 		t.Errorf("stack.size is %v, expected %v", stack.size, 1)

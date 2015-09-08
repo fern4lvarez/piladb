@@ -15,7 +15,7 @@ type Frame struct {
 // containing a pointer to the first Frame as a head and the
 // size of the stack.
 type Stack struct {
-	Head *Frame
+	head *Frame
 	size int
 }
 
@@ -26,14 +26,14 @@ func NewStack() *Stack {
 }
 
 // Push adds a new element on top of the stack, creating
-// a new head holding this data and updating its Head to
+// a new head holding this data and updating its head to
 // the previous stack's head.
 func (s *Stack) Push(element interface{}) {
 	head := &Frame{
 		data: element,
-		next: s.Head,
+		next: s.head,
 	}
-	s.Head = head
+	s.head = head
 	s.size++
 }
 
@@ -41,12 +41,12 @@ func (s *Stack) Push(element interface{}) {
 // updating its head to the next Frame. If the stack was empty,
 // it returns an error.
 func (s *Stack) Pop() (interface{}, error) {
-	if s.Head == nil {
+	if s.head == nil {
 		return nil, fmt.Errorf("stack is empty")
 	}
 
-	element := s.Head.data
-	s.Head = s.Head.next
+	element := s.head.data
+	s.head = s.head.next
 	s.size--
 	return element, nil
 }
@@ -58,8 +58,8 @@ func (s *Stack) Size() int {
 
 // Peek returns the element on top of the stack.
 func (s *Stack) Peek() interface{} {
-	if s.Head == nil {
+	if s.head == nil {
 		return nil
 	}
-	return s.Head.data
+	return s.head.data
 }
