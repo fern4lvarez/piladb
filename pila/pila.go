@@ -2,7 +2,10 @@
 // and stacks.
 package pila
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // Pilla contains a reference to all the existing Databases, i.e.
 // the currently running piladb instance
@@ -26,4 +29,19 @@ func (p *Pila) CreateDatabase(name string) fmt.Stringer {
 	db.Pila = p
 	p.Databases[db.ID] = db
 	return db.ID
+}
+
+// AddDatabase adds a given Database to the Pila. It returns and error if the Database
+// already had an assigned Pila, or if the Pila already contained the Database.
+func (p *Pila) AddDatabase(db *Database) error {
+	if db.Pila != nil {
+		return errors.New("database already added to a pila")
+	}
+	if _, ok := p.Databases[db.ID]; ok {
+		return errors.New("pila already contains database")
+	}
+
+	db.Pila = p
+	p.Databases[db.ID] = db
+	return nil
 }
