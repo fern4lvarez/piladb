@@ -1,4 +1,4 @@
-// package uuid provides the UUID type and
+// Package uuid provides the UUID type and
 // helper functions.
 package uuid
 

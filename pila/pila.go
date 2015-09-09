@@ -1,4 +1,4 @@
-// package pila represents the Go library that handles the Pila, databases
+// Package pila represents the Go library that handles the Pila, databases
 // and stacks.
 package pila
 
