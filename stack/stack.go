@@ -2,8 +2,6 @@
 // of a stack using a linked list.
 package stack
 
-import "fmt"
-
 // Frame represents an element of the stack. It contains
 // data and the link to the next Frame as a pointer.
 type Frame struct {
@@ -39,16 +37,16 @@ func (s *Stack) Push(element interface{}) {
 
 // Pop removes and returns the element on top of the stack,
 // updating its head to the next Frame. If the stack was empty,
-// it returns an error.
-func (s *Stack) Pop() (interface{}, error) {
+// it returns false.
+func (s *Stack) Pop() (interface{}, bool) {
 	if s.head == nil {
-		return nil, fmt.Errorf("stack is empty")
+		return nil, false
 	}
 
 	element := s.head.data
 	s.head = s.head.next
 	s.size--
-	return element, nil
+	return element, true
 }
 
 // Size returns the number of elements that a stack contains.

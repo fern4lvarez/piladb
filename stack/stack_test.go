@@ -31,9 +31,9 @@ func TestStackPop(t *testing.T) {
 	stack.Push("test")
 	stack.Push(8)
 
-	element, err := stack.Pop()
-	if err != nil {
-		t.Errorf("err is not nil")
+	element, ok := stack.Pop()
+	if !ok {
+		t.Errorf("stack.Pop() not ok")
 	}
 	if element != 8 {
 		t.Errorf("element is %v, expected %v", element, 8)
@@ -48,11 +48,11 @@ func TestStackPop(t *testing.T) {
 	}
 }
 
-func TestStackPop_Empty(t *testing.T) {
+func TestStackPop_False(t *testing.T) {
 	stack := NewStack()
-	_, err := stack.Pop()
-	if err == nil {
-		t.Error("err is nil")
+	_, ok := stack.Pop()
+	if ok {
+		t.Error("stack.Pop() is ok")
 	}
 }
 
