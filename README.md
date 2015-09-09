@@ -1,4 +1,4 @@
-piladb
+piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb)
 ======
 
 > _[pee-lah-dee-bee]_. _pila_ means _stack_ in Spanish.
