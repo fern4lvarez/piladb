@@ -1,9 +1,15 @@
 package pila
 
+import (
+	"fmt"
+
+	"github.com/fern4lvarez/piladb/pkg/uuid"
+)
+
 // Database represents a piladb database
 type Database struct {
 	// ID is a unique identifier of the database
-	ID string
+	ID fmt.Stringer
 	// Name of the database
 	Name string
 	// Pointer to the current piladb instance
@@ -14,7 +20,7 @@ type Database struct {
 // without any link to the piladb instance.
 func NewDatabase(name string) *Database {
 	return &Database{
-		ID:   name,
+		ID:   uuid.New(name),
 		Name: name,
 	}
 }
