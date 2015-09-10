@@ -20,15 +20,15 @@ func TestStackPush(t *testing.T) {
 	stack := NewStack("test-stack")
 	stack.Push(1)
 
-	if stack.Base.Size() != 1 {
-		t.Errorf("stack.Base.Size() is %d, expected %d", stack.Base.Size(), 0)
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
 	}
 
 	stack.Push(2)
 	stack.Push(struct{ id string }{id: "test"})
 
-	if stack.Base.Size() != 3 {
-		t.Errorf("stack.Base.Size() is %d, expected %d", stack.Base.Size(), 3)
+	if stack.Size() != 3 {
+		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 3)
 	}
 }
 
@@ -44,8 +44,8 @@ func TestStackPop(t *testing.T) {
 	if element != 8 {
 		t.Errorf("element is %v, expected %v", element, 8)
 	}
-	if stack.Base.Size() != 1 {
-		t.Errorf("stack.Base.Size() is %d, expected %d", stack.Base.Size(), 1)
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
 	}
 }
 

@@ -15,8 +15,9 @@ type Stack struct {
 	Name string
 	// Database associated to the Stack
 	Database *Database
-	// Base represent the Stack data structure
-	Base *stack.Stack
+
+	// base represent the Stack data structure
+	base *stack.Stack
 }
 
 // NewStack creates a new Stack given a name without
@@ -25,27 +26,27 @@ func NewStack(name string) *Stack {
 	s := &Stack{}
 	s.ID = uuid.New(name)
 	s.Name = name
-	s.Base = stack.NewStack()
+	s.base = stack.NewStack()
 	return s
 }
 
 // Push an element on top of the Stack.
 func (s *Stack) Push(element interface{}) {
-	s.Base.Push(element)
+	s.base.Push(element)
 }
 
 // Pop removes and returns the element on top of the Stack.
 //If the Stack was empty, it returns false.
 func (s *Stack) Pop() (interface{}, bool) {
-	return s.Base.Pop()
+	return s.base.Pop()
 }
 
 // Push returns the size of the Stack.
 func (s *Stack) Size() int {
-	return s.Base.Size()
+	return s.base.Size()
 }
 
 // Peek returns the element on top of the Stack.
 func (s *Stack) Peek() interface{} {
-	return s.Base.Peek()
+	return s.base.Peek()
 }

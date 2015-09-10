@@ -18,11 +18,11 @@ func TestNewStack(t *testing.T) {
 	if stack.Database != nil {
 		t.Error("stack.Database is not nil")
 	}
-	if stack.Base == nil {
-		t.Fatalf("stack.Base is nil")
+	if stack.base == nil {
+		t.Fatalf("stack.base is nil")
 	}
-	if stack.Base.Size() != 0 {
-		t.Fatalf("stack.Base.Size() is %d, expected %d", stack.Base.Size(), 0)
+	if stack.base.Size() != 0 {
+		t.Fatalf("stack.base.Size() is %d, expected %d", stack.base.Size(), 0)
 	}
 
 }
