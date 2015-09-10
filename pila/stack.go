@@ -28,3 +28,24 @@ func NewStack(name string) *Stack {
 	s.Base = stack.NewStack()
 	return s
 }
+
+// Push an element on top of the Stack.
+func (s *Stack) Push(element interface{}) {
+	s.Base.Push(element)
+}
+
+// Pop removes and returns the element on top of the Stack.
+//If the Stack was empty, it returns false.
+func (s *Stack) Pop() (interface{}, bool) {
+	return s.Base.Pop()
+}
+
+// Push returns the size of the Stack.
+func (s *Stack) Size() int {
+	return s.Base.Size()
+}
+
+// Peek returns the element on top of the Stack.
+func (s *Stack) Peek() interface{} {
+	return s.Base.Peek()
+}
