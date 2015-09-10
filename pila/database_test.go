@@ -1,6 +1,9 @@
 package pila
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestNewDatabase(t *testing.T) {
 	db := NewDatabase("test-1")
@@ -13,5 +16,26 @@ func TestNewDatabase(t *testing.T) {
 	}
 	if db.Pila != nil {
 		t.Error("db.Pila is not nil")
+	}
+}
+
+func TestDatabaseCreateStack(t *testing.T) {
+	db := NewDatabase("test-db")
+	id := db.CreateStack("test-stack")
+
+	if id == nil {
+		t.Fatal("stack ID is nil")
+	}
+
+	stack, ok := db.Stacks[id]
+	if !ok {
+		t.Fatal("stack not found in database")
+	}
+	if stack.ID != id {
+		t.Errorf("stack ID is %v, expected %v", stack.ID, id)
+	}
+
+	if !reflect.DeepEqual(stack.Database, db) {
+		t.Errorf("stack Database is %v, expected %v", stack.Database, db)
 	}
 }
