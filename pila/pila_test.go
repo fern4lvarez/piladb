@@ -63,3 +63,30 @@ func TestPilaAddDatabase_Error(t *testing.T) {
 		t.Error("err is nil")
 	}
 }
+
+func TestPilaRemoveDatabase(t *testing.T) {
+	pila := NewPila()
+	db := NewDatabase("test")
+	pila.AddDatabase(db)
+
+	if ok := pila.RemoveDatabase(db.ID); !ok {
+		t.Errorf("RemoveDatabase did not succeed")
+	}
+
+	if db.Pila != nil {
+		t.Errorf("a pila is assigned to database %v", &db.Pila, db.Name)
+	}
+
+	if _, ok := pila.Databases[db.ID]; ok {
+		t.Errorf("Removed database does exist on pila")
+	}
+}
+
+func TestPilaRemoveDatabasei_False(t *testing.T) {
+	pila := NewPila()
+	db := NewDatabase("test")
+
+	if ok := pila.RemoveDatabase(db.ID); ok {
+		t.Errorf("RemoveDatabase did succeed")
+	}
+}

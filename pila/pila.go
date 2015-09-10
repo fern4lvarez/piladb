@@ -45,3 +45,16 @@ func (p *Pila) AddDatabase(db *Database) error {
 	p.Databases[db.ID] = db
 	return nil
 }
+
+// RemoveDatabase deletes a Database given an ID from the Pila and returns
+// true if it succeeded.
+func (p *Pila) RemoveDatabase(id fmt.Stringer) bool {
+	db, ok := p.Databases[id]
+	if !ok {
+		return false
+	}
+
+	delete(p.Databases, id)
+	db.Pila = nil
+	return true
+}
