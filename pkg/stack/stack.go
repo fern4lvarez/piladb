@@ -2,19 +2,19 @@
 // of a stack using a linked list.
 package stack
 
-// Frame represents an element of the stack. It contains
-// data and the link to the next Frame as a pointer.
-type Frame struct {
-	data interface{}
-	next *Frame
-}
-
 // Stack represents the stack data structure as a linked list,
 // containing a pointer to the first Frame as a head and the
 // size of the stack.
 type Stack struct {
-	head *Frame
+	head *frame
 	size int
+}
+
+// frame represents an element of the stack. It contains
+// data and the link to the next Frame as a pointer.
+type frame struct {
+	data interface{}
+	next *frame
 }
 
 // NewStack returns a blank stack, where head is nil and size
@@ -27,7 +27,7 @@ func NewStack() *Stack {
 // a new head holding this data and updating its head to
 // the previous stack's head.
 func (s *Stack) Push(element interface{}) {
-	head := &Frame{
+	head := &frame{
 		data: element,
 		next: s.head,
 	}
