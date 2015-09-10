@@ -8,8 +8,9 @@ import (
 func TestNewPila(t *testing.T) {
 	pila := NewPila()
 	if pila == nil {
-		t.Error("pila is nil")
-	} else if pila.Databases == nil {
+		t.Fatal("pila is nil")
+	}
+	if pila.Databases == nil {
 		t.Error("pila.Databases is nil")
 	}
 
