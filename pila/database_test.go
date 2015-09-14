@@ -42,3 +42,56 @@ func TestDatabaseCreateStack(t *testing.T) {
 		t.Errorf("stack Database is %v, expected %v", stack.Database, db)
 	}
 }
+
+func TestDatabaseAddStack(t *testing.T) {
+	db := NewDatabase("test-db")
+	stack := NewStack("test-stack")
+
+	err := db.AddStack(stack)
+	if err != nil {
+		t.Fatal("err is not nil")
+	}
+
+	stack2, ok := db.Stacks[stack.ID]
+	if !ok {
+		t.Error("Stack not found in Database")
+	}
+	if !reflect.DeepEqual(stack2, stack) {
+		t.Errorf("Stack is %v, expected %v", stack2, stack)
+	}
+	if !reflect.DeepEqual(stack.Database, db) {
+		t.Errorf("Stack.Database is %v, expected %v", stack.Database, db)
+	}
+}
+
+func TestDatabaseAddStack_ErrorStackAlreadyAdded(t *testing.T) {
+	db := NewDatabase("test-db")
+	db2 := NewDatabase("test-db-2")
+	stack := NewStack("test-stack")
+
+	err := db.AddStack(stack)
+	if err != nil {
+		t.Fatal("err is not nil")
+	}
+
+	err = db2.AddStack(stack)
+	if err == nil {
+		t.Fatal("err is nil")
+	}
+}
+
+func TestDatabaseAddStack_ErrorDBAlreadyContainsStack(t *testing.T) {
+	db := NewDatabase("test-db")
+	stack := NewStack("test-stack")
+	stack2 := NewStack("test-stack")
+
+	err := db.AddStack(stack)
+	if err != nil {
+		t.Fatal("err is not nil")
+	}
+
+	err = db.AddStack(stack2)
+	if err == nil {
+		t.Fatal("err is nil")
+	}
+}

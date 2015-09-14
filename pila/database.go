@@ -37,3 +37,19 @@ func (db *Database) CreateStack(name string) fmt.Stringer {
 	db.Stacks[stack.ID] = stack
 	return stack.ID
 }
+
+// AddStack adds a given Stack to the Database, returning
+// an error if any was found.
+func (db *Database) AddStack(stack *Stack) error {
+	if stack.Database != nil {
+		return fmt.Errorf("stack %v already added to database %v", stack.Name, stack.Database.Name)
+	}
+
+	if _, ok := db.Stacks[stack.ID]; ok {
+		return fmt.Errorf("database %v already contains stack %v", db.Name, stack.Name)
+	}
+
+	stack.Database = db
+	db.Stacks[stack.ID] = stack
+	return nil
+}
