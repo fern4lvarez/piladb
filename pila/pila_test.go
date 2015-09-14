@@ -83,7 +83,7 @@ func TestPilaRemoveDatabase(t *testing.T) {
 	}
 }
 
-func TestPilaRemoveDatabasei_False(t *testing.T) {
+func TestPilaRemoveDatabase_False(t *testing.T) {
 	pila := NewPila()
 	db := NewDatabase("test")
 
