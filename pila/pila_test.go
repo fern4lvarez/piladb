@@ -33,7 +33,7 @@ func TestPilaAddDatabase(t *testing.T) {
 	db := NewDatabase("test")
 	err := pila.AddDatabase(db)
 	if err != nil {
-		t.Error("err is not nil")
+		t.Fatal("err is not nil")
 	}
 
 	id := db.ID
@@ -41,7 +41,7 @@ func TestPilaAddDatabase(t *testing.T) {
 	if !ok {
 		t.Errorf("db %v not added to pila", id)
 	} else if !reflect.DeepEqual(db.Pila, pila) {
-		t.Errorf("db %v does not contain pile", id)
+		t.Errorf("db %v does not contain pila", id)
 	}
 
 }
@@ -89,5 +89,32 @@ func TestPilaRemoveDatabase_False(t *testing.T) {
 
 	if ok := pila.RemoveDatabase(db.ID); ok {
 		t.Errorf("RemoveDatabase did succeed")
+	}
+}
+
+func TestPilaHasDatabase(t *testing.T) {
+	pila := NewPila()
+	db := NewDatabase("test")
+	err := pila.AddDatabase(db)
+	if err != nil {
+		t.Fatal("err is not nil")
+	}
+
+	db2, ok := pila.HasDatabase(db.ID)
+	if !ok {
+		t.Errorf("pila has no Database %v", db.ID)
+	} else if !reflect.DeepEqual(db2, db) {
+		t.Errorf("Database is %v, expected %v", db2, db)
+	}
+}
+
+func TestPilaHasDatabase_False(t *testing.T) {
+	pila := NewPila()
+	db := NewDatabase("test")
+	db2, ok := pila.HasDatabase(db.ID)
+	if ok {
+		t.Errorf("pila has Database %v", db.ID)
+	} else if db2 != nil {
+		t.Errorf("Database %v is not nil", db2)
 	}
 }
