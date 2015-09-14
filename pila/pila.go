@@ -59,10 +59,10 @@ func (p *Pila) RemoveDatabase(id fmt.Stringer) bool {
 	return true
 }
 
-// HasDatabase determines if a Database given by an ID is part
+// Database determines if a Database given by an ID is part
 // of the Pila, returning a pointer to the Database and a boolean
 // flag.
-func (p *Pila) HasDatabase(id fmt.Stringer) (*Database, bool) {
+func (p *Pila) Database(id fmt.Stringer) (*Database, bool) {
 	db, ok := p.Databases[id]
 	return db, ok
 }
