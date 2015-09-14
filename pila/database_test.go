@@ -34,6 +34,9 @@ func TestDatabaseCreateStack(t *testing.T) {
 	if stack.ID != id {
 		t.Errorf("stack ID is %v, expected %v", stack.ID, id)
 	}
+	if stack.Name != "test-stack" {
+		t.Errorf("stack Name is %s, expected %s", stack.Name, "test-stack")
+	}
 
 	if !reflect.DeepEqual(stack.Database, db) {
 		t.Errorf("stack Database is %v, expected %v", stack.Database, db)

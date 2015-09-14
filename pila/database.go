@@ -32,7 +32,7 @@ func NewDatabase(name string) *Database {
 // CreateStack creates a new Stack, given a name, which is associated
 // to the Database.
 func (db *Database) CreateStack(name string) fmt.Stringer {
-	stack := NewStack("test")
+	stack := NewStack(name)
 	stack.Database = db
 	db.Stacks[stack.ID] = stack
 	return stack.ID
