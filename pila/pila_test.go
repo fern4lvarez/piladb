@@ -75,7 +75,7 @@ func TestPilaRemoveDatabase(t *testing.T) {
 	}
 
 	if db.Pila != nil {
-		t.Errorf("a pila is assigned to database %v", &db.Pila, db.Name)
+		t.Errorf("a pila is assigned to database %v", db.Name)
 	}
 
 	if _, ok := pila.Databases[db.ID]; ok {
