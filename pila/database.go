@@ -53,3 +53,16 @@ func (db *Database) AddStack(stack *Stack) error {
 	db.Stacks[stack.ID] = stack
 	return nil
 }
+
+// RemoveStack removes a Stack from the Database given an id,
+// returning true if it succeeded. It will return false if the
+// Stack wasn't added to the Database.
+func (db *Database) RemoveStack(id fmt.Stringer) bool {
+	stack, ok := db.Stacks[id]
+	if !ok {
+		return false
+	}
+	stack.Database = nil
+	delete(db.Stacks, id)
+	return true
+}

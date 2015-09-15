@@ -95,3 +95,38 @@ func TestDatabaseAddStack_ErrorDBAlreadyContainsStack(t *testing.T) {
 		t.Fatal("err is nil")
 	}
 }
+
+func TestDatabaseRemoveStack(t *testing.T) {
+	db := NewDatabase("test-db")
+	stack := NewStack("test-stack")
+
+	err := db.AddStack(stack)
+	if err != nil {
+		t.Fatal("err is not nil")
+	}
+
+	ok := db.RemoveStack(stack.ID)
+	if !ok {
+		t.Errorf("stack %v was not removed from database %v", stack.Name, db.Name)
+	}
+
+	_, ok = db.Stacks[stack.ID]
+	if ok {
+		t.Errorf("stack %v was found in database %v", stack.Name, db.Name)
+	}
+
+	if stack.Database != nil {
+		t.Errorf("stack %v still associated to database %v", stack.Name, stack.Database.Name)
+	}
+
+}
+
+func TestDatabaseRemoveStack_False(t *testing.T) {
+	db := NewDatabase("test-db")
+	stack := NewStack("test-stack")
+
+	ok := db.RemoveStack(stack.ID)
+	if ok {
+		t.Errorf("stack %v was removed from database %v", stack.Name, db.Name)
+	}
+}
