@@ -1,0 +1,9 @@
+mode: set
+github.com/fern4lvarez/piladb/pilad/conn.go:19.22,24.2 4 1
+github.com/fern4lvarez/piladb/pilad/conn.go:27.70,31.2 3 1
+github.com/fern4lvarez/piladb/pilad/main.go:9.13,15.2 4 0
+github.com/fern4lvarez/piladb/pilad/port.go:8.20,10.16 2 1
+github.com/fern4lvarez/piladb/pilad/port.go:14.2,14.13 1 1
+github.com/fern4lvarez/piladb/pilad/port.go:10.16,12.3 1 1
+github.com/fern4lvarez/piladb/pilad/status.go:15.39,21.2 5 1
+github.com/fern4lvarez/piladb/pilad/status.go:25.52,28.2 2 1
