@@ -107,16 +107,20 @@ func TestDatabaseRemoveStack(t *testing.T) {
 
 	ok := db.RemoveStack(stack.ID)
 	if !ok {
-		t.Errorf("stack %v was not removed from database %v", stack.Name, db.Name)
+		t.Errorf("stack %s was not removed from database %s", stack.Name, db.Name)
 	}
 
 	_, ok = db.Stacks[stack.ID]
 	if ok {
-		t.Errorf("stack %v was found in database %v", stack.Name, db.Name)
+		t.Errorf("stack %s was found in database %s", stack.Name, db.Name)
 	}
 
 	if stack.Database != nil {
-		t.Errorf("stack %v still associated to database %v", stack.Name, stack.Database.Name)
+		t.Errorf("stack %s still associated to database %s", stack.Name, stack.Database.Name)
+	}
+
+	if stack.base != nil {
+		t.Errorf("stack %s still points to a base stack", stack.Name)
 	}
 
 }

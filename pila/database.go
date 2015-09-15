@@ -63,6 +63,7 @@ func (db *Database) RemoveStack(id fmt.Stringer) bool {
 		return false
 	}
 	stack.Database = nil
+	stack.base = nil
 	delete(db.Stacks, id)
 	return true
 }
