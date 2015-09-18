@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/fern4lvarez/piladb/_vendor/src/github.com/gorilla/mux"
+	"github.com/fern4lvarez/piladb/pilad/_vendor/src/github.com/gorilla/mux"
 )
 
 // Router returns a gorila/mux Router with all specified endpoints and
