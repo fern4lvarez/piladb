@@ -55,3 +55,33 @@ func TestStatusHandler(t *testing.T) {
 		t.Errorf("status is %s", string(statusJSON))
 	}
 }
+
+func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/_statuss", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.notFoundHandler(response, request)
+
+	if response.Code != 404 {
+		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+}
+
+func TestNotFoundHandler_WrongType(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("POST", "/_status", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.notFoundHandler(response, request)
+
+	if response.Code != 404 {
+		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+}
