@@ -24,7 +24,7 @@ func TestNewConn(t *testing.T) {
 	}
 
 	if conn.Status.Code != "OK" {
-		t.Errorf("conn.Status is %s, expected %s", "OK")
+		t.Errorf("conn.Status is %s, expected %s", conn.Status.Code, "OK")
 	}
 }
 

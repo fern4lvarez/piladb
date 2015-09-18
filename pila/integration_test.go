@@ -23,10 +23,10 @@ func TestIntegrationBasic(t *testing.T) {
 	}
 
 	if stack1.Size() != 3 {
-		t.Errorf("stack1.Size is %d, expected %d", stack1.Size, 3)
+		t.Errorf("stack1.Size is %d, expected %d", stack1.Size(), 3)
 	}
 	if stack2.Size() != 0 {
-		t.Errorf("stack2.Size is %d, expected %d", stack2.Size, 0)
+		t.Errorf("stack2.Size is %d, expected %d", stack2.Size(), 0)
 	}
 
 	if stack1.Peek() != interface{}("baz") {
@@ -46,10 +46,10 @@ func TestIntegrationBasic(t *testing.T) {
 	}
 
 	if stack1.Size() != 0 {
-		t.Errorf("stack1.Size is %d, expected %d", stack1.Size, 0)
+		t.Errorf("stack1.Size is %d, expected %d", stack1.Size(), 0)
 	}
 	if stack2.Size() != 3 {
-		t.Errorf("stack2.Size is %d, expected %d", stack2.Size, 3)
+		t.Errorf("stack2.Size is %d, expected %d", stack2.Size(), 3)
 	}
 
 	if stack1.Peek() != nil {
