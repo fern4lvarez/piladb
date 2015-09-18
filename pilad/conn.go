@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -30,10 +29,10 @@ func NewConn() *Conn {
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
-	fmt.Fprintln(w, string(c.Status.ToJson(time.Now())))
+	w.Write(c.Status.ToJson(time.Now()))
 }
 
-// notFoundHandler
+// notFoundHandler logs and returns a 404 NotFound response.
 func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL, http.StatusNotFound)
 	http.NotFound(w, r)
