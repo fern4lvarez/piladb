@@ -28,7 +28,7 @@ Development
 ```bash
 go get github.com/fern4lvarez/piladb/...
 cd $GOPATH/src/github.com/fern4lvarez/piladb
-go test -v -cover ./...
+make all
 ```
 
 Credits
