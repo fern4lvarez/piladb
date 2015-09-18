@@ -8,6 +8,10 @@ in order to interact with the system.
 Endpoints
 ---------
 
+### `/_status`
+
+Returns a JSON document with the current piladb status.
+
 ### `/databases`
 
 ### `/databases/$DATABASE_ID`
