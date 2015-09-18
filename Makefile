@@ -13,5 +13,5 @@ testv:
 vet:
 	go vet ./...
 
-server: get
+pilad: get
 	$(GOPATH)/bin/pilad
