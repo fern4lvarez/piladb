@@ -2,7 +2,10 @@
 // program.
 package version
 
-import "os/exec"
+import (
+	"os/exec"
+	"strings"
+)
 
 // Returns the commit hash of the repository.
 func CommitHash() string {
@@ -12,5 +15,5 @@ func CommitHash() string {
 	if err != nil {
 		return "unknown"
 	}
-	return string(b)
+	return strings.Replace(string(b), "\n", "", -1)
 }

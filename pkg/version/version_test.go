@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommitHash(t *testing.T) {
-	if len(CommitHash()) != 41 {
+	if len(CommitHash()) != 40 {
 		t.Errorf("commit hash version unexpected")
 	}
 }
