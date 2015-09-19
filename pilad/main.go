@@ -1,3 +1,4 @@
+// Binary pilad provides the daemon that runs the piladb server.
 package main
 
 import (

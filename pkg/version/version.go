@@ -1,4 +1,4 @@
-// package version provides ways to get the version of the
+// Package version provides ways to get the version of the
 // program.
 package version
 
