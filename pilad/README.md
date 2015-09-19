@@ -10,7 +10,7 @@ Endpoints
 
 ### `/_status`
 
-Returns a JSON document with the current piladb status.
+`GET` Returns a JSON document with the current piladb status.
 
 ### `/databases`
 
