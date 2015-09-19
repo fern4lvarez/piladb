@@ -15,10 +15,10 @@ type Status struct {
 }
 
 // NewStatus returns a new piladb status.
-func NewStatus(now time.Time) *Status {
+func NewStatus(version string, now time.Time) *Status {
 	status := &Status{}
 	status.Code = "OK"
-	status.Version = "0"
+	status.Version = version
 	status.StartedAt = now
 	return status
 }

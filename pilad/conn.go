@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
+	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
 // Conn represents the current piladb connection, containing
@@ -19,7 +20,7 @@ type Conn struct {
 func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
-	conn.Status = NewStatus(time.Now())
+	conn.Status = NewStatus(version.CommitHash(), time.Now())
 	return conn
 }
 
