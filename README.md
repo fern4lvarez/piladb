@@ -31,13 +31,8 @@ cd $GOPATH/src/github.com/fern4lvarez/piladb
 make all
 ```
 
-Automation
-----------
-
-> You need Docker installed.
-
-For more information on how to work with `piladb` in Docker, please
-visit the [`dev`](dev/) directory.
+You can also use Docker to create `piladb` builds or development environment.
+Please see the [`dev`](dev/) directory.
 
 Release
 -------
