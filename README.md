@@ -31,6 +31,18 @@ cd $GOPATH/src/github.com/fern4lvarez/piladb
 make all
 ```
 
+Release
+-------
+
+> You need Docker installed.
+
+It's possible to get `pilad` binary releases by executing `make release`.
+This will cross-compile `pilad` in all available OS's and architectures.
+
+Alternatively, if you don't have docker installed, you can release `pilad` binary
+with the `make gox` command. For this, you need a configured Go environment and
+[`gox`](https://github.com/mitchellh/gox) installed.
+
 Credits
 -------
 

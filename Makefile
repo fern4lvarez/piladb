@@ -13,5 +13,11 @@ testv:
 vet:
 	go vet ./...
 
-pilad: get
+pilad:	get
 	$(GOPATH)/bin/pilad
+
+gox:	get
+	gox -output "dist/{{.OS}}/{{.Arch}}/$(git rev-parse HEAD)/{{.Dir}}" ./pilad
+
+release:
+	docker run --rm --name="piladb_release" -v "$(PWD)":/gopath/src/github.com/fern4lvarez/piladb -w /gopath/src/github.com/fern4lvarez/piladb tcnksm/gox:1.5 make gox
