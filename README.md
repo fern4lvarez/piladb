@@ -34,6 +34,8 @@ make all
 Automation
 ----------
 
+> You need Docker installed.
+
 For more information on how to work with `piladb` in Docker, please
 visit the [`dev`](dev/) directory.
 
