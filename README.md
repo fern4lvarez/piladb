@@ -31,6 +31,12 @@ cd $GOPATH/src/github.com/fern4lvarez/piladb
 make all
 ```
 
+Automation
+----------
+
+For more information on how to work with `piladb` in Docker, please
+visit the [`dev`](dev/) directory.
+
 Release
 -------
 
