@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -17,6 +19,9 @@ func TestNewStatus(t *testing.T) {
 	}
 	if status.Version != "v1" {
 		t.Errorf("version is %s, expected %s", status.Version, "v1")
+	}
+	if host := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH); status.Host != host {
+		t.Errorf("host is %s, expected %s", status.Host, host)
 	}
 	if status.StartedAt != now {
 		t.Errorf("version is %v expected %v", status.StartedAt, now)
@@ -41,7 +46,7 @@ func TestStatusToJson(t *testing.T) {
 	now := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 	status := NewStatus("v1", now)
 	oneHourLater := now.Add(60 * time.Minute)
-	expectedJSON := `{"status":"OK","version":"v1","started_at":"2009-11-10T23:00:00Z","running_for":3600}`
+	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","started_at":"2009-11-10T23:00:00Z","running_for":3600}`, runtime.GOOS, runtime.GOARCH)
 
 	json := status.ToJson(oneHourLater)
 	if json == nil {
