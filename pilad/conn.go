@@ -33,6 +33,13 @@ func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(c.Status.ToJson(time.Now()))
 }
 
+// databasesHandler returns the information of the running databases.
+func (c *Conn) databasesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write(c.Pila.Status())
+}
+
 // notFoundHandler logs and returns a 404 NotFound response.
 func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL, http.StatusNotFound)

@@ -3,14 +3,22 @@
 package pila
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 )
 
-// Pilla contains a reference to all the existing Databases, i.e.
-// the currently running piladb instance
+// Pila contains a reference to all the existing Databases, i.e.
+// the currently running piladb instance.
 type Pila struct {
 	Databases map[fmt.Stringer]*Database
+}
+
+// pilaStatus contains the status of the Pila instance.
+type pilaStatus struct {
+	NumberDatabases int      `json:"number_of_databases"`
+	Databases       []string `json:"databases"`
 }
 
 // NewPila return a blank piladb instance
@@ -65,4 +73,24 @@ func (p *Pila) RemoveDatabase(id fmt.Stringer) bool {
 func (p *Pila) Database(id fmt.Stringer) (*Database, bool) {
 	db, ok := p.Databases[id]
 	return db, ok
+}
+
+// Status returns the status of the Pila instance in json format.
+func (p *Pila) Status() []byte {
+	ps := pilaStatus{}
+	ps.NumberDatabases = len(p.Databases)
+	dbs := make([]string, 0, len(p.Databases))
+	for d := range p.Databases {
+		dbs = append(dbs, d.String())
+	}
+
+	var dbsSorted sort.StringSlice = dbs
+	dbsSorted.Sort()
+	ps.Databases = dbsSorted
+
+	// Do not check error as the Status type does
+	// not contain types that could cause such case.
+	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	b, _ := json.Marshal(ps)
+	return b
 }

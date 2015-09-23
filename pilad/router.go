@@ -12,6 +12,8 @@ func Router(conn *Conn) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")
+	r.HandleFunc("/databases", conn.databasesHandler).
+		Methods("GET")
 	r.NotFoundHandler = http.HandlerFunc(conn.notFoundHandler)
 	return r
 }

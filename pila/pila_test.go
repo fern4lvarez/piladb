@@ -118,3 +118,29 @@ func TestPilaDatabase_False(t *testing.T) {
 		t.Errorf("Database %v is not nil", db2)
 	}
 }
+
+func TestPilaStatus(t *testing.T) {
+	pila := NewPila()
+	db0 := NewDatabase("db0")
+	db1 := NewDatabase("db1")
+	db2 := NewDatabase("db2")
+	pila.AddDatabase(db0)
+	pila.AddDatabase(db1)
+	pila.AddDatabase(db2)
+
+	expectedStatus := `{"number_of_databases":3,"databases":["5d02dd2c3917fdd29abe20a2c1b5ea1c","714e49277eb730717e413b167b76ef78","93c6f621b761cd88017846beae63f4be"]}`
+
+	if status := pila.Status(); string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestPilaStatus_Empty(t *testing.T) {
+	pila := NewPila()
+
+	expectedStatus := `{"number_of_databases":0,"databases":[]}`
+
+	if status := pila.Status(); string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}

@@ -14,6 +14,8 @@ Endpoints
 
 ### `/databases`
 
+`GET` Returns the status of the currently running databases.
+
 ### `/databases/$DATABASE_ID`
 
 ### `/databases/$DATABASE_ID/stacks`

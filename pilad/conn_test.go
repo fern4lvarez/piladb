@@ -56,6 +56,34 @@ func TestStatusHandler(t *testing.T) {
 	}
 }
 
+func TestDatabasesHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/databases", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.databasesHandler(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	databases, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(databases) != `{"number_of_databases":0,"databases":[]}` {
+		t.Errorf("databases are %s, expected %s", string(databases), `{"number_of_databases":0,"databases":[]}`)
+	}
+}
+
 func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
 	conn := NewConn()
 	request, err := http.NewRequest("GET", "/_statuss", nil)
