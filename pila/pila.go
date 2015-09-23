@@ -79,14 +79,14 @@ func (p *Pila) Database(id fmt.Stringer) (*Database, bool) {
 func (p *Pila) Status() []byte {
 	ps := pilaStatus{}
 	ps.NumberDatabases = len(p.Databases)
-	dbs := make([]string, 0, len(p.Databases))
+	var dbs sort.StringSlice = make([]string, len(p.Databases))
+	i := 0
 	for d := range p.Databases {
-		dbs = append(dbs, d.String())
+		dbs[i] = d.String()
+		i++
 	}
-
-	var dbsSorted sort.StringSlice = dbs
-	dbsSorted.Sort()
-	ps.Databases = dbsSorted
+	dbs.Sort()
+	ps.Databases = dbs
 
 	// Do not check error as the Status type does
 	// not contain types that could cause such case.
