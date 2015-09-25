@@ -128,7 +128,7 @@ func TestPilaStatus(t *testing.T) {
 	pila.AddDatabase(db1)
 	pila.AddDatabase(db2)
 
-	expectedStatus := `{"number_of_databases":3,"databases":["5d02dd2c3917fdd29abe20a2c1b5ea1c","714e49277eb730717e413b167b76ef78","93c6f621b761cd88017846beae63f4be"]}`
+	expectedStatus := `{"number_of_databases":3,"databases":["db0","db1","db2"]}`
 
 	if status := pila.Status(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)

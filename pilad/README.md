@@ -14,10 +14,12 @@ Endpoints
 
 ### `/databases`
 
-`GET` Returns the status of the currently running databases.
+`GET /databases` Returns the status of the currently running databases.
 
-### `/databases/$DATABASE_ID`
+`GET /databases/$DATABASE_ID` Returns the status of database $DATABASE_ID.
 
-### `/databases/$DATABASE_ID/stacks`
+`PUT /databases/$DATABASE_NAME` Creates a new $DATABASE_NAME database.
 
-### `/databases/$DATABASE_ID/stacks/$STACK_ID`
+### `/databases/$DATABASE_NAME/stacks`
+
+### `/databases/$DATABASE_NAME/stacks/$STACK_NAME`
