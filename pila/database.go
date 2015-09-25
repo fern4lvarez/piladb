@@ -1,7 +1,9 @@
 package pila
 
 import (
+	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
@@ -16,6 +18,14 @@ type Database struct {
 	Pila *Pila
 	// Stacks associated to Database mapped by their ID
 	Stacks map[fmt.Stringer]*Stack
+}
+
+// databaseStatus represents the status of a Database.
+type databaseStatus struct {
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	NumberStacks int      `json:"number_of_stacks"`
+	Stacks       []string `json:"stacks,omitempty"`
 }
 
 // NewDatabase creates a new Database given a name,
@@ -66,4 +76,27 @@ func (db *Database) RemoveStack(id fmt.Stringer) bool {
 	stack.base = nil
 	delete(db.Stacks, id)
 	return true
+}
+
+// Status returns the status of the Database in json format.
+func (db *Database) Status() []byte {
+	dbs := databaseStatus{}
+	dbs.ID = db.ID.String()
+	dbs.Name = db.Name
+	dbs.NumberStacks = len(db.Stacks)
+
+	var ss sort.StringSlice = make([]string, len(db.Stacks))
+	n := 0
+	for sID := range db.Stacks {
+		ss[n] = sID.String()
+		n++
+	}
+	ss.Sort()
+	dbs.Stacks = ss
+
+	// Do not check error as the Status type does
+	// not contain types that could cause such case.
+	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	b, _ := json.Marshal(dbs)
+	return b
 }

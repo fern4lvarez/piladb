@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 )
 
 // Pila contains a reference to all the existing Databases, i.e.
@@ -17,8 +16,8 @@ type Pila struct {
 
 // pilaStatus contains the status of the Pila instance.
 type pilaStatus struct {
-	NumberDatabases int      `json:"number_of_databases"`
-	Databases       []string `json:"databases"`
+	NumberDatabases int              `json:"number_of_databases"`
+	Databases       []databaseStatus `json:"databases"`
 }
 
 // NewPila return a blank piladb instance
@@ -80,13 +79,17 @@ func (p *Pila) Status() []byte {
 	ps := pilaStatus{}
 	ps.NumberDatabases = len(p.Databases)
 
-	var dbs sort.StringSlice = make([]string, len(p.Databases))
+	dbs := make([]databaseStatus, len(p.Databases))
 	n := 0
 	for _, db := range p.Databases {
-		dbs[n] = db.Name
+		ds := databaseStatus{
+			ID:           db.ID.String(),
+			Name:         db.Name,
+			NumberStacks: len(db.Stacks),
+		}
+		dbs[n] = ds
 		n++
 	}
-	dbs.Sort()
 	ps.Databases = dbs
 
 	// Do not check error as the Status type does

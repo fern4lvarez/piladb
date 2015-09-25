@@ -1,6 +1,7 @@
 package pila
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -132,5 +133,26 @@ func TestDatabaseRemoveStack_False(t *testing.T) {
 	ok := db.RemoveStack(stack.ID)
 	if ok {
 		t.Errorf("stack %v was removed from database %v", stack.Name, db.Name)
+	}
+}
+
+func TestDatabaseStatus(t *testing.T) {
+	db := NewDatabase("db")
+	s0ID := db.CreateStack("s0")
+	s1ID := db.CreateStack("s1")
+	s2ID := db.CreateStack("s2")
+
+	expectedStatus := fmt.Sprintf(`{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":3,"stacks":["%s","%s","%s"]}`, s2ID, s0ID, s1ID)
+	if status := db.Status(); string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestDatabaseStatus_Empty(t *testing.T) {
+	db := NewDatabase("db")
+
+	expectedStatus := `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}`
+	if status := db.Status(); string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
 	}
 }
