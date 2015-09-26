@@ -122,13 +122,9 @@ func TestPilaDatabase_False(t *testing.T) {
 func TestPilaStatus(t *testing.T) {
 	pila := NewPila()
 	db0 := NewDatabase("db0")
-	db1 := NewDatabase("db1")
-	db2 := NewDatabase("db2")
 	pila.AddDatabase(db0)
-	pila.AddDatabase(db1)
-	pila.AddDatabase(db2)
 
-	expectedStatus := `{"number_of_databases":3,"databases":[{"id":"714e49277eb730717e413b167b76ef78","name":"db0","number_of_stacks":0},{"id":"93c6f621b761cd88017846beae63f4be","name":"db1","number_of_stacks":0},{"id":"5d02dd2c3917fdd29abe20a2c1b5ea1c","name":"db2","number_of_stacks":0}]}`
+	expectedStatus := `{"number_of_databases":1,"databases":[{"id":"714e49277eb730717e413b167b76ef78","name":"db0","number_of_stacks":0}]}`
 
 	if status := pila.Status(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
