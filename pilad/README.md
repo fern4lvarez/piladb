@@ -13,6 +13,7 @@ Endpoints
 `GET` Returns a JSON document with the current piladb status.
 
 ```
+200 OK
 {
   "status": "OK",
   "version": "511016882554615139ba590753af00519513f765",
@@ -27,6 +28,7 @@ Endpoints
 `GET /databases` Returns the status of the currently running databases.
 
 ```
+200 OK
 {
   "number_of_databases": 3,
   "databases": [
@@ -52,7 +54,19 @@ Endpoints
 
 `GET /databases/$DATABASE_ID` Returns the status of database $DATABASE_ID.
 
-`PUT /databases/$DATABASE_NAME` Creates a new $DATABASE_NAME database.
+`PUT /databases?name=$DATABASE_NAME` Creates a new $DATABASE_NAME database.
+
+```
+201 CREATED
+{
+  "number_of_stacks": 0,
+  "name": "db0",
+  "id": "714e49277eb730717e413b167b76ef78"
+}
+```
+
+Returns `400 BAD REQUEST` if name is not provided, and `409 CONFLICT` is
+`$DATABASE_NAME` already exists.
 
 ### `/databases/$DATABASE_NAME/stacks`
 

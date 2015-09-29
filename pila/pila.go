@@ -31,6 +31,8 @@ func NewPila() *Pila {
 
 // CreateDatabase creates a database given a name, and build the relation
 // between such database and the Pila. It return the ID of the database.
+// If a Database called `name` already exists, it will be restarted. So
+// please consider using AddDatabase in case of possible conflicts.
 func (p *Pila) CreateDatabase(name string) fmt.Stringer {
 	db := NewDatabase(name)
 	db.Pila = p

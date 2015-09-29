@@ -56,7 +56,7 @@ func TestStatusHandler(t *testing.T) {
 	}
 }
 
-func TestDatabasesHandler(t *testing.T) {
+func TestDatabasesHandler_GET(t *testing.T) {
 	conn := NewConn()
 	request, err := http.NewRequest("GET", "/databases", nil)
 	if err != nil {
@@ -81,6 +81,94 @@ func TestDatabasesHandler(t *testing.T) {
 
 	if string(databases) != `{"number_of_databases":0,"databases":[]}` {
 		t.Errorf("databases are %s, expected %s", string(databases), `{"number_of_databases":0,"databases":[]}`)
+	}
+}
+
+func TestDatabasesHandler_PUT(t *testing.T) {
+	// see TestCreateDatabaseHandler* tests for a further spec on
+	// how createDatabaseHandler works.
+	conn := NewConn()
+	request, err := http.NewRequest("PUT", "/databases", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.databasesHandler(response, request)
+
+	if response.Code != 400 {
+		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	}
+}
+
+func TestCreateDatabaseHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("PUT", "/databases?name=db", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createDatabaseHandler(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 201 {
+		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	}
+
+	databases, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(databases) != `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}` {
+		t.Errorf("databases are %s, expected %s", string(databases), `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}`)
+	}
+}
+
+func TestCreateDatabaseHandler_NoName(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("PUT", "/databases", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createDatabaseHandler(response, request)
+
+	if response.Code != 400 {
+		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	}
+}
+
+func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
+	conn := NewConn()
+
+	request, err := http.NewRequest("PUT", "/databases?name=db", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createDatabaseHandler(response, request)
+
+	if response.Code != 201 {
+		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	}
+
+	request, err = http.NewRequest("PUT", "/databases?name=db", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response = httptest.NewRecorder()
+
+	conn.createDatabaseHandler(response, request)
+
+	if response.Code != 409 {
+		t.Errorf("response code is %v, expected %v", response.Code, 409)
 	}
 }
 
