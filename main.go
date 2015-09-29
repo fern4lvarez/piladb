@@ -5,5 +5,5 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("file generate to make project root go-getable.")
+	fmt.Println("file generated to make project root go-getable.")
 }
