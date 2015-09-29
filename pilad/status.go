@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"runtime"
 	"time"
 )
@@ -13,6 +14,7 @@ type Status struct {
 	Code       string    `json:"status"`
 	Version    string    `json:"version"`
 	Host       string    `json:"host"`
+	PID        int       `json:"pid"`
 	StartedAt  time.Time `json:"started_at"`
 	RunningFor float64   `json:"running_for"`
 }
@@ -23,6 +25,7 @@ func NewStatus(version string, now time.Time) *Status {
 	status.Code = "OK"
 	status.Version = version
 	status.Host = fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
+	status.PID = os.Getpid()
 	status.StartedAt = now
 	return status
 }
