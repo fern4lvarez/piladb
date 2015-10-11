@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/fern4lvarez/piladb/pila"
 )
 
 func TestNewConn(t *testing.T) {
@@ -199,5 +202,181 @@ func TestNotFoundHandler_WrongType(t *testing.T) {
 
 	if response.Code != 404 {
 		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+}
+
+func TestPopStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+	s.Push("foo")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	params := map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	popStackHandle := conn.popStackHandler(params)
+	popStackHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	elementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(elementJSON) != `{"element":"foo"}` {
+		t.Errorf("popped element is %s, expected %s", string(elementJSON), `{"element":"foo"}`)
+	}
+}
+
+func TestPopStackHandler_EmptyStack(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	params := map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	popStackHandle := conn.popStackHandler(params)
+	popStackHandle.ServeHTTP(response, request)
+
+	if response.Code != 204 {
+		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	}
+}
+
+func TestPopStackHandler_NoStackFound(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	params := map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	popStackHandle := conn.popStackHandler(params)
+	popStackHandle.ServeHTTP(response, request)
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+
+	message, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(message) != fmt.Sprintf("stack %s is Gone", s.ID.String()) {
+		t.Errorf("message is %s, expected %s",
+			string(message),
+			fmt.Sprintf("stack %s is Gone", s.ID.String()))
+	}
+}
+
+func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
+	s := pila.NewStack("stack")
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	params := map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	popStackHandle := conn.popStackHandler(params)
+	popStackHandle.ServeHTTP(response, request)
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+
+	message, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(message) != fmt.Sprintf("database %s is Gone", db.ID.String()) {
+		t.Errorf("message is %s, expected %s",
+			string(message),
+			fmt.Sprintf("database %s is Gone", db.ID.String()))
 	}
 }

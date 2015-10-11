@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
+	"github.com/fern4lvarez/piladb/pkg/uuid"
 	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
@@ -73,4 +75,38 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL, http.StatusNotFound)
 	http.NotFound(w, r)
+}
+
+// popStackHandler returns 200 and the first element of a Stack.
+func (c *Conn) popStackHandler(params map[string]string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		dbID := uuid.UUID(params["database_id"])
+		db, ok := c.Pila.Database(dbID)
+		if !ok {
+			log.Println(r.Method, r.URL, http.StatusGone, "database is Gone")
+			w.WriteHeader(http.StatusGone)
+			w.Write([]byte(fmt.Sprintf("database %s is Gone", params["database_id"])))
+			return
+		}
+
+		stackID := uuid.UUID(params["stack_id"])
+		stack, ok := db.Stacks[stackID]
+		if !ok {
+			log.Println(r.Method, r.URL, http.StatusGone, "stack is Gone")
+			w.WriteHeader(http.StatusGone)
+			w.Write([]byte(fmt.Sprintf("stack %s is Gone", params["stack_id"])))
+			return
+		}
+
+		element, ok := stack.Pop()
+		if !ok {
+			log.Println(r.Method, r.URL, http.StatusNoContent)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		log.Println(r.Method, r.URL, http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"element":"%s"}`, element.(string))))
+	})
 }
