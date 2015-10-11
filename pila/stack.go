@@ -10,7 +10,7 @@ import (
 // Stack represents a stack entity in piladb.
 type Stack struct {
 	// ID is a unique identifier of the Stack
-	ID fmt.Stringer
+	Id fmt.Stringer
 	// Name of the Stack
 	Name string
 	// Database associated to the Stack
@@ -24,7 +24,7 @@ type Stack struct {
 // an association to any Database.
 func NewStack(name string) *Stack {
 	s := &Stack{}
-	s.ID = uuid.New(name)
+	s.Id = uuid.New(name)
 	s.Name = name
 	s.base = stack.NewStack()
 	return s
