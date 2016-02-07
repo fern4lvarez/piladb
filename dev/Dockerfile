@@ -4,7 +4,7 @@
 #
 
 # Pull base image.
-FROM golang:1.5.1
+FROM golang:latest
 
 # Install piladb.
 RUN \
