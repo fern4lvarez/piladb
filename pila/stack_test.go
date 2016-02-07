@@ -1,6 +1,9 @@
 package pila
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestNewStack(t *testing.T) {
 	stack := NewStack("test-stack")
@@ -96,5 +99,47 @@ func TestStackPeek(t *testing.T) {
 	element := stack.Peek()
 	if element != 8 {
 		t.Errorf("element is %v, expected %v", element, 8)
+	}
+}
+
+func TestStackStatus(t *testing.T) {
+	stack := NewStack("test-stack")
+	stack.Push("test")
+	stack.Push(8)
+	stack.Push(5.87)
+	stack.Push([]byte("test"))
+
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4}`)
+	if status, err := stack.Status(); err != nil {
+		t.Fatal(err)
+	} else if string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestStackStatus_Empty(t *testing.T) {
+	stack := NewStack("test-stack")
+
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0}`)
+	if status, err := stack.Status(); err != nil {
+		t.Fatal(err)
+	} else if string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestStackStatus_Error(t *testing.T) {
+	// From https://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	// Channel, complex, and function values cannot be encoded in JSON.
+	// Attempting to encode such a value causes Marshal to return
+	// an UnsupportedTypeError.
+
+	ch := make(chan int)
+
+	stack := NewStack("test-stack")
+	stack.Push(ch)
+
+	if _, err := stack.Status(); err == nil {
+		t.Error("err is nil, expected UnsupportedTypeError")
 	}
 }

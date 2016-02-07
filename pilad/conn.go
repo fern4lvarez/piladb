@@ -84,7 +84,8 @@ func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 		dbID := uuid.UUID(params["database_id"])
 		db, ok := c.Pila.Database(dbID)
 		if !ok {
-			log.Println(r.Method, r.URL, http.StatusGone, "database is Gone")
+			log.Println(r.Method, r.URL,
+				http.StatusGone, "database is Gone")
 			w.WriteHeader(http.StatusGone)
 			w.Write([]byte(fmt.Sprintf("database %s is Gone", params["database_id"])))
 			return
@@ -93,7 +94,8 @@ func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 		stackID := uuid.UUID(params["stack_id"])
 		stack, ok := db.Stacks[stackID]
 		if !ok {
-			log.Println(r.Method, r.URL, http.StatusGone, "stack is Gone")
+			log.Println(r.Method, r.URL,
+				http.StatusGone, "stack is Gone")
 			w.WriteHeader(http.StatusGone)
 			w.Write([]byte(fmt.Sprintf("stack %s is Gone", params["stack_id"])))
 			return

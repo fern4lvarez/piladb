@@ -1,6 +1,7 @@
 package pila
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
@@ -18,6 +19,14 @@ type Stack struct {
 
 	// base represent the Stack data structure
 	base *stack.Stack
+}
+
+// stackStatus represents the status of a Stack.
+type stackStatus struct {
+	ID   string      `json:"id"`
+	Name string      `json:"name"`
+	Peek interface{} `json:"peek"`
+	Size int         `json:"size"`
 }
 
 // NewStack creates a new Stack given a name without
@@ -49,4 +58,15 @@ func (s *Stack) Size() int {
 // Peek returns the element on top of the Stack.
 func (s *Stack) Peek() interface{} {
 	return s.base.Peek()
+}
+
+// Status returns the status of the Stack  in json format.
+func (s *Stack) Status() ([]byte, error) {
+	status := stackStatus{}
+	status.ID = s.ID.String()
+	status.Name = s.Name
+	status.Size = s.Size()
+	status.Peek = s.Peek()
+
+	return json.Marshal(status)
 }
