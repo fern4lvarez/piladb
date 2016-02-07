@@ -5,6 +5,9 @@ pilad
 databases and stacks. It exposes a RESTful HTTP server that listens to requests
 in order to interact with the system.
 
+> Note: pilad API does not come with a built-in `pretty` option. We encourage
+  to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal.
+
 Endpoints
 ---------
 
@@ -17,6 +20,7 @@ Endpoints
 {
   "status": "OK",
   "version": "511016882554615139ba590753af00519513f765",
+  "pid": 26345,
   "host": "linux_amd64",
   "started_at": "2015-09-25T23:01:04.181146284+02:00",
   "running_for": 12.215756477
