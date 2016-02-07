@@ -46,16 +46,20 @@ Alternatively, if you don't have docker installed, you can release `pilad` binar
 with the `make gox` command. For this, you need a configured Go environment and
 [`gox`](https://github.com/mitchellh/gox) installed.
 
+API Documentation
+-----------------
+
+See [`pilad`](pilad/) documentation.
+
 Credits
 -------
 
-**piladb** is documentation, test driven developed by [Fernando Álvarez](
+**piladb** is documentation-, test-driven developed by [Fernando Álvarez](
 http://www.fer.ac) on his Dell XPS 13 laptop, running Ubuntu 14.04, and
 using [`vim-go`](https://github.com/fatih/vim-go) plugin within `vim` editor,
-in Berlin, 2015, with the help of his dog Godín.
+in Berlin and Madrid, with the support of his dog Godín.
 
 License
 -------
 
 MIT
-
