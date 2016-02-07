@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -109,6 +110,8 @@ func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 		}
 
 		log.Println(r.Method, r.URL, http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"element":"%s"}`, element.(string))))
+
+		b, _ := json.Marshal(element)
+		w.Write(b)
 	})
 }

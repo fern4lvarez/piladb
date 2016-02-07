@@ -250,8 +250,8 @@ func TestPopStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(elementJSON) != `{"element":"foo"}` {
-		t.Errorf("popped element is %s, expected %s", string(elementJSON), `{"element":"foo"}`)
+	if string(elementJSON) != "\"foo\"" {
+		t.Errorf("popped element is %v, expected %v", string(elementJSON), "\"foo\"")
 	}
 }
 
