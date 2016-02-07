@@ -14,3 +14,6 @@ run:
 
 bash:
 	docker exec -it piladb bash
+
+logs:
+	docker logs -f piladb
