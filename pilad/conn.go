@@ -95,6 +95,10 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 
 		db, ok := c.Pila.Database(uuid.UUID(vars["id"]))
 		if !ok {
+			// Fallback to find by database name
+			db, ok = c.Pila.Database(uuid.New(vars["id"]))
+		}
+		if !ok {
 			log.Println(r.Method, r.URL,
 				http.StatusGone, "database is Gone")
 			w.WriteHeader(http.StatusGone)

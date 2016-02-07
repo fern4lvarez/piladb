@@ -226,7 +226,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 
 	request, err := http.NewRequest("GET",
 		fmt.Sprintf("/databases/%s",
-			db.Name),
+			db.ID.String()),
 		nil)
 	if err != nil {
 		t.Fatal(err)
@@ -235,6 +235,50 @@ func TestDatabaseHandler_GET(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	databaseHandle := conn.databaseHandler(db.ID.String())
+	databaseHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	database, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["240d019e07a0ec2d7eeca6c7c00b82a4"]}`; string(database) != expected {
+		t.Errorf("database is %v, expected %v", string(database), expected)
+	}
+}
+
+func TestDatabaseHandler_GET_Name(t *testing.T) {
+	s := pila.NewStack("stack")
+	s.Push("foo")
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s",
+			db.Name),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	databaseHandle := conn.databaseHandler(db.Name)
 	databaseHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
