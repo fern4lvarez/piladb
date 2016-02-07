@@ -330,36 +330,6 @@ func TestDatabaseHandler_GET_Gone(t *testing.T) {
 
 }
 
-func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
-	conn := NewConn()
-	request, err := http.NewRequest("GET", "/_statuss", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	response := httptest.NewRecorder()
-
-	conn.notFoundHandler(response, request)
-
-	if response.Code != 404 {
-		t.Errorf("response code is %v, expected %v", response.Code, 404)
-	}
-}
-
-func TestNotFoundHandler_WrongType(t *testing.T) {
-	conn := NewConn()
-	request, err := http.NewRequest("POST", "/_status", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	response := httptest.NewRecorder()
-
-	conn.notFoundHandler(response, request)
-
-	if response.Code != 404 {
-		t.Errorf("response code is %v, expected %v", response.Code, 404)
-	}
-}
-
 func TestPopStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 	s.Push("foo")
@@ -533,5 +503,61 @@ func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
 		t.Errorf("message is %s, expected %s",
 			string(message),
 			fmt.Sprintf("database %s is Gone", db.ID.String()))
+	}
+}
+
+func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/_statuss", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.notFoundHandler(response, request)
+
+	if response.Code != 404 {
+		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+}
+
+func TestNotFoundHandler_WrongType(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("POST", "/_status", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.notFoundHandler(response, request)
+
+	if response.Code != 404 {
+		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+}
+
+func TestGoneHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/databases/nodb", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.goneHandler(response, request, "database nodb is Gone")
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	}
+
+	message, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(message) != "database nodb is Gone" {
+		t.Errorf("message is %s, expected %s",
+			string(message),
+			"nodb")
 	}
 }

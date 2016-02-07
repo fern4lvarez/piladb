@@ -74,13 +74,8 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(db.Status())
 }
 
-// notFoundHandler logs and returns a 404 NotFound response.
-func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL, http.StatusNotFound)
-	http.NotFound(w, r)
-}
-
-// databaseHandler returns the information of a single database.
+// databaseHandler returns the information of a single database given its ID
+// or name.
 func (c *Conn) databaseHandler(databaseID string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -99,10 +94,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 			db, ok = c.Pila.Database(uuid.New(vars["id"]))
 		}
 		if !ok {
-			log.Println(r.Method, r.URL,
-				http.StatusGone, "database is Gone")
-			w.WriteHeader(http.StatusGone)
-			w.Write([]byte(fmt.Sprintf("database %s is Gone", vars["id"])))
+			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["id"]))
 			return
 		}
 
@@ -119,23 +111,16 @@ func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 		dbID := uuid.UUID(params["database_id"])
 		db, ok := c.Pila.Database(dbID)
 		if !ok {
-			log.Println(r.Method, r.URL,
-				http.StatusGone, "database is Gone")
-			w.WriteHeader(http.StatusGone)
-			w.Write([]byte(fmt.Sprintf("database %s is Gone", params["database_id"])))
+			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
 			return
 		}
 
 		stackID := uuid.UUID(params["stack_id"])
 		stack, ok := db.Stacks[stackID]
 		if !ok {
-			log.Println(r.Method, r.URL,
-				http.StatusGone, "stack is Gone")
-			w.WriteHeader(http.StatusGone)
-			w.Write([]byte(fmt.Sprintf("stack %s is Gone", params["stack_id"])))
+			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", params["stack_id"]))
 			return
 		}
-
 		element, ok := stack.Pop()
 		if !ok {
 			log.Println(r.Method, r.URL, http.StatusNoContent)
@@ -148,4 +133,19 @@ func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 		b, _ := json.Marshal(element)
 		w.Write(b)
 	})
+}
+
+// notFoundHandler logs and returns a 404 NotFound response.
+func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, http.StatusNotFound)
+	http.NotFound(w, r)
+}
+
+// goneHandler logs and returns a 410 Gone response with information
+// about the missing resource.
+func (c *Conn) goneHandler(w http.ResponseWriter, r *http.Request, message string) {
+	log.Println(r.Method, r.URL,
+		http.StatusGone, message)
+	w.WriteHeader(http.StatusGone)
+	w.Write([]byte(message))
 }
