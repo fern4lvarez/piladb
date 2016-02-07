@@ -1,6 +1,10 @@
 ## piladb Dockerfile
 
-This repository contains a **Dockerfile** of [piladb](https://github.com/fern4lvarez/piladb) for [Docker](https://www.docker.com/)'s [automated build](https://registry.hub.docker.com/u/fern4lvarez/piladb/) published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
+This repository contains a **Dockerfile** of [piladb](https://github.com/fern4lvarez/piladb)
+for [Docker](https://www.docker.com/)'s [automated build](https://registry.hub.docker.com/u/fern4lvarez/piladb/)
+published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
+This means that the public image will always be synced with the latest source
+code version.
 
 Also, it contains a **Makefile** which groups the most common tasks
 for an easier usage of the `piladb` image.
@@ -15,7 +19,8 @@ for an easier usage of the `piladb` image.
 
 1. Install [Docker](https://www.docker.com/).
 
-2. Download [automated build](https://registry.hub.docker.com/u/fern4lvarez/piladb/) from public [Docker Hub Registry](https://registry.hub.docker.com/): `docker pull fern4lvarez/piladb`
+2. Download [automated build](https://registry.hub.docker.com/u/fern4lvarez/piladb/)
+   from public [Docker Hub Registry](https://registry.hub.docker.com/): `docker pull fern4lvarez/piladb`
 
    Alternatively, you can build an image from Dockerfile: `docker build -t="fern4lvarez/piladb" github.com/fern4lvarez/piladb`.
 
