@@ -10,6 +10,8 @@ import (
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 	"github.com/fern4lvarez/piladb/pkg/version"
+
+	"github.com/fern4lvarez/piladb/_vendor/src/github.com/gorilla/mux"
 )
 
 // Conn represents the current piladb connection, containing
@@ -76,6 +78,34 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL, http.StatusNotFound)
 	http.NotFound(w, r)
+}
+
+// databaseHandler returns the information of a single database.
+func (c *Conn) databaseHandler(databaseID string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
+		// we override the mux vars to be able to test
+		// an arbitrary database ID
+		if databaseID != "" {
+			vars = map[string]string{
+				"id": databaseID,
+			}
+		}
+
+		db, ok := c.Pila.Database(uuid.UUID(vars["id"]))
+		if !ok {
+			log.Println(r.Method, r.URL,
+				http.StatusGone, "database is Gone")
+			w.WriteHeader(http.StatusGone)
+			w.Write([]byte(fmt.Sprintf("database %s is Gone", vars["id"])))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		log.Println(r.Method, r.URL, http.StatusOK)
+		w.Write(db.Status())
+	})
 }
 
 // popStackHandler returns 200 and the first element of a Stack.

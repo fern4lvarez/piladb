@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/fern4lvarez/piladb/pila"
+	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
 
 func TestNewConn(t *testing.T) {
@@ -60,6 +61,41 @@ func TestStatusHandler(t *testing.T) {
 }
 
 func TestDatabasesHandler_GET(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET", "/databases", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.databasesHandler(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	databases, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := `{"number_of_databases":1,"databases":[{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}]}`; string(databases) != expected {
+		t.Errorf("databases are %s, expected %s", string(databases), expected)
+	}
+}
+
+func TestDatabasesHandler_GET_Empty(t *testing.T) {
 	conn := NewConn()
 	request, err := http.NewRequest("GET", "/databases", nil)
 	if err != nil {
@@ -173,6 +209,81 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 	if response.Code != 409 {
 		t.Errorf("response code is %v, expected %v", response.Code, 409)
 	}
+}
+
+func TestDatabaseHandler_GET(t *testing.T) {
+	s := pila.NewStack("stack")
+	s.Push("foo")
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s",
+			db.Name),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	databaseHandle := conn.databaseHandler(db.ID.String())
+	databaseHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	database, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["240d019e07a0ec2d7eeca6c7c00b82a4"]}`; string(database) != expected {
+		t.Errorf("database is %v, expected %v", string(database), expected)
+	}
+}
+
+func TestDatabaseHandler_GET_Gone(t *testing.T) {
+	conn := NewConn()
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s",
+			"nodb"),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	databaseHandle := conn.databaseHandler(uuid.UUID("nodb").String())
+	databaseHandle.ServeHTTP(response, request)
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+
+	database, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := "database nodb is Gone"; string(database) != expected {
+		t.Errorf("database is %v, expected %v", string(database), expected)
+	}
+
 }
 
 func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
