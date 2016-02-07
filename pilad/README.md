@@ -57,6 +57,17 @@ Endpoints
 ```
 
 `GET /databases/$DATABASE_ID` Returns the status of database $DATABASE_ID.
+You can use either the ID or the name of the database, although the former
+is used as default, the latter as fallback.
+
+```
+200 OK
+{
+  "number_of_stacks": 0,
+  "name": "db0",
+  "id": "714e49277eb730717e413b167b76ef78"
+}
+```
 
 `PUT /databases?name=$DATABASE_NAME` Creates a new $DATABASE_NAME database.
 
