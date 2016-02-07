@@ -17,7 +17,7 @@ Features
 * Manage databases and stacks using a REST API, so you can use it from
   any programming language.
 * Totally configurable using a INI-style configuration file.
-* In-memory store, with eventual persistence of data on disk.
+* In-memory store, persistence on disk wannabe.
 * Written in Go, i.e. binaries are self-contained and distributable.
 
 Development
