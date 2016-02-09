@@ -10,13 +10,19 @@ import (
 // handlers.
 func Router(conn *Conn) *mux.Router {
 	r := mux.NewRouter()
+
+	// GET /_status
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")
 
-	r.Handle("/databases/{id}", conn.databaseHandler("")).
-		Methods("GET")
+	// GET /databases
+	// PUT /databases?name=DATABASE_NAME
 	r.HandleFunc("/databases", conn.databasesHandler).
 		Methods("GET", "PUT")
+	// GET /databases/$DATABASE_ID
+	r.Handle("/databases/{id}", conn.databaseHandler("")).
+		Methods("GET")
+
 	r.NotFoundHandler = http.HandlerFunc(conn.notFoundHandler)
 	return r
 }
