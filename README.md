@@ -49,7 +49,9 @@ with the `make gox` command. For this, you need a configured Go environment and
 API Documentation
 -----------------
 
-See [`pilad`](pilad/) documentation.
+Looking for the API of the Go `pila` package? [Here](https://godoc.org/github.com/fern4lvarez/piladb/pila).
+
+Do you refer to the RESTful API? See [`pilad`](pilad/) documentation.
 
 Credits
 -------
