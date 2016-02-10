@@ -299,7 +299,73 @@ func TestDatabaseHandler_GET_Name(t *testing.T) {
 	}
 }
 
-func TestDatabaseHandler_GET_Gone(t *testing.T) {
+func TestDatabaseHandler_DELETE(t *testing.T) {
+	db1 := pila.NewDatabase("mydb1")
+	db2 := pila.NewDatabase("mydb2")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db1)
+	_ = p.AddDatabase(db2)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("DELETE",
+		fmt.Sprintf("/databases/%s",
+			db1.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	databaseHandle := conn.databaseHandler(db1.ID.String())
+	databaseHandle.ServeHTTP(response, request)
+
+	if response.Code != 204 {
+		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	}
+
+	if len(conn.Pila.Databases) != 1 {
+		t.Errorf("got %d database, expected %d", len(conn.Pila.Databases), 1)
+	}
+}
+
+func TestDatabaseHandler_DELETE_Name(t *testing.T) {
+	db1 := pila.NewDatabase("mydb1")
+	db2 := pila.NewDatabase("mydb2")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db1)
+	_ = p.AddDatabase(db2)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("DELETE",
+		fmt.Sprintf("/databases/%s",
+			db1.Name),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	databaseHandle := conn.databaseHandler(db1.Name)
+	databaseHandle.ServeHTTP(response, request)
+
+	if response.Code != 204 {
+		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	}
+
+	if len(conn.Pila.Databases) != 1 {
+		t.Errorf("got %d database, expected %d", len(conn.Pila.Databases), 1)
+	}
+}
+
+func TestDatabaseHandler_Gone(t *testing.T) {
 	conn := NewConn()
 
 	request, err := http.NewRequest("GET",

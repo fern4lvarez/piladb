@@ -98,6 +98,13 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 			return
 		}
 
+		if r.Method == "DELETE" {
+			_ = c.Pila.RemoveDatabase(db.ID)
+			log.Println(r.Method, r.URL, http.StatusNoContent)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		log.Println(r.Method, r.URL, http.StatusOK)
 		w.Write(db.Status())
