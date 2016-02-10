@@ -29,7 +29,9 @@ Endpoints
 
 ### `/databases`
 
-`GET /databases` Returns the status of the currently running databases.
+#### `GET /databases`
+
+Returns the status of the currently running databases.
 
 ```
 200 OK
@@ -56,7 +58,9 @@ Endpoints
 
 ```
 
-`GET /databases/$DATABASE_ID` Returns the status of database $DATABASE_ID.
+#### `GET /databases/$DATABASE_ID`
+
+Returns the status of database `$DATABASE_ID`.
 You can use either the ID or the name of the database, although the former
 is used as default, the latter as fallback.
 
@@ -69,7 +73,23 @@ is used as default, the latter as fallback.
 }
 ```
 
-`PUT /databases?name=$DATABASE_NAME` Creates a new $DATABASE_NAME database.
+Returns `410 GONE` if database does not exist.
+
+#### `DELETE /databases/$DATABASE_ID`
+
+Deletes database `$DATABASE_ID`. You can use either the ID or the name
+of the database, although the former is used as default, the latter
+as fallback.
+
+```
+204 NO CONTENT
+```
+
+Returns `410 GONE` if database does not exist.
+
+#### `PUT /databases?name=$DATABASE_NAME`
+
+Creates a new $DATABASE_NAME database.
 
 ```
 201 CREATED
