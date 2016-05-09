@@ -1,4 +1,4 @@
-piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb)
+piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
 ======
 
 ![Logo](http://i.imgur.com/tjQbm56.png)
@@ -67,6 +67,7 @@ Logo was designed by [GraphicLoads](http://www.iconarchive.com/artist/graphicloa
 
 Typography [_Lily Script One_](http://www.fontspace.com/julia-petretta/lily-script-one) designed
 by [Julia Petretta](http://www.fontspace.com/julia-petretta.)
+
 
 License
 -------
