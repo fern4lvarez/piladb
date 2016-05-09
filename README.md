@@ -1,6 +1,8 @@
 piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb)
 ======
 
+![Logo](http://i.imgur.com/UJaqm07.png)
+
 > _[pee-lah-dee-bee]_. _pila_ means _stack_ in Spanish.
 
 **piladb** is a RESTful database engine based on the [stack data structure](
@@ -60,6 +62,11 @@ Credits
 http://www.fer.ac) on his Dell XPS 13 laptop, running Ubuntu 14.04, and
 using [`vim-go`](https://github.com/fatih/vim-go) plugin within `vim` editor,
 in Berlin and Madrid, with the support of his dog Godín.
+
+Logo was designed by [GraphicLoads](http://www.iconarchive.com/artist/graphicloads.html).
+
+Typography [_Lily Script One_](http://www.fontspace.com/julia-petretta/lily-script-one) designed
+by [Julia Petretta](http://www.fontspace.com/julia-petretta.)
 
 License
 -------
