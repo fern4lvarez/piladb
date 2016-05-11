@@ -384,16 +384,6 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 	if response.Code != 410 {
 		t.Errorf("response code is %v, expected %v", response.Code, 410)
 	}
-
-	database, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if expected := "database nodb is Gone"; string(database) != expected {
-		t.Errorf("database is %v, expected %v", string(database), expected)
-	}
-
 }
 
 func TestPopStackHandler(t *testing.T) {
@@ -515,17 +505,6 @@ func TestPopStackHandler_NoStackFound(t *testing.T) {
 	if response.Code != 410 {
 		t.Errorf("response code is %v, expected %v", response.Code, 410)
 	}
-
-	message, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(message) != fmt.Sprintf("stack %s is Gone", s.ID.String()) {
-		t.Errorf("message is %s, expected %s",
-			string(message),
-			fmt.Sprintf("stack %s is Gone", s.ID.String()))
-	}
 }
 
 func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
@@ -558,17 +537,6 @@ func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
 
 	if response.Code != 410 {
 		t.Errorf("response code is %v, expected %v", response.Code, 410)
-	}
-
-	message, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(message) != fmt.Sprintf("database %s is Gone", db.ID.String()) {
-		t.Errorf("message is %s, expected %s",
-			string(message),
-			fmt.Sprintf("database %s is Gone", db.ID.String()))
 	}
 }
 
@@ -614,16 +582,5 @@ func TestGoneHandler(t *testing.T) {
 
 	if response.Code != 410 {
 		t.Errorf("response code is %v, expected %v", response.Code, 404)
-	}
-
-	message, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(message) != "database nodb is Gone" {
-		t.Errorf("message is %s, expected %s",
-			string(message),
-			"nodb")
 	}
 }
