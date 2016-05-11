@@ -154,5 +154,4 @@ func (c *Conn) goneHandler(w http.ResponseWriter, r *http.Request, message strin
 	log.Println(r.Method, r.URL,
 		http.StatusGone, message)
 	w.WriteHeader(http.StatusGone)
-	w.Write([]byte(message))
 }
