@@ -43,7 +43,7 @@ func NewDatabase(name string) *Database {
 // to the Database.
 func (db *Database) CreateStack(name string) fmt.Stringer {
 	stack := NewStack(name)
-	stack.Database = db
+	stack.SetDatabase(db)
 	db.Stacks[stack.ID] = stack
 	return stack.ID
 }
@@ -55,11 +55,12 @@ func (db *Database) AddStack(stack *Stack) error {
 		return fmt.Errorf("stack %v already added to database %v", stack.Name, stack.Database.Name)
 	}
 
+	stack.SetDatabase(db)
 	if _, ok := db.Stacks[stack.ID]; ok {
+		stack.Database = nil
 		return fmt.Errorf("database %v already contains stack %v", db.Name, stack.Name)
 	}
 
-	stack.Database = db
 	db.Stacks[stack.ID] = stack
 	return nil
 }
