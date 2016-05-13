@@ -13,6 +13,9 @@ testv:
 vet:
 	go vet ./...
 
+lint:
+	golint ./...
+
 pilad:	get
 	$(GOPATH)/bin/pilad
 

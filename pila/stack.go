@@ -50,7 +50,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 	return s.base.Pop()
 }
 
-// Push returns the size of the Stack.
+// Size returns the size of the Stack.
 func (s *Stack) Size() int {
 	return s.base.Size()
 }
@@ -78,7 +78,7 @@ func (s *Stack) SetDatabase(db *Database) {
 	s.SetID()
 }
 
-// SetId recalculates the id of the Stack based on its
+// SetID recalculates the id of the Stack based on its
 // Database name and its own name.
 func (s *Stack) SetID() {
 	if s.Database != nil {

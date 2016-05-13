@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Returns the commit hash of the repository.
+// CommitHash returns the commit hash of the repository.
 func CommitHash() string {
 	cmd := exec.Command("git", []string{"rev-parse", "HEAD"}...)
 

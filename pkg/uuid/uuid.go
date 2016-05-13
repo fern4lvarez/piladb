@@ -15,7 +15,7 @@ const seed = "bsa9phh6keet1ogh9ChoeNoK1jae8ro0"
 // https://www.ietf.org/rfc/rfc4122.txt
 type UUID string
 
-// NewUUID creates a new UUID given a string.
+// New creates a new UUID given a string.
 func New(s string) UUID {
 	h := hmac.New(md5.New, []byte(seed))
 	// we ignore errors, since it is not
