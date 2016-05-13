@@ -34,7 +34,7 @@ type stackStatus struct {
 func NewStack(name string) *Stack {
 	s := &Stack{}
 	s.Name = name
-	s.SetId()
+	s.SetID()
 	s.base = stack.NewStack()
 	return s
 }
@@ -75,12 +75,12 @@ func (s *Stack) Status() ([]byte, error) {
 // recalculates its ID.
 func (s *Stack) SetDatabase(db *Database) {
 	s.Database = db
-	s.SetId()
+	s.SetID()
 }
 
 // SetId recalculates the id of the Stack based on its
 // Database name and its own name.
-func (s *Stack) SetId() {
+func (s *Stack) SetID() {
 	if s.Database != nil {
 		s.ID = uuid.New(s.Database.Name + s.Name)
 		return

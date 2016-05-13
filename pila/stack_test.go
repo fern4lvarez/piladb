@@ -155,21 +155,21 @@ func TestStackStatus_Error(t *testing.T) {
 	}
 }
 
-func TestStackSetId(t *testing.T) {
+func TestStackSetID(t *testing.T) {
 	db := NewDatabase("test-db")
 
 	stack := NewStack("test-stack")
 	stack.Database = db
-	stack.SetId()
+	stack.SetID()
 
 	if stack.ID.String() != "378c2601e338a49341d9858081452226" {
 		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "378c2601e338a49341d9858081452226")
 	}
 }
 
-func TestStackSetId_NoDatabase(t *testing.T) {
+func TestStackSetID_NoDatabase(t *testing.T) {
 	stack := NewStack("test-stack")
-	stack.SetId()
+	stack.SetID()
 
 	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
 		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
