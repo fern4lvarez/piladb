@@ -46,13 +46,13 @@ func TestStatusSetRunningFor(t *testing.T) {
 
 }
 
-func TestStatusToJson(t *testing.T) {
+func TestStatusToJSON(t *testing.T) {
 	now := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 	status := NewStatus("v1", now)
 	oneHourLater := now.Add(60 * time.Minute)
 	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","pid":%d,"started_at":"2009-11-10T23:00:00Z","running_for":3600}`, runtime.GOOS, runtime.GOARCH, os.Getpid())
 
-	json := status.ToJson(oneHourLater)
+	json := status.ToJSON(oneHourLater)
 	if json == nil {
 		t.Fatal("json is nil")
 	}

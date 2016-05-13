@@ -30,16 +30,16 @@ func NewStatus(version string, now time.Time) *Status {
 	return status
 }
 
-// RunningFor returns the time piladb was running in
+// SetRunningFor returns the time piladb was running in
 // seconds given the current time.
 func (s *Status) SetRunningFor(now time.Time) float64 {
 	s.RunningFor = now.Sub(s.StartedAt).Seconds()
 	return s.RunningFor
 }
 
-// ToJson returns the Status into a JSON file in []byte
+// ToJSON returns the Status into a JSON file in []byte
 // format.
-func (s *Status) ToJson(now time.Time) []byte {
+func (s *Status) ToJSON(now time.Time) []byte {
 	_ = s.SetRunningFor(now)
 
 	// Do not check error as the Status type does

@@ -142,7 +142,7 @@ func TestDatabaseStatus(t *testing.T) {
 	s1ID := db.CreateStack("s1")
 	s2ID := db.CreateStack("s2")
 
-	expectedStatus := fmt.Sprintf(`{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":3,"stacks":["%s","%s","%s"]}`, s2ID, s0ID, s1ID)
+	expectedStatus := fmt.Sprintf(`{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":3,"stacks":["%s","%s","%s"]}`, s0ID, s2ID, s1ID)
 	if status := db.Status(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
 	}

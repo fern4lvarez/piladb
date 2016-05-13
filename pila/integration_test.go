@@ -36,7 +36,7 @@ func TestIntegrationBasic(t *testing.T) {
 		t.Errorf("stack2.Peek is %v, expected %v", stack2.Peek(), nil)
 	}
 
-	var ok bool = true
+	var ok = true
 	for ok {
 		var element interface{}
 		element, ok = stack1.Pop()
@@ -59,10 +59,10 @@ func TestIntegrationBasic(t *testing.T) {
 		t.Errorf("stack2.Peek is %v, expected %v", stack2.Peek(), interface{}("foo"))
 	}
 
-	if ok := db.RemoveStack(stack1.ID); !ok {
+	if ok = db.RemoveStack(stack1.ID); !ok {
 		t.Errorf("database %s failed on removing stack %s", db.Name, stack1.Name)
 	}
-	if _, ok := db.Stacks[stack1.ID]; ok {
+	if _, ok = db.Stacks[stack1.ID]; ok {
 		t.Errorf("stack1 %s was found in database %s", stack1.Name, db.Name)
 	}
 

@@ -33,8 +33,8 @@ type stackStatus struct {
 // an association to any Database.
 func NewStack(name string) *Stack {
 	s := &Stack{}
-	s.ID = uuid.New(name)
 	s.Name = name
+	s.SetID()
 	s.base = stack.NewStack()
 	return s
 }
@@ -50,7 +50,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 	return s.base.Pop()
 }
 
-// Push returns the size of the Stack.
+// Size returns the size of the Stack.
 func (s *Stack) Size() int {
 	return s.base.Size()
 }
@@ -69,4 +69,22 @@ func (s *Stack) Status() ([]byte, error) {
 	status.Peek = s.Peek()
 
 	return json.Marshal(status)
+}
+
+// SetDatabase links the Stack with a given Database and
+// recalculates its ID.
+func (s *Stack) SetDatabase(db *Database) {
+	s.Database = db
+	s.SetID()
+}
+
+// SetID recalculates the id of the Stack based on its
+// Database name and its own name.
+func (s *Stack) SetID() {
+	if s.Database != nil {
+		s.ID = uuid.New(s.Database.Name + s.Name)
+		return
+	}
+
+	s.ID = uuid.New(s.Name)
 }

@@ -35,7 +35,7 @@ func NewConn() *Conn {
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
-	w.Write(c.Status.ToJson(time.Now()))
+	w.Write(c.Status.ToJSON(time.Now()))
 }
 
 // databasesHandler returns the information of the running databases.

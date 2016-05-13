@@ -2,6 +2,7 @@ package pila
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -26,6 +27,16 @@ func TestNewStack(t *testing.T) {
 	}
 	if stack.base.Size() != 0 {
 		t.Fatalf("stack.base.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+}
+
+func TestSetDatabase(t *testing.T) {
+	db := NewDatabase("test-db")
+	stack := NewStack("test-stack")
+	stack.SetDatabase(db)
+
+	if !reflect.DeepEqual(stack.Database, db) {
+		t.Errorf("stack.Database is %v, expected %v", stack.Database, db)
 	}
 }
 
@@ -141,5 +152,26 @@ func TestStackStatus_Error(t *testing.T) {
 
 	if _, err := stack.Status(); err == nil {
 		t.Error("err is nil, expected UnsupportedTypeError")
+	}
+}
+
+func TestStackSetID(t *testing.T) {
+	db := NewDatabase("test-db")
+
+	stack := NewStack("test-stack")
+	stack.Database = db
+	stack.SetID()
+
+	if stack.ID.String() != "378c2601e338a49341d9858081452226" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "378c2601e338a49341d9858081452226")
+	}
+}
+
+func TestStackSetID_NoDatabase(t *testing.T) {
+	stack := NewStack("test-stack")
+	stack.SetID()
+
+	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
 	}
 }
