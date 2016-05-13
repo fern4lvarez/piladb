@@ -11,7 +11,7 @@ import (
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 	"github.com/fern4lvarez/piladb/pkg/version"
 
-	"github.com/fern4lvarez/piladb/_vendor/src/github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 // Conn represents the current piladb connection, containing

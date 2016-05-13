@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fern4lvarez/piladb/_vendor/src/github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 )
 
 func TestCommitHash(t *testing.T) {
