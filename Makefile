@@ -1,3 +1,5 @@
+.PHONY: vet lint
+
 default: vet get
 
 all: vet get test
@@ -10,11 +12,12 @@ test:
 
 testv:
 	go test -v -cover ./...
+
 vet:
-	go vet ./...
+	go list ./... | grep -v /vendor/ | xargs -L1 go vet
 
 lint:
-	golint ./...
+	go list ./... | grep -v /vendor/ | xargs -L1 golint
 
 pilad:	get
 	$(GOPATH)/bin/pilad
