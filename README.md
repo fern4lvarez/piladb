@@ -25,7 +25,7 @@ Features
 Development
 -----------
 
-> You need Go installed.
+> You need Go installed. Version 1.6+ recommended.
 
 ```bash
 go get github.com/fern4lvarez/piladb/...
@@ -35,6 +35,21 @@ make all
 
 You can also use Docker to create `piladb` builds or development environment.
 Please see the [`dev`](dev/) directory.
+
+Dependencies
+------------
+
+**piladb** aims to minimize the amount of third party dependencies and to rely on
+the Go standard library as much as possible.
+
+Even though, it uses [`gvt`](https://github.com/FiloSottile/gvt) to vendor its few
+dependencies. If you use Go 1.6+, or Go 1.5 with `GO15VENDOREXPERIMENT=1` set,
+you're good to go, libraries in `vendor` directory will be used and everything will
+work as expected. You don't need to install, use or understand `gvt`.
+
+If you are using a lower Go version, **piladb** will use either your current local
+version of the dependencies, or the latest one available. Things might break, so
+please
 
 Release
 -------
