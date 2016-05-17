@@ -3,3 +3,4 @@ pilad/pilad
 coverage.out
 dist
 lint
+vet
