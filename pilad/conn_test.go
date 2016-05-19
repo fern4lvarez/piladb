@@ -250,7 +250,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["240d019e07a0ec2d7eeca6c7c00b82a4"]}`; string(database) != expected {
+	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["b92f53fa3884305ef798fd8c5d7609ad"]}`; string(database) != expected {
 		t.Errorf("database is %v, expected %v", string(database), expected)
 	}
 }
@@ -294,7 +294,7 @@ func TestDatabaseHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["240d019e07a0ec2d7eeca6c7c00b82a4"]}`; string(database) != expected {
+	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["b92f53fa3884305ef798fd8c5d7609ad"]}`; string(database) != expected {
 		t.Errorf("database is %v, expected %v", string(database), expected)
 	}
 }

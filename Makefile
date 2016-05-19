@@ -1,8 +1,8 @@
 .PHONY: vet lint
 
-default: vet get
+default: vet get test
 
-all: vet get test
+all: vet lint get test
 
 get:
 	go get ./...
