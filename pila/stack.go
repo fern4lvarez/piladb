@@ -21,14 +21,6 @@ type Stack struct {
 	base *stack.Stack
 }
 
-// stackStatus represents the status of a Stack.
-type stackStatus struct {
-	ID   string      `json:"id"`
-	Name string      `json:"name"`
-	Peek interface{} `json:"peek"`
-	Size int         `json:"size"`
-}
-
 // NewStack creates a new Stack given a name without
 // an association to any Database.
 func NewStack(name string) *Stack {
@@ -60,17 +52,6 @@ func (s *Stack) Peek() interface{} {
 	return s.base.Peek()
 }
 
-// Status returns the status of the Stack  in json format.
-func (s *Stack) Status() ([]byte, error) {
-	status := stackStatus{}
-	status.ID = s.ID.String()
-	status.Name = s.Name
-	status.Size = s.Size()
-	status.Peek = s.Peek()
-
-	return json.Marshal(status)
-}
-
 // SetDatabase links the Stack with a given Database and
 // recalculates its ID.
 func (s *Stack) SetDatabase(db *Database) {
@@ -87,4 +68,28 @@ func (s *Stack) SetID() {
 	}
 
 	s.ID = uuid.New(s.Name)
+}
+
+// Status returns the status of the Stack  in json format.
+func (s *Stack) Status() StackStatus {
+	status := StackStatus{}
+	status.ID = s.ID.String()
+	status.Name = s.Name
+	status.Size = s.Size()
+	status.Peek = s.Peek()
+
+	return status
+}
+
+// StackStatus represents the status of a Stack.
+type StackStatus struct {
+	ID   string      `json:"id"`
+	Name string      `json:"name"`
+	Peek interface{} `json:"peek"`
+	Size int         `json:"size"`
+}
+
+// ToJSON converts a StackStatus into JSON.
+func (stackStatus StackStatus) ToJSON() ([]byte, error) {
+	return json.Marshal(stackStatus)
 }
