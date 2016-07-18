@@ -47,7 +47,7 @@ func (c *Conn) databasesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
-	w.Write(c.Pila.Status())
+	w.Write(c.Pila.Status().ToJSON())
 }
 
 // createDatabaseHandler creates a Database and returns 201 and the ID and name
