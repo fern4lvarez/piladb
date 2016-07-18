@@ -13,7 +13,6 @@ func TestNewPila(t *testing.T) {
 	if pila.Databases == nil {
 		t.Error("pila.Databases is nil")
 	}
-
 }
 
 func TestPilaCreateDatabase(t *testing.T) {
@@ -119,24 +118,24 @@ func TestPilaDatabase_False(t *testing.T) {
 	}
 }
 
-func TestPilaStatus(t *testing.T) {
+func TestPilaStatusToJSON(t *testing.T) {
 	pila := NewPila()
 	db0 := NewDatabase("db0")
 	pila.AddDatabase(db0)
 
 	expectedStatus := `{"number_of_databases":1,"databases":[{"id":"714e49277eb730717e413b167b76ef78","name":"db0","number_of_stacks":0}]}`
 
-	if status := pila.Status(); string(status) != expectedStatus {
+	if status := pila.Status().ToJSON(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
 	}
 }
 
-func TestPilaStatus_Empty(t *testing.T) {
+func TestPilaStatusToJSON_Empty(t *testing.T) {
 	pila := NewPila()
 
 	expectedStatus := `{"number_of_databases":0,"databases":[]}`
 
-	if status := pila.Status(); string(status) != expectedStatus {
+	if status := pila.Status().ToJSON(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
 	}
 }

@@ -1,7 +1,6 @@
 package pila
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -142,17 +141,60 @@ func TestDatabaseStatus(t *testing.T) {
 	s1ID := db.CreateStack("s1")
 	s2ID := db.CreateStack("s2")
 
-	expectedStatus := fmt.Sprintf(`{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":3,"stacks":["%s","%s","%s"]}`, s0ID, s2ID, s1ID)
-	if status := db.Status(); string(status) != expectedStatus {
-		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	expectedStatus := DatabaseStatus{
+		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",
+		Name:         "db",
+		NumberStacks: 3,
+		Stacks:       []string{s0ID.String(), s2ID.String(), s1ID.String()},
+	}
+
+	if status := db.Status(); !reflect.DeepEqual(status, expectedStatus) {
+		t.Errorf("status is %v, expected %v", status, expectedStatus)
 	}
 }
 
 func TestDatabaseStatus_Empty(t *testing.T) {
 	db := NewDatabase("db")
 
-	expectedStatus := `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}`
-	if status := db.Status(); string(status) != expectedStatus {
-		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	expectedStatus := DatabaseStatus{
+		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",
+		Name:         "db",
+		NumberStacks: 0,
+		Stacks:       []string{},
 	}
+
+	if status := db.Status(); !reflect.DeepEqual(status, expectedStatus) {
+		t.Errorf("status is %#v, expected %#v", status, expectedStatus)
+	}
+}
+
+func TestDatabaseStatusToJSON(t *testing.T) {
+	databaseStatus := DatabaseStatus{
+		ID:           "123456789",
+		Name:         "db",
+		NumberStacks: 3,
+		Stacks:       []string{"stack1", "stack2", "stack3"},
+	}
+
+	expectedToJSON := `{"id":"123456789","name":"db","number_of_stacks":3,"stacks":["stack1","stack2","stack3"]}`
+
+	if toJSON := databaseStatus.ToJSON(); string(toJSON) != expectedToJSON {
+		t.Errorf("toJSON is %s, expected %s", string(toJSON), expectedToJSON)
+	}
+
+}
+
+func TestDatabaseStatusToJSON_Empty(t *testing.T) {
+	databaseStatus := DatabaseStatus{
+		ID:           "123456789",
+		Name:         "db",
+		NumberStacks: 0,
+	}
+
+	expectedToJSON := `{"id":"123456789","name":"db","number_of_stacks":0}`
+
+	if toJSON := databaseStatus.ToJSON(); string(toJSON) != expectedToJSON {
+		t.Errorf("toJSON is %s, expected %s", string(toJSON), expectedToJSON)
+	}
+
 }

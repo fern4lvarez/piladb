@@ -20,14 +20,6 @@ type Database struct {
 	Stacks map[fmt.Stringer]*Stack
 }
 
-// databaseStatus represents the status of a Database.
-type databaseStatus struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	NumberStacks int      `json:"number_of_stacks"`
-	Stacks       []string `json:"stacks,omitempty"`
-}
-
 // NewDatabase creates a new Database given a name,
 // without any link to the piladb instance.
 func NewDatabase(name string) *Database {
@@ -79,9 +71,9 @@ func (db *Database) RemoveStack(id fmt.Stringer) bool {
 	return true
 }
 
-// Status returns the status of the Database in json format.
-func (db *Database) Status() []byte {
-	dbs := databaseStatus{}
+// Status returns the status of the Database.
+func (db *Database) Status() DatabaseStatus {
+	dbs := DatabaseStatus{}
 	dbs.ID = db.ID.String()
 	dbs.Name = db.Name
 	dbs.NumberStacks = len(db.Stacks)
@@ -95,9 +87,22 @@ func (db *Database) Status() []byte {
 	ss.Sort()
 	dbs.Stacks = ss
 
+	return dbs
+}
+
+// DatabaseStatus represents the status of a Database.
+type DatabaseStatus struct {
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	NumberStacks int      `json:"number_of_stacks"`
+	Stacks       []string `json:"stacks,omitempty"`
+}
+
+// ToJSON converts a DatabaseStatus into JSON.
+func (databaseStatus DatabaseStatus) ToJSON() []byte {
 	// Do not check error as the Status type does
 	// not contain types that could cause such case.
 	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
-	b, _ := json.Marshal(dbs)
+	b, _ := json.Marshal(databaseStatus)
 	return b
 }

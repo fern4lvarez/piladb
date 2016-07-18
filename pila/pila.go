@@ -14,10 +14,10 @@ type Pila struct {
 	Databases map[fmt.Stringer]*Database
 }
 
-// pilaStatus contains the status of the Pila instance.
-type pilaStatus struct {
+// Status contains the status of the Pila instance.
+type Status struct {
 	NumberDatabases int              `json:"number_of_databases"`
-	Databases       []databaseStatus `json:"databases"`
+	Databases       []DatabaseStatus `json:"databases"`
 }
 
 // NewPila return a blank piladb instance
@@ -76,15 +76,15 @@ func (p *Pila) Database(id fmt.Stringer) (*Database, bool) {
 	return db, ok
 }
 
-// Status returns the status of the Pila instance in json format.
-func (p *Pila) Status() []byte {
-	ps := pilaStatus{}
+// Status returns the status of the Pila.
+func (p *Pila) Status() Status {
+	ps := Status{}
 	ps.NumberDatabases = len(p.Databases)
 
-	dbs := make([]databaseStatus, len(p.Databases))
+	dbs := make([]DatabaseStatus, len(p.Databases))
 	n := 0
 	for _, db := range p.Databases {
-		ds := databaseStatus{
+		ds := DatabaseStatus{
 			ID:           db.ID.String(),
 			Name:         db.Name,
 			NumberStacks: len(db.Stacks),
@@ -94,9 +94,14 @@ func (p *Pila) Status() []byte {
 	}
 	ps.Databases = dbs
 
+	return ps
+}
+
+// ToJSON converts a Status into JSON.
+func (pilaStatus Status) ToJSON() []byte {
 	// Do not check error as the Status type does
 	// not contain types that could cause such case.
 	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
-	b, _ := json.Marshal(ps)
+	b, _ := json.Marshal(pilaStatus)
 	return b
 }
