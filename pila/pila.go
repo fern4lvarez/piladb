@@ -17,7 +17,7 @@ type Pila struct {
 // pilaStatus contains the status of the Pila instance.
 type pilaStatus struct {
 	NumberDatabases int              `json:"number_of_databases"`
-	Databases       []databaseStatus `json:"databases"`
+	Databases       []DatabaseStatus `json:"databases"`
 }
 
 // NewPila return a blank piladb instance
@@ -81,10 +81,10 @@ func (p *Pila) Status() []byte {
 	ps := pilaStatus{}
 	ps.NumberDatabases = len(p.Databases)
 
-	dbs := make([]databaseStatus, len(p.Databases))
+	dbs := make([]DatabaseStatus, len(p.Databases))
 	n := 0
 	for _, db := range p.Databases {
-		ds := databaseStatus{
+		ds := DatabaseStatus{
 			ID:           db.ID.String(),
 			Name:         db.Name,
 			NumberStacks: len(db.Stacks),

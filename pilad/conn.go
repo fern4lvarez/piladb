@@ -71,7 +71,7 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusCreated)
 	w.WriteHeader(http.StatusCreated)
-	w.Write(db.Status())
+	w.Write(db.Status().ToJSON())
 }
 
 // databaseHandler returns the information of a single database given its ID
@@ -107,7 +107,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 
 		w.Header().Set("Content-Type", "application/json")
 		log.Println(r.Method, r.URL, http.StatusOK)
-		w.Write(db.Status())
+		w.Write(db.Status().ToJSON())
 	})
 }
 
