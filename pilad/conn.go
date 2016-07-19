@@ -111,6 +111,45 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 	})
 }
 
+// stacksHandler handles the stacks of a database, being able to get the status
+// of them, or create a new one.
+func (c *Conn) stacksHandler(databaseID string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
+		// we override the mux vars to be able to test
+		// an arbitrary database ID
+		if databaseID != "" {
+			vars = map[string]string{
+				"database_id": databaseID,
+			}
+		}
+
+		db, ok := c.Pila.Database(uuid.UUID(vars["database_id"]))
+		if !ok {
+			// Fallback to find by database name
+			db, ok = c.Pila.Database(uuid.New(vars["database_id"]))
+		}
+		if !ok {
+			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
+			return
+		}
+
+		res, err := db.StacksStatus().ToJSON()
+		if err != nil {
+			log.Println(r.Method, r.URL, http.StatusBadRequest,
+				"error on response serialization")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(res)
+		log.Println(r.Method, r.URL, http.StatusOK)
+
+	})
+}
+
 // popStackHandler returns 200 and the first element of a Stack.
 func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

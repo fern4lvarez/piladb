@@ -24,6 +24,10 @@ func Router(conn *Conn) *mux.Router {
 	r.Handle("/databases/{id}", conn.databaseHandler("")).
 		Methods("GET", "DELETE")
 
+	// GET /databases/$DATABASE_ID/stacks
+	r.Handle("/databases/{database_id}/stacks", conn.stacksHandler("")).
+		Methods("GET")
+
 	r.NotFoundHandler = http.HandlerFunc(conn.notFoundHandler)
 	return r
 }
