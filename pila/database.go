@@ -90,6 +90,22 @@ func (db *Database) Status() DatabaseStatus {
 	return dbs
 }
 
+// StacksStatus returns the status of the Stacks of Database.
+func (db *Database) StacksStatus() StacksStatus {
+	status := StacksStatus{}
+
+	var ss = make([]StackStatus, len(db.Stacks))
+	n := 0
+	for _, s := range db.Stacks {
+		ss[n] = s.Status()
+		n++
+	}
+	status.Stacks = ss
+	sort.Sort(status)
+
+	return status
+}
+
 // DatabaseStatus represents the status of a Database.
 type DatabaseStatus struct {
 	ID           string   `json:"id"`

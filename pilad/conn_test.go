@@ -386,6 +386,147 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 	}
 }
 
+func TestStacksHandler_GET(t *testing.T) {
+	s1 := pila.NewStack("stack1")
+	s1.Push("foo")
+
+	s2 := pila.NewStack("stack2")
+	s2.Push(1)
+	s2.Push(8)
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s1)
+	_ = db.AddStack(s2)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET", "/databases/db/stacks", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler(db.ID.String())
+	stacksHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	stacks, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`; string(stacks) != expected {
+		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
+	}
+}
+
+func TestStacksHandler_GET_Name(t *testing.T) {
+	s1 := pila.NewStack("stack1")
+	s1.Push("bar")
+
+	s2 := pila.NewStack("stack2")
+	s2.Push(`{"a":"b"}`)
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s1)
+	_ = db.AddStack(s2)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET", "/databases/db/stacks", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler("db")
+	stacksHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 200 {
+		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	}
+
+	stacks, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected := `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1}]}`; string(stacks) != expected {
+		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
+	}
+}
+
+func TestStacksHandler_GET_Gone(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET", "/databases/nodb/stacks", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler("nodb")
+	stacksHandle.ServeHTTP(response, request)
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+}
+
+func TestStacksHandler_GET_BadRequest(t *testing.T) {
+	ch := make(chan int)
+
+	stack := pila.NewStack("test-stack-channel")
+	stack.Push(ch)
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(stack)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET", "/databases/db/stacks", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler("db")
+	stacksHandle.ServeHTTP(response, request)
+
+	if response.Code != 400 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+}
+
 func TestPopStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 	s.Push("foo")
