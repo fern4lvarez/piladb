@@ -93,3 +93,13 @@ type StackStatus struct {
 func (stackStatus StackStatus) ToJSON() ([]byte, error) {
 	return json.Marshal(stackStatus)
 }
+
+// StacksStatus represents the status of a list of Stacks.
+type StacksStatus struct {
+	Stacks []StackStatus `json:"stacks"`
+}
+
+// ToJSON converts a StacksStatus into JSON.
+func (stacksStatus StacksStatus) ToJSON() ([]byte, error) {
+	return json.Marshal(stacksStatus)
+}

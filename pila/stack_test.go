@@ -183,3 +183,72 @@ func TestStackStatusJSON_Error(t *testing.T) {
 		t.Error("err is nil, expected UnsupportedTypeError")
 	}
 }
+
+func TestStacksStatusJSON(t *testing.T) {
+	stack1 := NewStack("test-stack-1")
+	stack1.Push("test")
+	stack1.Push(8)
+	stack1.Push(5.87)
+	stack1.Push([]byte("test"))
+
+	stack2 := NewStack("test-stack-2")
+	stack2.Push("foo")
+	stack2.Push([]byte("bar"))
+	stack2.Push(999)
+
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
+	}
+
+	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3}]}`)
+	if status, err := stacksStatus.ToJSON(); err != nil {
+		t.Fatal(err)
+	} else if string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestStacksStatusJSON_Empty(t *testing.T) {
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{},
+	}
+
+	expectedStatus := fmt.Sprintf(`{"stacks":[]}`)
+	if status, err := stacksStatus.ToJSON(); err != nil {
+		t.Fatal(err)
+	} else if string(status) != expectedStatus {
+		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
+	}
+}
+
+func TestStacksStatusJSON_Error(t *testing.T) {
+	// From https://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	// Channel, complex, and function values cannot be encoded in JSON.
+	// Attempting to encode such a value causes Marshal to return
+	// an UnsupportedTypeError.
+
+	ch := make(chan int)
+	f := func() string { return "a" }
+
+	stack := NewStack("test-stack-channel")
+	stack.Push(ch)
+
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack.Status()},
+	}
+
+	if _, err := stacksStatus.ToJSON(); err == nil {
+		t.Error("err is nil, expected UnsupportedTypeError")
+	}
+
+	stack = NewStack("test-stack-function")
+	stack.Push(f)
+
+	stacksStatus = StacksStatus{
+		Stacks: []StackStatus{stack.Status()},
+	}
+
+	if _, err := stacksStatus.ToJSON(); err == nil {
+		t.Error("err is nil, expected UnsupportedTypeError")
+	}
+}

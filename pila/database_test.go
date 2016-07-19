@@ -198,3 +198,39 @@ func TestDatabaseStatusToJSON_Empty(t *testing.T) {
 	}
 
 }
+
+func TestDatabaseStacksStatus(t *testing.T) {
+	s1 := NewStack("stack1")
+	s1.Push("foo")
+
+	s2 := NewStack("stack2")
+	s2.Push(1)
+	s2.Push(8)
+
+	s3 := NewStack("stack3")
+
+	db := NewDatabase("db")
+	_ = db.AddStack(s1)
+	_ = db.AddStack(s2)
+	_ = db.AddStack(s3)
+
+	expectedStatus := StacksStatus{
+		Stacks: []StackStatus{s1.Status(), s2.Status(), s3.Status()},
+	}
+
+	if status := db.StacksStatus(); !reflect.DeepEqual(status, expectedStatus) {
+		t.Errorf("status is %v, expected %v", status, expectedStatus)
+	}
+}
+
+func TestDatabaseStacksStatus_Empty(t *testing.T) {
+	db := NewDatabase("db")
+
+	expectedStatus := StacksStatus{
+		Stacks: []StackStatus{},
+	}
+
+	if status := db.StacksStatus(); !reflect.DeepEqual(status, expectedStatus) {
+		t.Errorf("status is %v, expected %v", status, expectedStatus)
+	}
+}
