@@ -252,3 +252,47 @@ func TestStacksStatusJSON_Error(t *testing.T) {
 		t.Error("err is nil, expected UnsupportedTypeError")
 	}
 }
+
+func TestStacksStatusLen(t *testing.T) {
+	stack1 := NewStack("test-stack-1")
+	stack2 := NewStack("test-stack-2")
+
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
+	}
+
+	expectedLen := 2
+	if len := stacksStatus.Len(); len != expectedLen {
+		t.Errorf("len is %d, expected %d", len, expectedLen)
+	}
+}
+
+func TestStacksStatusLess(t *testing.T) {
+	stack1 := NewStack("test-stack-1")
+	stack2 := NewStack("test-stack-2")
+
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
+	}
+
+	if less := stacksStatus.Less(0, 1); !less {
+		t.Errorf("less is %v, expected %v", less, true)
+	}
+}
+
+func TestStacksStatusSwap(t *testing.T) {
+	stack1 := NewStack("test-stack-1")
+	stack2 := NewStack("test-stack-2")
+
+	stacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
+	}
+
+	expectedStacksStatus := StacksStatus{
+		Stacks: []StackStatus{stack2.Status(), stack1.Status()},
+	}
+
+	if stacksStatus.Swap(0, 1); !reflect.DeepEqual(stacksStatus, expectedStacksStatus) {
+		t.Errorf("status is %v, expected %v", stacksStatus, expectedStacksStatus)
+	}
+}

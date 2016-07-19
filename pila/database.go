@@ -101,6 +101,7 @@ func (db *Database) StacksStatus() StacksStatus {
 		n++
 	}
 	status.Stacks = ss
+	sort.Sort(status)
 
 	return status
 }
