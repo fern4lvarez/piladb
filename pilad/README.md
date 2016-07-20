@@ -103,6 +103,32 @@ Creates a new $DATABASE_NAME database.
 Returns `400 BAD REQUEST` if name is not provided, and `409 CONFLICT` is
 `$DATABASE_NAME` already exists.
 
-### `/databases/$DATABASE_NAME/stacks`
+### `/databases/$DATABASE_ID/stacks`
+
+#### GET `/databases/$DATABASE_NAME/stacks`
+
+Returns the status of the stacks of the database `$DATABASE_ID`.
+You can use either the ID or the name of the database, although the former
+is used as default, the latter as fallback.
+
+```
+200 OK
+{
+  "stacks" : [
+    {
+      "id":"f0306fec639bd57fc2929c8b897b9b37",
+      "name":"stack1",
+      "peek":"foo",
+      "size":1
+    },
+    {
+      "id":"dde8f895aea2ffa5546336146b9384e7",
+      "name":"stack2",
+      "peek":8,
+      "size":2
+    }
+  ]
+}
+```
 
 ### `/databases/$DATABASE_NAME/stacks/$STACK_NAME`
