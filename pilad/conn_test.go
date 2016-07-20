@@ -527,6 +527,190 @@ func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	}
 }
 
+func TestStacksHandler_PUT(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler(db.ID.String())
+	stacksHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 201 {
+		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	}
+
+	stack, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+
+	if string(stack) != expectedStack {
+		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
+	}
+}
+
+func TestStacksHandler_PUT_Name(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.Name)
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	stacksHandle := conn.stacksHandler(db.ID.String())
+	stacksHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 201 {
+		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	}
+
+	stack, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+
+	if string(stack) != expectedStack {
+		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
+	}
+}
+
+func TestCreateStackHandler(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createStackHandler(response, request, db.ID.String())
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != 201 {
+		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	}
+
+	stack, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	if string(stack) != expectedStack {
+		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
+	}
+}
+
+func TestCreateStackHandler_NoName(t *testing.T) {
+	db := pila.NewDatabase("db")
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=", db.ID.String())
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createStackHandler(response, request, db.ID.String())
+
+	if response.Code != 400 {
+		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	}
+}
+
+func TestCreateStackHandler_Gone(t *testing.T) {
+	p := pila.NewPila()
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", "12345")
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createStackHandler(response, request, "12345")
+
+	if response.Code != 410 {
+		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	}
+}
+
+func TestCreateStackHandler_Conflict(t *testing.T) {
+	s := pila.NewStack("test-stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
+	request, err := http.NewRequest("PUT", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.createStackHandler(response, request, db.ID.String())
+
+	if response.Code != 409 {
+		t.Errorf("response code is %v, expected %v", response.Code, 409)
+	}
+}
+
 func TestPopStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 	s.Push("foo")
