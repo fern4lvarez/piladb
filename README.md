@@ -49,7 +49,7 @@ work as expected. You don't need to install, use or understand `gvt`.
 
 If you are using a lower Go version, **piladb** will use either your current local
 version of the dependencies, or the latest one available. Things might break, so
-please
+please consider updating to the latest version.
 
 Release
 -------
