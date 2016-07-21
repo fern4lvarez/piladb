@@ -135,6 +135,11 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 			return
 		}
 
+		if r.Method == "PUT" {
+			c.createStackHandler(w, r, db.ID.String())
+			return
+		}
+
 		res, err := db.StacksStatus().ToJSON()
 		if err != nil {
 			log.Println(r.Method, r.URL, http.StatusBadRequest,
@@ -148,6 +153,41 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 		log.Println(r.Method, r.URL, http.StatusOK)
 
 	})
+}
+
+// createStackHandler handles the creation of a stack, given a database
+// by its id. Returns the status of the new stack.
+func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string) {
+	name := r.FormValue("name")
+	if name == "" {
+		log.Println(r.Method, r.URL, http.StatusBadRequest, "missing name")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	db, ok := c.Pila.Database(uuid.UUID(databaseID))
+	if !ok {
+		c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", databaseID))
+		return
+	}
+
+	stack := pila.NewStack(name)
+	err := db.AddStack(stack)
+	if err != nil {
+		log.Println(r.Method, r.URL, http.StatusConflict, fmt.Sprintf("stack %s exists in database %s", name, databaseID))
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	// Do not check error as the Status of a new stack does
+	// not contain types that could cause such case.
+	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	res, _ := stack.Status().ToJSON()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(res)
+	log.Println(r.Method, r.URL, http.StatusCreated)
 }
 
 // popStackHandler returns 200 and the first element of a Stack.

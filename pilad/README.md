@@ -3,7 +3,7 @@ pilad
 
 **pilad** is the daemon that runs the **piladb** server, manages the main pila,
 databases and stacks. It exposes a RESTful HTTP server that listens to requests
-in order to interact with the system.
+in order to interact with the engine.
 
 > Note: pilad API does not come with a built-in `pretty` option. We encourage
   to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal.
@@ -11,11 +11,13 @@ in order to interact with the system.
 Endpoints
 ---------
 
-### `/_status`
+### STATUS
 
-`GET` Returns a JSON document with the current piladb status.
+#### GET `/_status`
 
-```
+Returns `200 OK` and a JSON document with the current piladb status.
+
+```json
 200 OK
 {
   "status": "OK",
@@ -27,13 +29,13 @@ Endpoints
 }
 ```
 
-### `/databases`
+### `DATABASES`
 
 #### `GET /databases`
 
-Returns the status of the currently running databases.
+Returns `200 OK` and the status of the currently running databases.
 
-```
+```json
 200 OK
 {
   "number_of_databases": 3,
@@ -60,11 +62,11 @@ Returns the status of the currently running databases.
 
 #### `GET /databases/$DATABASE_ID`
 
-Returns the status of database `$DATABASE_ID`.
+Returns `200 OK` and the status of database `$DATABASE_ID`.
 You can use either the ID or the name of the database, although the former
 is used as default, the latter as fallback.
 
-```
+```json
 200 OK
 {
   "number_of_stacks": 0,
@@ -77,21 +79,17 @@ Returns `410 GONE` if database does not exist.
 
 #### `DELETE /databases/$DATABASE_ID`
 
-Deletes database `$DATABASE_ID`. You can use either the ID or the name
-of the database, although the former is used as default, the latter
-as fallback.
-
-```
-204 NO CONTENT
-```
+Returns `204 NO CONTENT` and deletes database `$DATABASE_ID`.
+You can use either the ID or the name of the database, although
+the former is used as default, the latter as fallback.
 
 Returns `410 GONE` if database does not exist.
 
 #### `PUT /databases?name=$DATABASE_NAME`
 
-Creates a new $DATABASE_NAME database.
+Returns `201 CREATED` and creates a new $DATABASE_NAME database.
 
-```
+```json
 201 CREATED
 {
   "number_of_stacks": 0,
@@ -100,9 +98,59 @@ Creates a new $DATABASE_NAME database.
 }
 ```
 
-Returns `400 BAD REQUEST` if name is not provided, and `409 CONFLICT` is
-`$DATABASE_NAME` already exists.
+Returns `400 BAD REQUEST` if `name` is not provided
 
-### `/databases/$DATABASE_NAME/stacks`
+Returns `409 CONFLICT` if `$DATABASE_NAME` already exists.
 
-### `/databases/$DATABASE_NAME/stacks/$STACK_NAME`
+### STACKS
+
+#### GET `/databases/$DATABASE_ID/stacks`
+
+Returns `200 OK` and the status of the stacks of the database `$DATABASE_ID`.
+You can use either the ID or the Name of the database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "stacks" : [
+    {
+      "id":"f0306fec639bd57fc2929c8b897b9b37",
+      "name":"stack1",
+      "peek":"foo",
+      "size":1
+    },
+    {
+      "id":"dde8f895aea2ffa5546336146b9384e7",
+      "name":"stack2",
+      "peek":8,
+      "size":2
+    }
+  ]
+}
+```
+
+Returns `410 GONE` if the database does not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the stacks
+response..
+
+#### PUT `/databases/$DATABASE_ID/stacks?name=$STACK_NAME`
+
+Creates a new $STACK_NAME stack belongind to database $DATABASE_ID.
+
+```json
+201 CREATED
+{
+  "size": 0,
+  "peek": null,
+  "name": "stack",
+  "id": "714e49277eb730717e413b167b76ef78"
+}
+```
+
+Returns `410 GONE` if the database does not exist.
+
+Returns `400 BAD REQUEST` if `name` is not provided.
+
+Returns `409 CONFLICT` if `$STACK_NAME` already exists.
