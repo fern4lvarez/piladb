@@ -15,12 +15,25 @@ Features
 
 * Stacks are auto-scalable and are only limited by the capacity of the host
   or by configuration.
-* Available `pop`, `push`, `peek`, or `size` operations for each of the stacks.
-* Manage databases and stacks using a REST API, so you can use it from
+* Available `POP`, `PUSH`, `PEEK`, or `SIZE` operations for each of the stacks.
+* Manage databases and stacks using a REST API, so you wrap it with
   any programming language.
-* Totally configurable using a INI-style configuration file.
-* In-memory store, persistence on disk wannabe.
+* Totally configurable using a REST API, environment variables or
+  configuration file.
+* In-memory store, persistence on disk wannabe (https://github.com/fern4lvarez/piladb/issues/11).
 * Written in Go, i.e. binaries are self-contained and distributable.
+
+Install
+-------
+
+Releases not available yet. For now:
+
+> You need Go installed. Version 1.6+ recommended.
+
+```bash
+go get github.com/fern4lvarez/piladb/...
+pilad
+```
 
 Development
 -----------
