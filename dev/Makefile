@@ -1,6 +1,9 @@
 default: build push
 
-build:
+base:
+	docker pull golang:latest
+
+build: base
 	docker build -t fern4lvarez/piladb:latest .
 
 push:

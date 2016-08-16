@@ -6,6 +6,10 @@
 # Pull base image.
 FROM golang:latest
 
+# Install dependencies.
+RUN \
+  go get github.com/golang/lint/golint
+
 # Install piladb.
 RUN \
   go get github.com/fern4lvarez/piladb && \
