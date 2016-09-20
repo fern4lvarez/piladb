@@ -190,7 +190,49 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 	log.Println(r.Method, r.URL, http.StatusCreated)
 }
 
-// popStackHandler returns 200 and the first element of a Stack.
+// pushStackHandler adds an element into a Stack and returns 200 and the element.
+func (c *Conn) pushStackHandler(params map[string]string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body == nil {
+			log.Println(r.Method, r.URL, http.StatusBadRequest,
+				"no element provided")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		dbID := uuid.UUID(params["database_id"])
+		db, ok := c.Pila.Database(dbID)
+		if !ok {
+			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
+			return
+		}
+
+		stackID := uuid.UUID(params["stack_id"])
+		stack, ok := db.Stacks[stackID]
+		if !ok {
+			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", params["stack_id"]))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		var element pila.Element
+		err := element.Decode(r.Body)
+		if err != nil {
+			log.Println(r.Method, r.URL, http.StatusBadRequest,
+				"error on decoding element")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		stack.Push(element.Value)
+		// Do not check error as we consider our element
+		// suitable for a JSON encoding.
+		b, _ := element.ToJSON()
+		w.Write(b)
+	})
+}
+
+// popStackHandler extracts the peek element of a Srack, returns 200 and returns it.
 func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
