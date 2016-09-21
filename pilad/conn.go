@@ -191,7 +191,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
-func (c *Conn) pushStackHandler(params map[string]string) http.Handler {
+func (c *Conn) pushStackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Body == nil {
 			log.Println(r.Method, r.URL, http.StatusBadRequest,
@@ -200,17 +200,24 @@ func (c *Conn) pushStackHandler(params map[string]string) http.Handler {
 			return
 		}
 
-		dbID := uuid.UUID(params["database_id"])
+		vars := mux.Vars(r)
+		// we override the mux vars to be able to test
+		// an arbitrary database ID
+		if params != nil {
+			vars = *params
+		}
+
+		dbID := uuid.UUID(vars["database_id"])
 		db, ok := c.Pila.Database(dbID)
 		if !ok {
-			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
+			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
 			return
 		}
 
-		stackID := uuid.UUID(params["stack_id"])
+		stackID := uuid.UUID(vars["stack_id"])
 		stack, ok := db.Stacks[stackID]
 		if !ok {
-			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", params["stack_id"]))
+			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
 			return
 		}
 

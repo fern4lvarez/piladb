@@ -739,7 +739,7 @@ func TestPushStackHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	params := &map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
@@ -789,7 +789,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	params := &map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
@@ -823,7 +823,7 @@ func TestPushStackHandler_DatabaseGone(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	params := &map[string]string{
 		"database_id": "db",
 		"stack_id":    "stack",
 	}
@@ -860,7 +860,7 @@ func TestPushStackHandler_StackGone(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	params := &map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    "stack",
 	}
@@ -899,7 +899,7 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	params := &map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
