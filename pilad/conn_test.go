@@ -47,8 +47,8 @@ func TestStatusHandler(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	statusJSON, err := ioutil.ReadAll(response.Body)
@@ -82,8 +82,8 @@ func TestDatabasesHandler_GET(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	databases, err := ioutil.ReadAll(response.Body)
@@ -110,8 +110,8 @@ func TestDatabasesHandler_GET_Empty(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	databases, err := ioutil.ReadAll(response.Body)
@@ -136,8 +136,8 @@ func TestDatabasesHandler_PUT(t *testing.T) {
 
 	conn.databasesHandler(response, request)
 
-	if response.Code != 400 {
-		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
 	}
 }
 
@@ -155,8 +155,8 @@ func TestCreateDatabaseHandler(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 201 {
-		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	if response.Code != http.StatusCreated {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusCreated)
 	}
 
 	databases, err := ioutil.ReadAll(response.Body)
@@ -179,8 +179,8 @@ func TestCreateDatabaseHandler_NoName(t *testing.T) {
 
 	conn.createDatabaseHandler(response, request)
 
-	if response.Code != 400 {
-		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
 	}
 }
 
@@ -195,8 +195,8 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 
 	conn.createDatabaseHandler(response, request)
 
-	if response.Code != 201 {
-		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	if response.Code != http.StatusCreated {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusCreated)
 	}
 
 	request, err = http.NewRequest("PUT", "/databases?name=db", nil)
@@ -207,8 +207,8 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 
 	conn.createDatabaseHandler(response, request)
 
-	if response.Code != 409 {
-		t.Errorf("response code is %v, expected %v", response.Code, 409)
+	if response.Code != http.StatusConflict {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusConflict)
 	}
 }
 
@@ -242,8 +242,8 @@ func TestDatabaseHandler_GET(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	database, err := ioutil.ReadAll(response.Body)
@@ -286,8 +286,8 @@ func TestDatabaseHandler_GET_Name(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	database, err := ioutil.ReadAll(response.Body)
@@ -324,8 +324,8 @@ func TestDatabaseHandler_DELETE(t *testing.T) {
 	databaseHandle := conn.databaseHandler(db1.ID.String())
 	databaseHandle.ServeHTTP(response, request)
 
-	if response.Code != 204 {
-		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	if response.Code != http.StatusNoContent {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
 	}
 
 	if len(conn.Pila.Databases) != 1 {
@@ -357,8 +357,8 @@ func TestDatabaseHandler_DELETE_Name(t *testing.T) {
 	databaseHandle := conn.databaseHandler(db1.Name)
 	databaseHandle.ServeHTTP(response, request)
 
-	if response.Code != 204 {
-		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	if response.Code != http.StatusNoContent {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
 	}
 
 	if len(conn.Pila.Databases) != 1 {
@@ -382,8 +382,8 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 	databaseHandle := conn.databaseHandler(uuid.UUID("nodb").String())
 	databaseHandle.ServeHTTP(response, request)
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -418,8 +418,8 @@ func TestStacksHandler_GET(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	stacks, err := ioutil.ReadAll(response.Body)
@@ -462,8 +462,8 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	stacks, err := ioutil.ReadAll(response.Body)
@@ -494,8 +494,8 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 	stacksHandle := conn.stacksHandler("nodb")
 	stacksHandle.ServeHTTP(response, request)
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -523,8 +523,8 @@ func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	stacksHandle := conn.stacksHandler("db")
 	stacksHandle.ServeHTTP(response, request)
 
-	if response.Code != 400 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -551,8 +551,8 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 201 {
-		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	if response.Code != http.StatusCreated {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusCreated)
 	}
 
 	stack, err := ioutil.ReadAll(response.Body)
@@ -590,8 +590,8 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 201 {
-		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	if response.Code != http.StatusCreated {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusCreated)
 	}
 
 	stack, err := ioutil.ReadAll(response.Body)
@@ -628,8 +628,8 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 201 {
-		t.Errorf("response code is %v, expected %v", response.Code, 201)
+	if response.Code != http.StatusCreated {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusCreated)
 	}
 
 	stack, err := ioutil.ReadAll(response.Body)
@@ -661,8 +661,8 @@ func TestCreateStackHandler_NoName(t *testing.T) {
 
 	conn.createStackHandler(response, request, db.ID.String())
 
-	if response.Code != 400 {
-		t.Errorf("response code is %v, expected %v", response.Code, 400)
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
 	}
 }
 
@@ -681,8 +681,8 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 
 	conn.createStackHandler(response, request, "12345")
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -707,8 +707,8 @@ func TestCreateStackHandler_Conflict(t *testing.T) {
 
 	conn.createStackHandler(response, request, db.ID.String())
 
-	if response.Code != 409 {
-		t.Errorf("response code is %v, expected %v", response.Code, 409)
+	if response.Code != http.StatusConflict {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusConflict)
 	}
 }
 
@@ -751,8 +751,8 @@ func TestPushStackHandler(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	elementJSON, err := ioutil.ReadAll(response.Body)
@@ -804,8 +804,8 @@ func TestPushStackHandler_Name(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	elementJSON, err := ioutil.ReadAll(response.Body)
@@ -1001,8 +1001,8 @@ func TestPopStackHandler(t *testing.T) {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	if response.Code != 200 {
-		t.Errorf("response code is %v, expected %v", response.Code, 200)
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
 	elementJSON, err := ioutil.ReadAll(response.Body)
@@ -1046,8 +1046,8 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 	popStackHandle := conn.popStackHandler(params)
 	popStackHandle.ServeHTTP(response, request)
 
-	if response.Code != 204 {
-		t.Errorf("response code is %v, expected %v", response.Code, 204)
+	if response.Code != http.StatusNoContent {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
 	}
 }
 
@@ -1081,8 +1081,8 @@ func TestPopStackHandler_NoStackFound(t *testing.T) {
 	popStackHandle := conn.popStackHandler(params)
 	popStackHandle.ServeHTTP(response, request)
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -1114,8 +1114,8 @@ func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
 	popStackHandle := conn.popStackHandler(params)
 	popStackHandle.ServeHTTP(response, request)
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 410)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -1129,8 +1129,8 @@ func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
 
 	conn.notFoundHandler(response, request)
 
-	if response.Code != 404 {
-		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	if response.Code != http.StatusNotFound {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNotFound)
 	}
 }
 
@@ -1144,8 +1144,8 @@ func TestNotFoundHandler_WrongType(t *testing.T) {
 
 	conn.notFoundHandler(response, request)
 
-	if response.Code != 404 {
-		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	if response.Code != http.StatusNotFound {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNotFound)
 	}
 }
 
@@ -1159,7 +1159,7 @@ func TestGoneHandler(t *testing.T) {
 
 	conn.goneHandler(response, request, "database nodb is Gone")
 
-	if response.Code != 410 {
-		t.Errorf("response code is %v, expected %v", response.Code, 404)
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNotFound)
 	}
 }
