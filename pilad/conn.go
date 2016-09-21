@@ -210,12 +210,20 @@ func (c *Conn) pushStackHandler(params *map[string]string) http.Handler {
 		dbID := uuid.UUID(vars["database_id"])
 		db, ok := c.Pila.Database(dbID)
 		if !ok {
+			// Fallback to find by database name
+			db, ok = c.Pila.Database(uuid.New(vars["database_id"]))
+		}
+		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
 			return
 		}
 
 		stackID := uuid.UUID(vars["stack_id"])
 		stack, ok := db.Stacks[stackID]
+		if !ok {
+			// Fallback to find by stack name
+			stack, ok = db.Stacks[uuid.New(db.Name+vars["stack_id"])]
+		}
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
 			return
