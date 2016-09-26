@@ -712,7 +712,7 @@ func TestCreateStackHandler_Conflict(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler(t *testing.T) {
+func TestStackHandler_POST(t *testing.T) {
 	s := pila.NewStack("stack")
 
 	db := pila.NewDatabase("db")
@@ -744,8 +744,117 @@ func TestPushStackHandler(t *testing.T) {
 		"stack_id":    s.ID.String(),
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	stackHandle := conn.stackHandler(params)
+	stackHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	elementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(elementJSON) != string(expectedElementJSON) {
+		t.Errorf("pushed element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+	}
+}
+
+func TestStackHandler_POST_Name(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.Name,
+			s.Name),
+		bytes.NewBuffer(expectedElementJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	params := &map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	stackHandle := conn.stackHandler(params)
+	stackHandle.ServeHTTP(response, request)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	elementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(elementJSON) != string(expectedElementJSON) {
+		t.Errorf("pushed element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+	}
+}
+
+func TestPushStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		bytes.NewBuffer(expectedElementJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    s.ID.String(),
+	}
+
+	conn.pushStackHandler(response, request, vars)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
+		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
+	}
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
@@ -792,13 +901,16 @@ func TestPushStackHandler_Name(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := &map[string]string{
+	vars := map[string]string{
 		"database_id": db.Name,
 		"stack_id":    s.Name,
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	conn.pushStackHandler(response, request, vars)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
+		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
+	}
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
@@ -842,13 +954,16 @@ func TestPushStackHandler_Empty(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := &map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	conn.pushStackHandler(response, request, vars)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
+		t.Errorf("Pushed element is %v, expected nil", pushedElement)
+	}
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
@@ -876,13 +991,12 @@ func TestPushStackHandler_DatabaseGone(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := &map[string]string{
+	vars := map[string]string{
 		"database_id": "db",
 		"stack_id":    "stack",
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	conn.pushStackHandler(response, request, vars)
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
@@ -913,13 +1027,12 @@ func TestPushStackHandler_StackGone(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := &map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    "stack",
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	conn.pushStackHandler(response, request, vars)
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
@@ -952,13 +1065,16 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := &map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
 
-	pushStackHandle := conn.pushStackHandler(params)
-	pushStackHandle.ServeHTTP(response, request)
+	conn.pushStackHandler(response, request, vars)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
+		t.Errorf("Pushed element is %v, expected nil", pushedElement)
+	}
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
