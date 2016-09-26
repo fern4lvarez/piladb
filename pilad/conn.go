@@ -88,11 +88,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 			}
 		}
 
-		db, ok := c.Pila.Database(uuid.UUID(vars["id"]))
-		if !ok {
-			// Fallback to find by database name
-			db, ok = c.Pila.Database(uuid.New(vars["id"]))
-		}
+		db, ok := ResourceDatabase(c, vars["id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["id"]))
 			return
@@ -125,11 +121,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 			}
 		}
 
-		db, ok := c.Pila.Database(uuid.UUID(vars["database_id"]))
-		if !ok {
-			// Fallback to find by database name
-			db, ok = c.Pila.Database(uuid.New(vars["database_id"]))
-		}
+		db, ok := ResourceDatabase(c, vars["database_id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
 			return
@@ -217,12 +209,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map
 		return
 	}
 
-	dbID := uuid.UUID(vars["database_id"])
-	db, ok := c.Pila.Database(dbID)
-	if !ok {
-		// Fallback to find by database name
-		db, ok = c.Pila.Database(uuid.New(vars["database_id"]))
-	}
+	db, ok := ResourceDatabase(c, vars["database_id"])
 	if !ok {
 		c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
 		return
@@ -264,8 +251,8 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map
 func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		dbID := uuid.UUID(params["database_id"])
-		db, ok := c.Pila.Database(dbID)
+
+		db, ok := ResourceDatabase(c, params["database_id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
 			return
