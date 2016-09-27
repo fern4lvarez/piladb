@@ -88,11 +88,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 			}
 		}
 
-		db, ok := c.Pila.Database(uuid.UUID(vars["id"]))
-		if !ok {
-			// Fallback to find by database name
-			db, ok = c.Pila.Database(uuid.New(vars["id"]))
-		}
+		db, ok := ResourceDatabase(c, vars["id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["id"]))
 			return
@@ -125,11 +121,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 			}
 		}
 
-		db, ok := c.Pila.Database(uuid.UUID(vars["database_id"]))
-		if !ok {
-			// Fallback to find by database name
-			db, ok = c.Pila.Database(uuid.New(vars["database_id"]))
-		}
+		db, ok := ResourceDatabase(c, vars["database_id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
 			return
@@ -190,12 +182,76 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 	log.Println(r.Method, r.URL, http.StatusCreated)
 }
 
-// popStackHandler returns 200 and the first element of a Stack.
+// stackHandler handles operations on a single stack of a database. It holds
+// the PUSH, POP and PEEK methods, and the stack deletion.
+func (c *Conn) stackHandler(params *map[string]string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		// we override the mux vars to be able to test
+		// an arbitrary database and stack ID
+		if params != nil {
+			vars = *params
+		}
+
+		if r.Method == "POST" {
+			c.pushStackHandler(w, r, vars)
+			return
+		}
+	})
+}
+
+// pushStackHandler adds an element into a Stack and returns 200 and the element.
+func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	if r.Body == nil {
+		log.Println(r.Method, r.URL, http.StatusBadRequest,
+			"no element provided")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	db, ok := ResourceDatabase(c, vars["database_id"])
+	if !ok {
+		c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
+		return
+	}
+
+	stackID := uuid.UUID(vars["stack_id"])
+	stack, ok := db.Stacks[stackID]
+	if !ok {
+		// Fallback to find by stack name
+		stack, ok = db.Stacks[uuid.New(db.Name+vars["stack_id"])]
+	}
+	if !ok {
+		c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
+		return
+	}
+
+	var element pila.Element
+	err := element.Decode(r.Body)
+	if err != nil {
+		log.Println(r.Method, r.URL, http.StatusBadRequest,
+			"error on decoding element:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	stack.Push(element.Value)
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// popStackHandler extracts the peek element of a Srack, returns 200 and returns it.
 func (c *Conn) popStackHandler(params map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		dbID := uuid.UUID(params["database_id"])
-		db, ok := c.Pila.Database(dbID)
+
+		db, ok := ResourceDatabase(c, params["database_id"])
 		if !ok {
 			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
 			return

@@ -3,6 +3,7 @@ package pila
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -12,8 +13,10 @@ import (
 type Stack struct {
 	// ID is a unique identifier of the Stack
 	ID fmt.Stringer
+
 	// Name of the Stack
 	Name string
+
 	// Database associated to the Stack
 	Database *Database
 
@@ -117,4 +120,20 @@ func (stacksStatus StacksStatus) Less(i, j int) bool {
 // Swap swaps positions between two StackStatus.
 func (stacksStatus StacksStatus) Swap(i, j int) {
 	stacksStatus.Stacks[i], stacksStatus.Stacks[j] = stacksStatus.Stacks[j], stacksStatus.Stacks[i]
+}
+
+// Element represents the payload of a Stack element.
+type Element struct {
+	Value interface{} `json:"element"`
+}
+
+// ToJSON converts an Element into JSON.
+func (element Element) ToJSON() ([]byte, error) {
+	return json.Marshal(element)
+}
+
+// Decode decodes json data into an Element.
+func (element *Element) Decode(r io.Reader) error {
+	decoder := json.NewDecoder(r)
+	return decoder.Decode(element)
 }

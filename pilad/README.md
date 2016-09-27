@@ -133,11 +133,11 @@ is used as default, the latter as fallback.
 Returns `410 GONE` if the database does not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the stacks
-response..
+response.
 
 #### PUT `/databases/$DATABASE_ID/stacks?name=$STACK_NAME`
 
-Creates a new $STACK_NAME stack belongind to database $DATABASE_ID.
+Creates a new $STACK_NAME stack belonging to database $DATABASE_ID.
 
 ```json
 201 CREATED
@@ -154,3 +154,21 @@ Returns `410 GONE` if the database does not exist.
 Returns `400 BAD REQUEST` if `name` is not provided.
 
 Returns `409 CONFLICT` if `$STACK_NAME` already exists.
+
+#### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
+
+Pushes `ELEMENT` on top of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+returns `200 OK`, and the pushed element.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "element": "this is an element"
+}
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the element.

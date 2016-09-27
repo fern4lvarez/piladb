@@ -1,6 +1,7 @@
 package pila
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"testing"
@@ -294,5 +295,101 @@ func TestStacksStatusSwap(t *testing.T) {
 
 	if stacksStatus.Swap(0, 1); !reflect.DeepEqual(stacksStatus, expectedStacksStatus) {
 		t.Errorf("status is %v, expected %v", stacksStatus, expectedStacksStatus)
+	}
+}
+
+func TestElementJSON(t *testing.T) {
+	elements := []Element{
+		Element{Value: "foo"},
+		Element{Value: 42},
+		Element{Value: 3.14},
+		Element{Value: []byte("hello")},
+		Element{Value: map[string]int{"one": 1}},
+	}
+	expectedElements := []string{
+		`{"element":"foo"}`,
+		`{"element":42}`,
+		`{"element":3.14}`,
+		`{"element":"aGVsbG8="}`,
+		`{"element":{"one":1}}`,
+	}
+
+	for i, element := range elements {
+		expectedElement := expectedElements[i]
+		if element, err := element.ToJSON(); err != nil {
+			t.Fatal(err)
+		} else if string(element) != expectedElement {
+			t.Errorf("element is %s, expected %s", string(element), expectedElement)
+		}
+	}
+
+}
+
+func TestElementJSON_Error(t *testing.T) {
+	// From https://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	// Channel, complex, and function values cannot be encoded in JSON.
+	// Attempting to encode such a value causes Marshal to return
+	// an UnsupportedTypeError.
+
+	ch := make(chan int)
+	f := func() string { return "a" }
+	elements := []Element{
+		Element{Value: ch},
+		Element{Value: f},
+	}
+
+	for _, element := range elements {
+		if _, err := element.ToJSON(); err == nil {
+			t.Error("err is nil, expected UnsupportedTypeError")
+		}
+	}
+}
+
+func TestElementDecode(t *testing.T) {
+	elementReaders := []string{
+		`{"element":"foo"}`,
+		`{"element":42}`,
+		`{"element":3.14}`,
+		`{"element":"aGVsbG8="}`,
+		`{"element":{"one":1}}`,
+	}
+	expectedElements := []Element{
+		Element{Value: "foo"},
+		Element{Value: 42.0}, // decode int into float
+		Element{Value: 3.14},
+		Element{Value: "aGVsbG8="},                         // does not decode into []byte
+		Element{Value: map[string]interface{}{"one": 1.0}}, // decode inner int into float
+	}
+
+	for i, elementReader := range elementReaders {
+		expectedElement := expectedElements[i]
+		r := bytes.NewBuffer([]byte(elementReader))
+
+		var element Element
+		if err := element.Decode(r); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(element.Value, expectedElement.Value) {
+			t.Errorf("element is %#v, expected %#v", element.Value, expectedElement.Value)
+		}
+	}
+}
+
+func TestElementDecode_Error(t *testing.T) {
+	elementReaders := []string{
+		`{`,
+		`}`,
+		``,
+		` `,
+		`$`,
+		`%{}`,
+	}
+
+	for _, elementReader := range elementReaders {
+		r := bytes.NewBuffer([]byte(elementReader))
+
+		var element Element
+		if err := element.Decode(r); err == nil {
+			t.Fatal("err is nil, expected error")
+		}
 	}
 }
