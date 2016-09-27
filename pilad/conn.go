@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -247,34 +246,39 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map
 }
 
 // popStackHandler extracts the peek element of a Srack, returns 200 and returns it.
-func (c *Conn) popStackHandler(params map[string]string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	db, ok := ResourceDatabase(c, vars["database_id"])
+	if !ok {
+		c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", vars["database_id"]))
+		return
+	}
 
-		db, ok := ResourceDatabase(c, params["database_id"])
-		if !ok {
-			c.goneHandler(w, r, fmt.Sprintf("database %s is Gone", params["database_id"]))
-			return
-		}
+	stackID := uuid.UUID(vars["stack_id"])
+	stack, ok := db.Stacks[stackID]
+	if !ok {
+		// Fallback to find by stack name
+		stack, ok = db.Stacks[uuid.New(db.Name+vars["stack_id"])]
+	}
+	if !ok {
+		c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
+		return
+	}
 
-		stackID := uuid.UUID(params["stack_id"])
-		stack, ok := db.Stacks[stackID]
-		if !ok {
-			c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", params["stack_id"]))
-			return
-		}
-		element, ok := stack.Pop()
-		if !ok {
-			log.Println(r.Method, r.URL, http.StatusNoContent)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	var element pila.Element
+	element.Value, ok = stack.Pop()
+	if !ok {
+		log.Println(r.Method, r.URL, http.StatusNoContent)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 
-		log.Println(r.Method, r.URL, http.StatusOK)
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 
-		b, _ := json.Marshal(element)
-		w.Write(b)
-	})
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
 }
 
 // notFoundHandler logs and returns a 404 NotFound response.

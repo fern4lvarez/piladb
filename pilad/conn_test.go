@@ -1082,8 +1082,11 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 }
 
 func TestPopStackHandler(t *testing.T) {
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
 	s := pila.NewStack("stack")
-	s.Push("foo")
+	s.Push(element.Value)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1094,7 +1097,7 @@ func TestPopStackHandler(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("GET",
+	request, err := http.NewRequest("DELETE",
 		fmt.Sprintf("/databases/%s/stacks/%s",
 			db.ID.String(),
 			s.ID.String()),
@@ -1105,29 +1108,43 @@ func TestPopStackHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
+	varss := []map[string]string{
+		map[string]string{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		map[string]string{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
 	}
 
-	popStackHandle := conn.popStackHandler(params)
-	popStackHandle.ServeHTTP(response, request)
+	for _, vars := range varss {
+		conn.popStackHandler(response, request, vars)
 
-	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
-		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
-	}
+		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+			t.Errorf("stack contains %v, expected to be empty", peek)
+		}
 
-	if response.Code != http.StatusOK {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
-	}
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
 
-	elementJSON, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
 
-	if string(elementJSON) != "\"foo\"" {
-		t.Errorf("popped element is %v, expected %v", string(elementJSON), "\"foo\"")
+		elementJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(elementJSON) != string(expectedElementJSON) {
+			t.Errorf("popped element is %s, expected %s", string(elementJSON), string(expectedElementJSON))
+		}
+
+		// restore element for next table test iteration
+		s.Push(element.Value)
 	}
 }
 
@@ -1143,7 +1160,7 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("GET",
+	request, err := http.NewRequest("DELETE",
 		fmt.Sprintf("/databases/%s/stacks/%s",
 			db.ID.String(),
 			s.ID.String()),
@@ -1154,13 +1171,12 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
 
-	popStackHandle := conn.popStackHandler(params)
-	popStackHandle.ServeHTTP(response, request)
+	conn.popStackHandler(response, request, vars)
 
 	if response.Code != http.StatusNoContent {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
@@ -1178,7 +1194,7 @@ func TestPopStackHandler_NoStackFound(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("GET",
+	request, err := http.NewRequest("DELETE",
 		fmt.Sprintf("/databases/%s/stacks/%s",
 			db.ID.String(),
 			s.ID.String()),
@@ -1189,13 +1205,12 @@ func TestPopStackHandler_NoStackFound(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
 
-	popStackHandle := conn.popStackHandler(params)
-	popStackHandle.ServeHTTP(response, request)
+	conn.popStackHandler(response, request, vars)
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
@@ -1211,7 +1226,7 @@ func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("GET",
+	request, err := http.NewRequest("DELETE",
 		fmt.Sprintf("/databases/%s/stacks/%s",
 			db.ID.String(),
 			s.ID.String()),
@@ -1222,13 +1237,12 @@ func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	params := map[string]string{
+	vars := map[string]string{
 		"database_id": db.ID.String(),
 		"stack_id":    s.ID.String(),
 	}
 
-	popStackHandle := conn.popStackHandler(params)
-	popStackHandle.ServeHTTP(response, request)
+	conn.popStackHandler(response, request, vars)
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
