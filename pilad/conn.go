@@ -183,7 +183,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
-// the PUSH, POP and PEEK methods, and the stack deletion
+// the PUSH, POP and PEEK methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -226,12 +226,11 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	var element pila.Element
 	err := element.Decode(r.Body)
 	if err != nil {
 		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"error on decoding element")
+			"error on decoding element:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

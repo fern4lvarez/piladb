@@ -122,7 +122,7 @@ func (stacksStatus StacksStatus) Swap(i, j int) {
 	stacksStatus.Stacks[i], stacksStatus.Stacks[j] = stacksStatus.Stacks[j], stacksStatus.Stacks[i]
 }
 
-// Element represents the payload of a Stack element
+// Element represents the payload of a Stack element.
 type Element struct {
 	Value interface{} `json:"element"`
 }
@@ -132,7 +132,7 @@ func (element Element) ToJSON() ([]byte, error) {
 	return json.Marshal(element)
 }
 
-// Decode decodes json data into an Element
+// Decode decodes json data into an Element.
 func (element *Element) Decode(r io.Reader) error {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(element)
