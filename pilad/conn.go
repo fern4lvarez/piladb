@@ -63,7 +63,7 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	db := pila.NewDatabase(name)
 	err := c.Pila.AddDatabase(db)
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusConflict, "database exists")
+		log.Println(r.Method, r.URL, http.StatusConflict, err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
@@ -135,7 +135,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 		res, err := db.StacksStatus().ToJSON()
 		if err != nil {
 			log.Println(r.Method, r.URL, http.StatusBadRequest,
-				"error on response serialization")
+				"error on response serialization:", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -166,7 +166,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 	stack := pila.NewStack(name)
 	err := db.AddStack(stack)
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusConflict, fmt.Sprintf("stack %s exists in database %s", name, databaseID))
+		log.Println(r.Method, r.URL, http.StatusConflict, err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
