@@ -818,6 +818,80 @@ func TestStackHandler_POST_Name(t *testing.T) {
 	}
 }
 
+func TestStackHandler_DatabaseGone(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			"non-existing-db",
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	params := &map[string]string{
+		"database_id": "non-existing-db",
+		"stack_id":    s.ID.String(),
+	}
+
+	stackHandle := conn.stackHandler(params)
+	stackHandle.ServeHTTP(response, request)
+
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+}
+
+func TestStackHandler_StackGone(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			"non-existing-stack"),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	params := &map[string]string{
+		"database_id": db.ID.String(),
+		"stack_id":    "non-existing-stack",
+	}
+
+	stackHandle := conn.stackHandler(params)
+	stackHandle.ServeHTTP(response, request)
+
+	if response.Code != http.StatusGone {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+}
+
 func TestPushStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 
@@ -845,12 +919,7 @@ func TestPushStackHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.pushStackHandler(response, request, vars)
+	conn.pushStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
@@ -901,12 +970,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"database_id": db.Name,
-		"stack_id":    s.Name,
-	}
-
-	conn.pushStackHandler(response, request, vars)
+	conn.pushStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
@@ -954,12 +1018,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.pushStackHandler(response, request, vars)
+	conn.pushStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
 		t.Errorf("Pushed element is %v, expected nil", pushedElement)
@@ -967,75 +1026,6 @@ func TestPushStackHandler_Empty(t *testing.T) {
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
-	}
-}
-
-func TestPushStackHandler_DatabaseGone(t *testing.T) {
-	p := pila.NewPila()
-
-	conn := NewConn()
-	conn.Pila = p
-
-	element := pila.Element{Value: "test-element"}
-	expectedElementJSON, _ := element.ToJSON()
-
-	request, err := http.NewRequest("POST",
-		fmt.Sprintf("/databases/%s/stacks/%s",
-			"db",
-			"stack"),
-		bytes.NewBuffer(expectedElementJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	response := httptest.NewRecorder()
-
-	vars := map[string]string{
-		"database_id": "db",
-		"stack_id":    "stack",
-	}
-
-	conn.pushStackHandler(response, request, vars)
-
-	if response.Code != http.StatusGone {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
-	}
-}
-
-func TestPushStackHandler_StackGone(t *testing.T) {
-	p := pila.NewPila()
-
-	db := pila.NewDatabase("db")
-	_ = p.AddDatabase(db)
-
-	conn := NewConn()
-	conn.Pila = p
-
-	element := pila.Element{Value: "test-element"}
-	expectedElementJSON, _ := element.ToJSON()
-
-	request, err := http.NewRequest("POST",
-		fmt.Sprintf("/databases/%s/stacks/%s",
-			db.ID.String(),
-			"stack"),
-		bytes.NewBuffer(expectedElementJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	response := httptest.NewRecorder()
-
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    "stack",
-	}
-
-	conn.pushStackHandler(response, request, vars)
-
-	if response.Code != http.StatusGone {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
@@ -1065,12 +1055,7 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.pushStackHandler(response, request, vars)
+	conn.pushStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
 		t.Errorf("Pushed element is %v, expected nil", pushedElement)
@@ -1097,17 +1082,6 @@ func TestPopStackHandler(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("DELETE",
-		fmt.Sprintf("/databases/%s/stacks/%s",
-			db.ID.String(),
-			s.ID.String()),
-		nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	response := httptest.NewRecorder()
-
 	varss := []map[string]string{
 		map[string]string{
 			"database_id": db.ID.String(),
@@ -1120,7 +1094,18 @@ func TestPopStackHandler(t *testing.T) {
 	}
 
 	for _, vars := range varss {
-		conn.popStackHandler(response, request, vars)
+		request, err := http.NewRequest("DELETE",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.popStackHandler(response, request, s)
 
 		if peek, ok := db.Stacks[s.ID].Pop(); ok {
 			t.Errorf("stack contains %v, expected to be empty", peek)
@@ -1171,81 +1156,10 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.popStackHandler(response, request, vars)
+	conn.popStackHandler(response, request, s)
 
 	if response.Code != http.StatusNoContent {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
-	}
-}
-
-func TestPopStackHandler_NoStackFound(t *testing.T) {
-	s := pila.NewStack("stack")
-
-	db := pila.NewDatabase("db")
-
-	p := pila.NewPila()
-	_ = p.AddDatabase(db)
-
-	conn := NewConn()
-	conn.Pila = p
-
-	request, err := http.NewRequest("DELETE",
-		fmt.Sprintf("/databases/%s/stacks/%s",
-			db.ID.String(),
-			s.ID.String()),
-		nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	response := httptest.NewRecorder()
-
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.popStackHandler(response, request, vars)
-
-	if response.Code != http.StatusGone {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
-	}
-}
-
-func TestPopStackHandler_NoDatabaseFound(t *testing.T) {
-	s := pila.NewStack("stack")
-	db := pila.NewDatabase("db")
-
-	p := pila.NewPila()
-
-	conn := NewConn()
-	conn.Pila = p
-
-	request, err := http.NewRequest("DELETE",
-		fmt.Sprintf("/databases/%s/stacks/%s",
-			db.ID.String(),
-			s.ID.String()),
-		nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	response := httptest.NewRecorder()
-
-	vars := map[string]string{
-		"database_id": db.ID.String(),
-		"stack_id":    s.ID.String(),
-	}
-
-	conn.popStackHandler(response, request, vars)
-
-	if response.Code != http.StatusGone {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
 	}
 }
 
