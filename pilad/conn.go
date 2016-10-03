@@ -214,12 +214,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, vars map
 		return
 	}
 
-	stackID := uuid.UUID(vars["stack_id"])
-	stack, ok := db.Stacks[stackID]
-	if !ok {
-		// Fallback to find by stack name
-		stack, ok = db.Stacks[uuid.New(db.Name+vars["stack_id"])]
-	}
+	stack, ok := ResourceStack(db, vars["stack_id"])
 	if !ok {
 		c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
 		return
@@ -253,12 +248,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, vars map[
 		return
 	}
 
-	stackID := uuid.UUID(vars["stack_id"])
-	stack, ok := db.Stacks[stackID]
-	if !ok {
-		// Fallback to find by stack name
-		stack, ok = db.Stacks[uuid.New(db.Name+vars["stack_id"])]
-	}
+	stack, ok := ResourceStack(db, vars["stack_id"])
 	if !ok {
 		c.goneHandler(w, r, fmt.Sprintf("stack %s is Gone", vars["stack_id"]))
 		return
