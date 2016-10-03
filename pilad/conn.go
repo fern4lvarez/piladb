@@ -208,6 +208,11 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			c.pushStackHandler(w, r, stack)
 			return
 		}
+
+		if r.Method == "DELETE" {
+			c.popStackHandler(w, r, stack)
+			return
+		}
 	})
 }
 
