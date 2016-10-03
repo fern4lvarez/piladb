@@ -254,11 +254,10 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 		return
 	}
 
-	log.Println(r.Method, r.URL, http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	element := pila.Element{Value: value}
 
-	var element pila.Element
-	element.Value = value
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider our element
 	// suitable for a JSON encoding.
