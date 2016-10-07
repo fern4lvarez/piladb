@@ -30,8 +30,9 @@ func Router(conn *Conn) *mux.Router {
 		Methods("GET", "PUT")
 
 	// POST /databases/$DATABASE_ID/stacks/$STACK_ID + {element: value}
+	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID
 	r.Handle("/databases/{database_id}/stacks/{stack_id}", conn.stackHandler(nil)).
-		Methods("POST")
+		Methods("POST", "DELETE")
 
 	r.NotFoundHandler = http.HandlerFunc(conn.notFoundHandler)
 	return r

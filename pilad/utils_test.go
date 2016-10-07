@@ -47,3 +47,41 @@ func TestResourceDatabase_False(t *testing.T) {
 		}
 	}
 }
+
+func TestResourceStack(t *testing.T) {
+	dbName := "db"
+
+	stackName := "stack"
+	inputs := []string{stackName, uuid.New(dbName + stackName).String()}
+
+	for _, input := range inputs {
+		expectedStack := pila.NewStack(stackName)
+
+		db := pila.NewDatabase(dbName)
+		_ = db.AddStack(expectedStack)
+
+		stack, ok := ResourceStack(db, input)
+		if !ok {
+			t.Errorf("ok is %v, expected true", ok)
+		}
+		if !reflect.DeepEqual(expectedStack, stack) {
+			t.Errorf("stack is %v, expected stack id %v", stack, expectedStack)
+		}
+	}
+}
+
+func TestResourceStack_False(t *testing.T) {
+	dbName := "db"
+
+	stackName := "stack"
+	inputs := []string{stackName, uuid.New(dbName + stackName).String()}
+
+	for _, input := range inputs {
+		db := pila.NewDatabase(dbName)
+
+		_, ok := ResourceStack(db, input)
+		if ok {
+			t.Errorf("ok is %v, expected false", ok)
+		}
+	}
+}
