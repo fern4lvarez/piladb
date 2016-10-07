@@ -741,8 +741,8 @@ func TestStackHandler_POST(t *testing.T) {
 	for _, params := range paramss {
 		request, err := http.NewRequest("POST",
 			fmt.Sprintf("/databases/%s/stacks/%s",
-				db.ID.String(),
-				s.ID.String()),
+				params["database_id"],
+				params["stack_id"]),
 			bytes.NewBuffer(expectedElementJSON))
 		if err != nil {
 			t.Fatal(err)
