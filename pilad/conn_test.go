@@ -728,11 +728,11 @@ func TestStackHandler_POST(t *testing.T) {
 	expectedElementJSON, _ := element.ToJSON()
 
 	paramss := []map[string]string{
-		map[string]string{
+		{
 			"database_id": db.ID.String(),
 			"stack_id":    s.ID.String(),
 		},
-		map[string]string{
+		{
 			"database_id": db.Name,
 			"stack_id":    s.Name,
 		},
@@ -790,11 +790,11 @@ func TestStackHandler_DELETE(t *testing.T) {
 	conn.Pila = p
 
 	paramss := []map[string]string{
-		map[string]string{
+		{
 			"database_id": db.ID.String(),
 			"stack_id":    s.ID.String(),
 		},
-		map[string]string{
+		{
 			"database_id": db.Name,
 			"stack_id":    s.Name,
 		},
@@ -1106,11 +1106,11 @@ func TestPopStackHandler(t *testing.T) {
 	conn.Pila = p
 
 	varss := []map[string]string{
-		map[string]string{
+		{
 			"database_id": db.ID.String(),
 			"stack_id":    s.ID.String(),
 		},
-		map[string]string{
+		{
 			"database_id": db.Name,
 			"stack_id":    s.Name,
 		},

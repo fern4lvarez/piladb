@@ -300,11 +300,11 @@ func TestStacksStatusSwap(t *testing.T) {
 
 func TestElementJSON(t *testing.T) {
 	elements := []Element{
-		Element{Value: "foo"},
-		Element{Value: 42},
-		Element{Value: 3.14},
-		Element{Value: []byte("hello")},
-		Element{Value: map[string]int{"one": 1}},
+		{Value: "foo"},
+		{Value: 42},
+		{Value: 3.14},
+		{Value: []byte("hello")},
+		{Value: map[string]int{"one": 1}},
 	}
 	expectedElements := []string{
 		`{"element":"foo"}`,
@@ -334,8 +334,8 @@ func TestElementJSON_Error(t *testing.T) {
 	ch := make(chan int)
 	f := func() string { return "a" }
 	elements := []Element{
-		Element{Value: ch},
-		Element{Value: f},
+		{Value: ch},
+		{Value: f},
 	}
 
 	for _, element := range elements {
@@ -354,11 +354,11 @@ func TestElementDecode(t *testing.T) {
 		`{"element":{"one":1}}`,
 	}
 	expectedElements := []Element{
-		Element{Value: "foo"},
-		Element{Value: 42.0}, // decode int into float
-		Element{Value: 3.14},
-		Element{Value: "aGVsbG8="},                         // does not decode into []byte
-		Element{Value: map[string]interface{}{"one": 1.0}}, // decode inner int into float
+		{Value: "foo"},
+		{Value: 42.0}, // decode int into float
+		{Value: 3.14},
+		{Value: "aGVsbG8="},                         // does not decode into []byte
+		{Value: map[string]interface{}{"one": 1.0}}, // decode inner int into float
 	}
 
 	for i, elementReader := range elementReaders {
