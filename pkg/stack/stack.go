@@ -6,7 +6,8 @@ import "sync"
 
 // Stack represents the stack data structure as a linked list,
 // containing a pointer to the first Frame as a head and the
-// size of the stack.
+// size of the stack. It also contain a mutex to lock and unlock
+// the access to the stack on I/O.
 type Stack struct {
 	head *frame
 	size int
