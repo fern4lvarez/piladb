@@ -2,12 +2,15 @@
 // of a stack using a linked list.
 package stack
 
+import "sync"
+
 // Stack represents the stack data structure as a linked list,
 // containing a pointer to the first Frame as a head and the
 // size of the stack.
 type Stack struct {
 	head *frame
 	size int
+	mux  sync.Mutex
 }
 
 // frame represents an element of the stack. It contains
@@ -27,6 +30,9 @@ func NewStack() *Stack {
 // a new head holding this data and updating its head to
 // the previous stack's head.
 func (s *Stack) Push(element interface{}) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	head := &frame{
 		data: element,
 		next: s.head,
@@ -39,6 +45,9 @@ func (s *Stack) Push(element interface{}) {
 // updating its head to the next Frame. If the stack was empty,
 // it returns false.
 func (s *Stack) Pop() (interface{}, bool) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	if s.head == nil {
 		return nil, false
 	}
