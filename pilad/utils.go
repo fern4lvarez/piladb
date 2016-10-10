@@ -1,6 +1,8 @@
 package main
 
 import (
+	"runtime"
+
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
@@ -27,4 +29,12 @@ func ResourceStack(db *pila.Database, stackInput string) (*pila.Stack, bool) {
 	}
 
 	return stack, ok
+}
+
+// MemStats fetches the memory statistics provide
+// by the Go stdlib.
+func MemStats() *runtime.MemStats {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+	return &mem
 }

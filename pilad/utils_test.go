@@ -85,3 +85,15 @@ func TestResourceStack_False(t *testing.T) {
 		}
 	}
 }
+
+func TestMemStats(t *testing.T) {
+	memStats := MemStats()
+
+	if memStats == nil {
+		t.Fatalf("memory stats is nil")
+	}
+
+	if memStats.Alloc < 0 {
+		t.Errorf("memory allocated is negative, expected positive")
+	}
+}

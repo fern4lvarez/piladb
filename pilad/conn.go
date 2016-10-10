@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
@@ -26,9 +25,7 @@ func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
 
-	var mem runtime.MemStats
-	runtime.ReadMemStats(&mem)
-	conn.Status = NewStatus(version.CommitHash(), time.Now(), &mem)
+	conn.Status = NewStatus(version.CommitHash(), time.Now(), MemStats())
 	return conn
 }
 
@@ -36,9 +33,7 @@ func NewConn() *Conn {
 
 // statusHandler writes the piladb status into the response.
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
-	var mem runtime.MemStats
-	runtime.ReadMemStats(&mem)
-	c.Status.Update(time.Now(), &mem)
+	c.Status.Update(time.Now(), MemStats())
 
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
