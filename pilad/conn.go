@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
@@ -24,7 +25,10 @@ type Conn struct {
 func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
-	conn.Status = NewStatus(version.CommitHash(), time.Now())
+
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+	conn.Status = NewStatus(version.CommitHash(), time.Now(), &mem)
 	return conn
 }
 
@@ -32,9 +36,13 @@ func NewConn() *Conn {
 
 // statusHandler writes the piladb status into the response.
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+	c.Status.Update(time.Now(), &mem)
+
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
-	w.Write(c.Status.ToJSON(time.Now()))
+	w.Write(c.Status.ToJSON())
 }
 
 // databasesHandler returns the information of the running databases.
