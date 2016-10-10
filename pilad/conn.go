@@ -24,7 +24,6 @@ type Conn struct {
 func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
-
 	conn.Status = NewStatus(version.CommitHash(), time.Now(), MemStats())
 	return conn
 }

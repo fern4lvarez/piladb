@@ -30,7 +30,6 @@ func NewStatus(version string, now time.Time, mem *runtime.MemStats) *Status {
 	status.PID = os.Getpid()
 	status.StartedAt = now
 	status.NumberGoroutines = runtime.NumGoroutine()
-
 	if mem != nil {
 		status.MemoryAlloc = fmt.Sprintf("%.2fMB", float64(mem.Alloc)/1048576.0)
 	}

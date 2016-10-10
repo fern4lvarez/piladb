@@ -31,7 +31,7 @@ func ResourceStack(db *pila.Database, stackInput string) (*pila.Stack, bool) {
 	return stack, ok
 }
 
-// MemStats fetches the memory statistics provide
+// MemStats fetches the memory statistics provided
 // by the Go stdlib.
 func MemStats() *runtime.MemStats {
 	var mem runtime.MemStats
