@@ -114,6 +114,21 @@ func TestStackPeek(t *testing.T) {
 	}
 }
 
+func TestStackFlush(t *testing.T) {
+	stack := NewStack("test-stack")
+	stack.Push("test")
+	stack.Push(8)
+	stack.Push(87.443)
+
+	stack.Flush()
+	if stack.Size() != 0 {
+		t.Errorf("stack is not empty")
+	}
+	if stack.Peek() != nil {
+		t.Errorf("stack peek is not nil")
+	}
+}
+
 func TestStackSetID(t *testing.T) {
 	db := NewDatabase("test-db")
 

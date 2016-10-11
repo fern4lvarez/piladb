@@ -55,6 +55,11 @@ func (s *Stack) Peek() interface{} {
 	return s.base.Peek()
 }
 
+// Flush flushes the content of the Stack.
+func (s *Stack) Flush() {
+	s.base.Flush()
+}
+
 // SetDatabase links the Stack with a given Database and
 // recalculates its ID.
 func (s *Stack) SetDatabase(db *Database) {
