@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/fern4lvarez/piladb/pila"
@@ -37,4 +38,25 @@ func MemStats() *runtime.MemStats {
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)
 	return &mem
+}
+
+// MemOutput returns a formatted string given an amount
+// of memory as an integer. It will print the result in B,
+// KiB, MiB or GiB.
+// 1KiB = 1,024 Bytes
+// 1MiB = 1,048,576 Bytes
+// 1GiB = 1,073,741,824 Bytes
+func MemOutput(mem uint64) string {
+	var memF64 = float64(mem)
+
+	switch {
+	case mem < 1024:
+		return fmt.Sprintf("%dB", mem)
+	case mem < 1048576:
+		return fmt.Sprintf("%.2fKiB", memF64/1024)
+	case mem < 1073741824:
+		return fmt.Sprintf("%.2fMiB", memF64/1048576)
+	default:
+		return fmt.Sprintf("%.2fGiB", memF64/1073741824)
+	}
 }

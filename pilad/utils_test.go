@@ -97,3 +97,22 @@ func TestMemStats(t *testing.T) {
 		t.Errorf("memory allocated is negative, expected positive")
 	}
 }
+
+func TestMemOutput(t *testing.T) {
+	inputOutput := []struct {
+		input    uint64
+		expected string
+	}{
+		{635, "635B"},
+		{5373, "5.25KiB"},
+		{2436735, "2.32MiB"},
+		{537352438, "512.46MiB"},
+		{4545373524, "4.23GiB"},
+	}
+
+	for _, io := range inputOutput {
+		if output := MemOutput(io.input); output != io.expected {
+			t.Errorf("memory output is %s, expected %s", output, io.expected)
+		}
+	}
+}
