@@ -91,7 +91,7 @@ func TestStackPeek(t *testing.T) {
 	}
 
 	stack.Push(true)
-	if stack.Peek() == false {
+	if !stack.Peek().(bool) {
 		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), true)
 	}
 
@@ -103,4 +103,21 @@ func TestStackPeek(t *testing.T) {
 		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), "two")
 	}
 
+}
+
+func TestStackFlush(t *testing.T) {
+	stack := NewStack()
+
+	stack.Push("one")
+	stack.Push("two")
+	stack.Push("three")
+
+	stack.Flush()
+
+	if stack.Peek() != nil {
+		t.Error("stack.Peek() is not nil")
+	}
+	if stack.Size() != 0 {
+		t.Errorf("stack is not empty")
+	}
 }

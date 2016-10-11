@@ -71,3 +71,12 @@ func (s *Stack) Peek() interface{} {
 	}
 	return s.head.data
 }
+
+// Flush flushes the content of the stack.
+func (s *Stack) Flush() {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	s.size = 0
+	s.head = nil
+}
