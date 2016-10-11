@@ -25,7 +25,9 @@ Returns `200 OK` and a JSON document with the current piladb status.
   "pid": 26345,
   "host": "linux_amd64",
   "started_at": "2015-09-25T23:01:04.181146284+02:00",
-  "running_for": 12.215756477
+  "running_for": 12.215756477,
+  "memory_alloc": "1.28MiB",
+  "number_goroutines": 3
 }
 ```
 
