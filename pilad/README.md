@@ -159,6 +159,8 @@ Returns `409 CONFLICT` if `$STACK_NAME` already exists.
 
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
+> PUSH operation.
+
 Pushes `ELEMENT` on top of the `$STACK_ID` stack of database `$DATABASE_ID`, and
 returns `200 OK`, and the pushed element.
 You can use either the ID or the Name of the stack and database, although the former
@@ -176,6 +178,8 @@ Returns `410 GONE` if the database or stack do not exist.
 Returns `400 BAD REQUEST` if there's an error serializing the element.
 
 #### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID`
+
+> POP operation.
 
 Pops the element on top of the `$STACK_ID` stack of database `$DATABASE_ID`, and
 returns `200 OK`, and the popped element.

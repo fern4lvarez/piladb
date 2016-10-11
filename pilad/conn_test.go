@@ -1186,6 +1186,84 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 	}
 }
 
+func TestFlushStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	expectedStackStatusJSON, err := s.Status().ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s.Push("one")
+	s.Push("two")
+	s.Push("three")
+
+	varss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, vars := range varss {
+		request, err := http.NewRequest("DELETE",
+			fmt.Sprintf("/databases/%s/stacks/%s?flush",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.flushStackHandler(response, request, s)
+
+		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+			t.Errorf("stack contains %v, expected to be empty", peek)
+		}
+
+		if size := db.Stacks[s.ID].Size(); size != 0 {
+			t.Errorf("stack has size %d, expected %d", size, 0)
+		}
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		stackStatusJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
+			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
+		}
+
+		// restore elements for next table test iteration
+		s.Push("one")
+		s.Push("two")
+		s.Push("three")
+	}
+}
+
 func TestNotFoundHandler_WrongEndpoint(t *testing.T) {
 	conn := NewConn()
 	request, err := http.NewRequest("GET", "/_statuss", nil)
