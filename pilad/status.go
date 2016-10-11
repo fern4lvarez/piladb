@@ -31,7 +31,7 @@ func NewStatus(version string, now time.Time, mem *runtime.MemStats) *Status {
 	status.StartedAt = now
 	status.NumberGoroutines = runtime.NumGoroutine()
 	if mem != nil {
-		status.MemoryAlloc = fmt.Sprintf("%.2fMB", float64(mem.Alloc)/1048576.0)
+		status.MemoryAlloc = MemOutput(mem.Alloc)
 	}
 
 	return status
@@ -42,7 +42,7 @@ func NewStatus(version string, now time.Time, mem *runtime.MemStats) *Status {
 func (s *Status) Update(now time.Time, mem *runtime.MemStats) {
 	s.RunningFor = now.Sub(s.StartedAt).Seconds()
 	s.NumberGoroutines = runtime.NumGoroutine()
-	s.MemoryAlloc = fmt.Sprintf("%.2fMB", float64(mem.Alloc)/1048576.0)
+	s.MemoryAlloc = MemOutput(mem.Alloc)
 }
 
 // ToJSON returns the Status into a JSON file in []byte

@@ -34,7 +34,7 @@ func TestNewStatus(t *testing.T) {
 	if status.NumberGoroutines != runtime.NumGoroutine() {
 		t.Errorf("number of goroutines is %v expected %v", status.StartedAt, now)
 	}
-	if status.MemoryAlloc != "0.00MB" {
+	if status.MemoryAlloc != "0B" {
 		t.Errorf("memory allocated is %v, expected to be %v", status.MemoryAlloc, "0.00MB")
 	}
 }
@@ -54,8 +54,8 @@ func TestStatusUpdate(t *testing.T) {
 	if n := status.NumberGoroutines; n != numberGoroutines {
 		t.Errorf("number of goroutines is %v, expected %v", n, numberGoroutines)
 	}
-	if m := status.MemoryAlloc; m != "7013.07MB" {
-		t.Errorf("memory allocated is %v, expected %v", m, "7013.07MB")
+	if m := status.MemoryAlloc; m != "6.85GiB" {
+		t.Errorf("memory allocated is %v, expected %v", m, "6.85GiB")
 	}
 }
 
@@ -64,7 +64,7 @@ func TestStatusToJSON(t *testing.T) {
 	status := NewStatus("v1", now, nil)
 	oneHourLater := now.Add(60 * time.Minute)
 	mem := runtime.MemStats{Alloc: 0}
-	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","pid":%d,"started_at":"2009-11-10T23:00:00Z","running_for":3600,"number_goroutines":%d,"memory_alloc":"0.00MB"}`, runtime.GOOS, runtime.GOARCH, os.Getpid(), runtime.NumGoroutine())
+	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","pid":%d,"started_at":"2009-11-10T23:00:00Z","running_for":3600,"number_goroutines":%d,"memory_alloc":"0B"}`, runtime.GOOS, runtime.GOARCH, os.Getpid(), runtime.NumGoroutine())
 
 	status.Update(oneHourLater, &mem)
 	json := status.ToJSON()
