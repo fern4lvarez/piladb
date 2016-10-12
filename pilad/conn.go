@@ -212,9 +212,15 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 		}
 
 		if r.Method == "DELETE" {
+			_ = r.ParseForm()
+			if _, ok := r.Form["flush"]; ok {
+				c.flushStackHandler(w, r, stack)
+				return
+			}
 			c.popStackHandler(w, r, stack)
 			return
 		}
+
 	})
 }
 
@@ -275,7 +281,7 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
-	// Do not check error as we consider our flushed
+	// Do not check error as we consider a flushed
 	// stack has no JSON encoding issues.
 	b, _ := stack.Status().ToJSON()
 	w.Write(b)
