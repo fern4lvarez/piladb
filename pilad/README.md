@@ -196,3 +196,24 @@ is used as default, the latter as fallback.
 Returns `204 NO CONTENT` if the stack is empty and no element was popped.
 
 Returns `410 GONE` if the database or stack do not exist.
+
+#### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID?flush`
+
+> FLUSH operation.
+
+Flushes the content of the `$STACK_ID` stack of database `$DATABASE_ID`,
+and returns `200 OK`, and the stack status.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "size": 0,
+  "peek": null,
+  "name": "stack",
+  "id": "714e49277eb730717e413b167b76ef78"
+}
+```
+
+Returns `410 GONE` if the database or stack do not exist.
