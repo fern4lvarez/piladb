@@ -31,6 +31,7 @@ func Router(conn *Conn) *mux.Router {
 
 	// POST /databases/$DATABASE_ID/stacks/$STACK_ID + {element: value}
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID
+	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID?flush
 	r.Handle("/databases/{database_id}/stacks/{stack_id}", conn.stackHandler(nil)).
 		Methods("POST", "DELETE")
 

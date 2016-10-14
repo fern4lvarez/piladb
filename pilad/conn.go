@@ -212,6 +212,11 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 		}
 
 		if r.Method == "DELETE" {
+			_ = r.ParseForm()
+			if _, ok := r.Form["flush"]; ok {
+				c.flushStackHandler(w, r, stack)
+				return
+			}
 			c.popStackHandler(w, r, stack)
 			return
 		}
@@ -247,7 +252,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(b)
 }
 
-// popStackHandler extracts the peek element of a Srack, returns 200 and returns it.
+// popStackHandler extracts the peek element of a Stack, returns 200 and returns it.
 func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	value, ok := stack.Pop()
 	if !ok {
@@ -264,6 +269,20 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 	// Do not check error as we consider our element
 	// suitable for a JSON encoding.
 	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// flushStackHandler flushes the Stack, setting the size to 0 and emptying all
+// the content.
+func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Flush()
+
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a flushed
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
 	w.Write(b)
 }
 
