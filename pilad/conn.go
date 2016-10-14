@@ -220,7 +220,6 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			c.popStackHandler(w, r, stack)
 			return
 		}
-
 	})
 }
 
@@ -274,14 +273,14 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 }
 
 // flushStackHandler flushes the Stack, setting the size to 0 and emptying all
-// the content..
+// the content.
 func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Flush()
 
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
-	// Do not check error as we consider a flushed
+	// Do not check error as we consider that a flushed
 	// stack has no JSON encoding issues.
 	b, _ := stack.Status().ToJSON()
 	w.Write(b)
