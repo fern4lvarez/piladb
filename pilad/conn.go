@@ -294,7 +294,7 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, database *pila.Database, stack *pila.Stack) {
 	stack.Flush()
 
-	// do not check output as we validated that
+	// Do not check output as we validated that
 	// stack always exists
 	_ = database.RemoveStack(stack.ID)
 
