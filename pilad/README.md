@@ -217,3 +217,14 @@ is used as default, the latter as fallback.
 ```
 
 Returns `410 GONE` if the database or stack do not exist.
+
+#### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID?full`
+
+> DELETE stack operation.
+
+Deletes `$STACK_ID` stack from database `$DATABASE_ID`,
+and returns `204 No Content`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+Returns `410 GONE` if the database or stack do not exist.
