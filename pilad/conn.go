@@ -291,8 +291,7 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 }
 
 // deleteStackHandler deletes the Stack from a database.
-func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request,
-	database *pila.Database, stack *pila.Stack) {
+func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, database *pila.Database, stack *pila.Stack) {
 	stack.Flush()
 
 	// do not check output as we validated that
