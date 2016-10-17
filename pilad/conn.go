@@ -295,7 +295,7 @@ func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, databa
 	stack.Flush()
 
 	// Do not check output as we validated that
-	// stack always exists
+	// stack always exists.
 	_ = database.RemoveStack(stack.ID)
 
 	log.Println(r.Method, r.URL, http.StatusNoContent)
