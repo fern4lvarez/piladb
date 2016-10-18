@@ -217,6 +217,10 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.flushStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["full"]; ok {
+				c.deleteStackHandler(w, r, db, stack)
+				return
+			}
 			c.popStackHandler(w, r, stack)
 			return
 		}
@@ -284,6 +288,19 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	// stack has no JSON encoding issues.
 	b, _ := stack.Status().ToJSON()
 	w.Write(b)
+}
+
+// deleteStackHandler deletes the Stack from a database.
+func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, database *pila.Database, stack *pila.Stack) {
+	stack.Flush()
+
+	// Do not check output as we validated that
+	// stack always exists.
+	_ = database.RemoveStack(stack.ID)
+
+	log.Println(r.Method, r.URL, http.StatusNoContent)
+	w.WriteHeader(http.StatusNoContent)
+	return
 }
 
 // notFoundHandler logs and returns a 404 NotFound response.

@@ -801,28 +801,50 @@ func TestStackHandler_DELETE(t *testing.T) {
 			stack    string
 			op       string
 		}
-		output []byte
+		output struct {
+			response []byte
+			code     int
+		}
 	}{
 		{struct {
 			database string
 			stack    string
 			op       string
 		}{db.ID.String(), s.ID.String(), ""},
-			expectedElementJSON,
+			struct {
+				response []byte
+				code     int
+			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
 			database string
 			stack    string
 			op       string
 		}{db.Name, s.Name, ""},
-			expectedElementJSON,
+			struct {
+				response []byte
+				code     int
+			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
 			database string
 			stack    string
 			op       string
 		}{db.Name, s.Name, "flush"},
-			expectedStackStatusJSON,
+			struct {
+				response []byte
+				code     int
+			}{expectedStackStatusJSON, http.StatusOK},
+		},
+		{struct {
+			database string
+			stack    string
+			op       string
+		}{db.Name, s.Name, "full"},
+			struct {
+				response []byte
+				code     int
+			}{nil, http.StatusNoContent},
 		},
 	}
 
@@ -847,16 +869,25 @@ func TestStackHandler_DELETE(t *testing.T) {
 		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
-		if peek, ok := db.Stacks[s.ID].Pop(); ok {
-			t.Errorf("stack contains %v, expected to be empty", peek)
+		if io.input.op == "full" {
+			if s := db.Stacks[uuid.UUID(io.input.stack)]; s != nil {
+				t.Errorf("db contains %v, expected not to", io.input.stack)
+			}
+		} else {
+			if peek, ok := db.Stacks[s.ID].Pop(); ok {
+				t.Errorf("stack contains %v, expected to be empty", peek)
+			}
+
+			if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+			}
+
+			// restore element for next table test iteration
+			s.Push(element.Value)
 		}
 
-		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
-			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
-		}
-
-		if response.Code != http.StatusOK {
-			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		if response.Code != io.output.code {
+			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
 		}
 
 		responseJSON, err := ioutil.ReadAll(response.Body)
@@ -864,12 +895,9 @@ func TestStackHandler_DELETE(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if string(responseJSON) != string(io.output) {
-			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output))
+		if string(responseJSON) != string(io.output.response) {
+			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
 		}
-
-		// restore element for next table test iteration
-		s.Push(element.Value)
 	}
 }
 
@@ -1293,6 +1321,61 @@ func TestFlushStackHandler(t *testing.T) {
 		s.Push("one")
 		s.Push("two")
 		s.Push("three")
+	}
+}
+
+func TestDeleteStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Push("one")
+
+	varss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, vars := range varss {
+		request, err := http.NewRequest("DELETE",
+			fmt.Sprintf("/databases/%s/stacks/%s?full",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		fmt.Printf("DEBUG %+v %+v \n", db, s)
+		conn.deleteStackHandler(response, request, db, s)
+
+		if expectedStack := db.Stacks[uuid.UUID(vars["stack_id"])]; expectedStack != nil {
+			t.Errorf("db contains %v, expected not to", vars["stack_id"])
+		}
+
+		if response.Code != http.StatusNoContent {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
+		}
+
+		// restore elements for next table test iteration
+		s = pila.NewStack("stack")
+		_ = db.AddStack(s)
+		s.Push("one")
 	}
 }
 
