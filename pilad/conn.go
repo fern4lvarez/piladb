@@ -206,7 +206,13 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 
+		_ = r.ParseForm()
+
 		if r.Method == "GET" {
+			if _, ok := r.Form["full"]; ok {
+				c.statusStackHandler(w, r, stack)
+				return
+			}
 			c.peekStackHandler(w, r, stack)
 			return
 		}
@@ -217,7 +223,6 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 		}
 
 		if r.Method == "DELETE" {
-			_ = r.ParseForm()
 			if _, ok := r.Form["flush"]; ok {
 				c.flushStackHandler(w, r, stack)
 				return
@@ -243,6 +248,17 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	// Do not check error as we consider our element
 	// suitable for a JSON encoding.
 	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// statusStackHandler returns the status of the Stack.
+func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a flushed
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
 	w.Write(b)
 }
 
