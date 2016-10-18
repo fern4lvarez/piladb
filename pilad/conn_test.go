@@ -975,6 +975,59 @@ func TestStackHandler_StackGone(t *testing.T) {
 	}
 }
 
+func TestPeekStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
+	s.Push(element.Value)
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.peekStackHandler(response, request, s)
+
+	if peekElement := db.Stacks[s.ID].Peek(); peekElement != element.Value {
+		t.Errorf("peek element is %v, expected %v", peekElement, element.Value)
+	}
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	elementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(elementJSON) != string(expectedElementJSON) {
+		t.Errorf("peek element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+	}
+}
+
 func TestPushStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 

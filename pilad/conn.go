@@ -227,6 +227,20 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	})
 }
 
+// peekStackHandler returns the peek of the Stack without modifying it.
+func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	var element pila.Element
+	element.Value = stack.Peek()
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
 func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	if r.Body == nil {
