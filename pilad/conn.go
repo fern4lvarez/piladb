@@ -206,6 +206,11 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 
+		if r.Method == "GET" {
+			c.peekStackHandler(w, r, stack)
+			return
+		}
+
 		if r.Method == "POST" {
 			c.pushStackHandler(w, r, stack)
 			return

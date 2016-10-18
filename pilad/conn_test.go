@@ -712,6 +712,95 @@ func TestCreateStackHandler_Conflict(t *testing.T) {
 	}
 }
 
+func TestStackHandler_GET(t *testing.T) {
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Push(element.Value)
+
+	_, err := s.Status().ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	inputOutput := []struct {
+		input struct {
+			database string
+			stack    string
+			op       string
+		}
+		output struct {
+			response []byte
+			code     int
+		}
+	}{
+		{struct {
+			database string
+			stack    string
+			op       string
+		}{db.ID.String(), s.ID.String(), ""},
+			struct {
+				response []byte
+				code     int
+			}{expectedElementJSON, http.StatusOK},
+		},
+	}
+
+	for _, io := range inputOutput {
+		request, err := http.NewRequest("GET",
+			fmt.Sprintf("/databases/%s/stacks/%s?%s",
+				io.input.database,
+				io.input.stack,
+				io.input.op),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		params := map[string]string{
+			"database_id": io.input.database,
+			"stack_id":    io.input.stack,
+		}
+
+		stackHandle := conn.stackHandler(&params)
+		stackHandle.ServeHTTP(response, request)
+
+		if peek := db.Stacks[s.ID].Peek(); peek != element.Value {
+			t.Errorf("peek is %v, expected %v", peek, element.Value)
+		}
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != io.output.code {
+			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
+		}
+
+		responseJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(responseJSON) != string(io.output.response) {
+			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
+		}
+	}
+}
+
 func TestStackHandler_POST(t *testing.T) {
 	s := pila.NewStack("stack")
 
