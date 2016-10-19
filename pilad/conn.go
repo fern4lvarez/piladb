@@ -206,6 +206,16 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 
+		if r.Method == "GET" {
+			_ = r.ParseForm()
+			if _, ok := r.Form["full"]; ok {
+				c.statusStackHandler(w, r, stack)
+				return
+			}
+			c.peekStackHandler(w, r, stack)
+			return
+		}
+
 		if r.Method == "POST" {
 			c.pushStackHandler(w, r, stack)
 			return
@@ -225,6 +235,31 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 	})
+}
+
+// peekStackHandler returns the peek of the Stack without modifying it.
+func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	var element pila.Element
+	element.Value = stack.Peek()
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// statusStackHandler returns the status of the Stack.
+func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a flushed
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
+	w.Write(b)
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.

@@ -157,6 +157,41 @@ Returns `400 BAD REQUEST` if `name` is not provided.
 
 Returns `409 CONFLICT` if `$STACK_NAME` already exists.
 
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID`
+
+> PEEK operation.
+
+Returns the peek of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+`200 OK`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "element": "this is an element"
+}
+```
+
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?full`
+
+Returns the status of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+`200 OK`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "size": 0,
+  "peek": null,
+  "name": "stack",
+  "id": "714e49277eb730717e413b167b76ef78"
+}
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.
