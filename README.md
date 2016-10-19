@@ -15,11 +15,10 @@ Features
 
 * Stacks are auto-scalable and are only limited by the capacity of the host
   or by configuration.
-* Available `POP`, `PUSH`, `PEEK`, or `SIZE` operations for each of the stacks.
+* Available `POP`, `PUSH`, `PEEK`,`SIZE`, and `FLUSH` operations for each of the stacks.
 * Manage databases and stacks using a REST API, so you wrap it with
   any programming language.
-* Totally configurable using a REST API, environment variables or
-  configuration file.
+* Totally configurable using a REST API, or cli parameters.
 * In-memory store, persistence on disk wannabe (https://github.com/fern4lvarez/piladb/issues/11).
 * Written in Go, i.e. binaries are self-contained and distributable.
 
@@ -32,7 +31,8 @@ Releases not available yet. For now:
 
 ```bash
 go get github.com/fern4lvarez/piladb/...
-pilad
+cd $GOPATH/src/github.com/fern4lvarez/piladb
+make pilad
 ```
 
 Development
@@ -87,15 +87,14 @@ Credits
 -------
 
 **piladb** is documentation-, test-driven developed by [Fernando Álvarez](
-http://www.fer.ac) on his Dell XPS 13 laptop, running Ubuntu 14.04, and
-using [`vim-go`](https://github.com/fatih/vim-go) plugin within `vim` editor,
+https://www.twitter.com/fern4lvarez) on his Dell XPS 13 laptop, running Ubuntu 14.04, and
+using [`vim-go`](https://github.com/fatih/vim-go) plugin within the `vim` editor,
 in Berlin and Madrid, with the support of his dog Godín.
 
 Logo was designed by [GraphicLoads](http://www.iconarchive.com/artist/graphicloads.html).
 
 Typography [_Lily Script One_](http://www.fontspace.com/julia-petretta/lily-script-one) designed
 by [Julia Petretta](http://www.fontspace.com/julia-petretta.)
-
 
 License
 -------
