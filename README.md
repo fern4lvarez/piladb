@@ -3,7 +3,7 @@ piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=mast
 
 ![Logo](http://i.imgur.com/tjQbm56.png)
 
-> _[pee-lah-dee-bee]_. _pila_ means _stack_ in Spanish.
+> _[pee-lah-dee-bee]_. _pila_ means _stack_ or _battery_ in Spanish.
 
 **piladb** is a RESTful database engine based on the [stack data structure](
 https://en.wikipedia.org/wiki/Stack_%28abstract_data_type%29).
