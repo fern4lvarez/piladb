@@ -205,6 +205,8 @@ is used as default, the latter as fallback.
 6
 ```
 
+Returns `410 GONE` if the database or stack do not exist.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.
