@@ -206,7 +206,8 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 
-		if r.Method == "GET" {
+		switch {
+		case r.Method == "GET":
 			_ = r.ParseForm()
 			if _, ok := r.Form["peek"]; ok {
 				c.peekStackHandler(w, r, stack)
@@ -218,14 +219,12 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			}
 			c.statusStackHandler(w, r, stack)
 			return
-		}
 
-		if r.Method == "POST" {
+		case r.Method == "POST":
 			c.pushStackHandler(w, r, stack)
 			return
-		}
 
-		if r.Method == "DELETE" {
+		case r.Method == "DELETE":
 			_ = r.ParseForm()
 			if _, ok := r.Form["flush"]; ok {
 				c.flushStackHandler(w, r, stack)
