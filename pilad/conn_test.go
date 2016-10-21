@@ -734,6 +734,8 @@ func TestStackHandler_GET(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	expectedSizeJSON := s.SizeToJSON()
+
 	inputOutput := []struct {
 		input struct {
 			database string
@@ -764,6 +766,16 @@ func TestStackHandler_GET(t *testing.T) {
 				response []byte
 				code     int
 			}{expectedElementJSON, http.StatusOK},
+		},
+		{struct {
+			database string
+			stack    string
+			op       string
+		}{db.ID.String(), s.ID.String(), "size"},
+			struct {
+				response []byte
+				code     int
+			}{expectedSizeJSON, http.StatusOK},
 		},
 	}
 

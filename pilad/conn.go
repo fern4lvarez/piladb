@@ -212,6 +212,10 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.peekStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["size"]; ok {
+				c.sizeStackHandler(w, r, stack)
+				return
+			}
 			c.statusStackHandler(w, r, stack)
 			return
 		}

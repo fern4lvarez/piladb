@@ -191,6 +191,20 @@ is used as default, the latter as fallback.
 }
 ```
 
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?size`
+
+> SIZE operation.
+
+Returns the size of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+`200 OK`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+6
+```
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.
