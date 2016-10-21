@@ -150,6 +150,18 @@ func TestStackSetID_NoDatabase(t *testing.T) {
 	}
 }
 
+func TestStackSizeToJSON(t *testing.T) {
+	stack := NewStack("test-stack")
+	stack.Push("test")
+	stack.Push(8)
+	stack.Push(87.443)
+
+	expectedSize := `3`
+	if string(stack.SizeToJSON()) != expectedSize {
+		t.Errorf("size is %s, expected %s", string(stack.SizeToJSON()), expectedSize)
+	}
+}
+
 func TestStackStatusJSON(t *testing.T) {
 	stack := NewStack("test-stack")
 	stack.Push("test")

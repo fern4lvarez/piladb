@@ -262,6 +262,16 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(b)
 }
 
+// sizeStackHandler returns the size of the Stack.
+func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Size())
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider the size
+	// of a stack valid for a JSON encoding.
+	w.Write(stack.SizeToJSON())
+}
+
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
 func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	if r.Body == nil {
