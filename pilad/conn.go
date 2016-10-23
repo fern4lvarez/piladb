@@ -133,7 +133,15 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 			return
 		}
 
-		res, err := db.StacksStatus().ToJSON()
+		var status pila.StackStatuser
+		_ = r.ParseForm()
+		if _, ok := r.Form["kv"]; ok {
+			status = db.StacksKV()
+		} else {
+			status = db.StacksStatus()
+		}
+
+		res, err := status.ToJSON()
 		if err != nil {
 			log.Println(r.Method, r.URL, http.StatusBadRequest,
 				"error on response serialization:", err)

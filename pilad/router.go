@@ -25,6 +25,7 @@ func Router(conn *Conn) *mux.Router {
 		Methods("GET", "DELETE")
 
 	// GET /databases/$DATABASE_ID/stacks
+	// GET /databases/$DATABASE_ID/stacks?kv
 	// PUT /databases/$DATABASE_ID/stacks?name=STACK_NAME
 	r.Handle("/databases/{database_id}/stacks", conn.stacksHandler("")).
 		Methods("GET", "PUT")
