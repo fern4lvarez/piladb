@@ -106,6 +106,20 @@ func (db *Database) StacksStatus() StacksStatus {
 	return status
 }
 
+// StacksKV returns the status of the Stacks of Database
+// in a key-value format.
+func (db *Database) StacksKV() StacksKV {
+	stacksKV := StacksKV{}
+
+	var kv = make(map[string]interface{})
+	for _, s := range db.Stacks {
+		kv[s.Name] = s.Peek()
+	}
+
+	stacksKV.Stacks = kv
+	return stacksKV
+}
+
 // DatabaseStatus represents the status of a Database.
 type DatabaseStatus struct {
 	ID           string   `json:"id"`

@@ -97,44 +97,6 @@ func (s *Stack) Status() StackStatus {
 	return status
 }
 
-// StackStatus represents the status of a Stack.
-type StackStatus struct {
-	ID   string      `json:"id"`
-	Name string      `json:"name"`
-	Peek interface{} `json:"peek"`
-	Size int         `json:"size"`
-}
-
-// ToJSON converts a StackStatus into JSON.
-func (stackStatus StackStatus) ToJSON() ([]byte, error) {
-	return json.Marshal(stackStatus)
-}
-
-// StacksStatus represents the status of a list of Stacks.
-type StacksStatus struct {
-	Stacks []StackStatus `json:"stacks"`
-}
-
-// ToJSON converts a StacksStatus into JSON.
-func (stacksStatus StacksStatus) ToJSON() ([]byte, error) {
-	return json.Marshal(stacksStatus)
-}
-
-// Len return the length of the list of Stacks.
-func (stacksStatus StacksStatus) Len() int {
-	return len(stacksStatus.Stacks)
-}
-
-// Less determines whether a StackStatus on the list is less than other.
-func (stacksStatus StacksStatus) Less(i, j int) bool {
-	return stacksStatus.Stacks[i].Name < stacksStatus.Stacks[j].Name
-}
-
-// Swap swaps positions between two StackStatus.
-func (stacksStatus StacksStatus) Swap(i, j int) {
-	stacksStatus.Stacks[i], stacksStatus.Stacks[j] = stacksStatus.Stacks[j], stacksStatus.Stacks[i]
-}
-
 // Element represents the payload of a Stack element.
 type Element struct {
 	Value interface{} `json:"element"`

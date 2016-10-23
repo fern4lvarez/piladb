@@ -234,3 +234,43 @@ func TestDatabaseStacksStatus_Empty(t *testing.T) {
 		t.Errorf("status is %v, expected %v", status, expectedStatus)
 	}
 }
+
+func TestDatabaseStacksKV(t *testing.T) {
+	s1 := NewStack("stack1")
+	s1.Push("foo")
+
+	s2 := NewStack("stack2")
+	s2.Push(1)
+	s2.Push(8)
+
+	s3 := NewStack("stack3")
+
+	db := NewDatabase("db")
+	_ = db.AddStack(s1)
+	_ = db.AddStack(s2)
+	_ = db.AddStack(s3)
+
+	expectedKV := StacksKV{
+		Stacks: map[string]interface{}{
+			"stack1": "foo",
+			"stack2": 8,
+			"stack3": nil,
+		},
+	}
+
+	if kv := db.StacksKV(); !reflect.DeepEqual(kv, expectedKV) {
+		t.Errorf("key-value is %v, expected %v", kv, expectedKV)
+	}
+}
+
+func TestDatabaseStacksKV_Empty(t *testing.T) {
+	db := NewDatabase("db")
+
+	expectedKV := StacksKV{
+		Stacks: map[string]interface{}{},
+	}
+
+	if kv := db.StacksKV(); !reflect.DeepEqual(kv, expectedKV) {
+		t.Errorf("key-value is %v, expected %v", kv, expectedKV)
+	}
+}
