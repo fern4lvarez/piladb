@@ -99,8 +99,7 @@ func (db *Database) StacksStatus() StacksStatus {
 		n++
 	}
 
-	status := StacksStatus{}
-	status.Stacks = ss
+	status := StacksStatus{Stacks: ss}
 	sort.Sort(status)
 	return status
 }
@@ -113,8 +112,7 @@ func (db *Database) StacksKV() StacksKV {
 		kv[s.Name] = s.Peek()
 	}
 
-	stacksKV := StacksKV{}
-	stacksKV.Stacks = kv
+	stacksKV := StacksKV{Stacks: kv}
 	return stacksKV
 }
 
