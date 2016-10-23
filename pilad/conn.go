@@ -206,22 +206,25 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 
-		if r.Method == "GET" {
+		switch {
+		case r.Method == "GET":
 			_ = r.ParseForm()
-			if _, ok := r.Form["full"]; ok {
-				c.statusStackHandler(w, r, stack)
+			if _, ok := r.Form["peek"]; ok {
+				c.peekStackHandler(w, r, stack)
 				return
 			}
-			c.peekStackHandler(w, r, stack)
+			if _, ok := r.Form["size"]; ok {
+				c.sizeStackHandler(w, r, stack)
+				return
+			}
+			c.statusStackHandler(w, r, stack)
 			return
-		}
 
-		if r.Method == "POST" {
+		case r.Method == "POST":
 			c.pushStackHandler(w, r, stack)
 			return
-		}
 
-		if r.Method == "DELETE" {
+		case r.Method == "DELETE":
 			_ = r.ParseForm()
 			if _, ok := r.Form["flush"]; ok {
 				c.flushStackHandler(w, r, stack)
@@ -235,6 +238,17 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 		}
 	})
+}
+
+// statusStackHandler returns the status of the Stack.
+func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a flushed
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
+	w.Write(b)
 }
 
 // peekStackHandler returns the peek of the Stack without modifying it.
@@ -251,15 +265,14 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(b)
 }
 
-// statusStackHandler returns the status of the Stack.
-func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-	log.Println(r.Method, r.URL, http.StatusOK)
+// sizeStackHandler returns the size of the Stack.
+func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Size())
 	w.Header().Set("Content-Type", "application/json")
 
-	// Do not check error as we consider that a flushed
-	// stack has no JSON encoding issues.
-	b, _ := stack.Status().ToJSON()
-	w.Write(b)
+	// Do not check error as we consider the size
+	// of a stack valid for a JSON encoding.
+	w.Write(stack.SizeToJSON())
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.

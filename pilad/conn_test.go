@@ -734,6 +734,8 @@ func TestStackHandler_GET(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	expectedSizeJSON := s.SizeToJSON()
+
 	inputOutput := []struct {
 		input struct {
 			database string
@@ -753,17 +755,27 @@ func TestStackHandler_GET(t *testing.T) {
 			struct {
 				response []byte
 				code     int
+			}{expectedStackStatusJSON, http.StatusOK},
+		},
+		{struct {
+			database string
+			stack    string
+			op       string
+		}{db.ID.String(), s.ID.String(), "peek"},
+			struct {
+				response []byte
+				code     int
 			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
 			database string
 			stack    string
 			op       string
-		}{db.ID.String(), s.ID.String(), "full"},
+		}{db.ID.String(), s.ID.String(), "size"},
 			struct {
 				response []byte
 				code     int
-			}{expectedStackStatusJSON, http.StatusOK},
+			}{expectedSizeJSON, http.StatusOK},
 		},
 	}
 
@@ -1074,6 +1086,72 @@ func TestStackHandler_StackGone(t *testing.T) {
 	}
 }
 
+func TestStatusStackHandler(t *testing.T) {
+	s := pila.NewStack("stack")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Push("one")
+
+	expectedStackStatusJSON, err := s.Status().ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	varss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, vars := range varss {
+		request, err := http.NewRequest("GET",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.statusStackHandler(response, request, s)
+		if peek := db.Stacks[s.ID].Peek(); peek != "one" {
+			t.Errorf("peek is %v, expected %v", peek, "one")
+		}
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		stackStatusJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
+			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
+		}
+	}
+}
+
 func TestPeekStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 
@@ -1092,7 +1170,7 @@ func TestPeekStackHandler(t *testing.T) {
 	s.Push(element.Value)
 
 	request, err := http.NewRequest("GET",
-		fmt.Sprintf("/databases/%s/stacks/%s",
+		fmt.Sprintf("/databases/%s/stacks/%s?peek",
 			db.ID.String(),
 			s.ID.String()),
 		nil)
@@ -1127,7 +1205,7 @@ func TestPeekStackHandler(t *testing.T) {
 	}
 }
 
-func TestStatusStackHandler(t *testing.T) {
+func TestSizeStackHandler(t *testing.T) {
 	s := pila.NewStack("stack")
 
 	db := pila.NewDatabase("db")
@@ -1139,57 +1217,39 @@ func TestStatusStackHandler(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	s.Push("one")
+	s.Push("element")
 
-	expectedStackStatusJSON, err := s.Status().ToJSON()
+	expectedSizeJSON := s.SizeToJSON()
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s?size",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.sizeStackHandler(response, request, s)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	sizeJSON, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	varss := []map[string]string{
-		{
-			"database_id": db.ID.String(),
-			"stack_id":    s.ID.String(),
-		},
-		{
-			"database_id": db.Name,
-			"stack_id":    s.Name,
-		},
-	}
-
-	for _, vars := range varss {
-		request, err := http.NewRequest("GET",
-			fmt.Sprintf("/databases/%s/stacks/%s?full",
-				vars["database_id"],
-				vars["stack_id"]),
-			nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		response := httptest.NewRecorder()
-
-		conn.statusStackHandler(response, request, s)
-		if peek := db.Stacks[s.ID].Peek(); peek != "one" {
-			t.Errorf("peek is %v, expected %v", peek, "one")
-		}
-
-		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
-			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
-		}
-
-		if response.Code != http.StatusOK {
-			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
-		}
-
-		stackStatusJSON, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
-			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
-		}
+	if string(sizeJSON) != string(expectedSizeJSON) {
+		t.Errorf("size is %v, expected %v", string(sizeJSON), string(expectedSizeJSON))
 	}
 }
 

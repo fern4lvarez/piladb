@@ -78,6 +78,14 @@ func (s *Stack) SetID() {
 	s.ID = uuid.New(s.Name)
 }
 
+// SizeToJSON returns the size of the Stack encoded as json.
+func (s *Stack) SizeToJSON() []byte {
+	// Do not check error as we consider the size
+	// of a stack valid for a JSON encoding.
+	size, _ := json.Marshal(s.Size())
+	return size
+}
+
 // Status returns the status of the Stack  in json format.
 func (s *Stack) Status() StackStatus {
 	status := StackStatus{}
