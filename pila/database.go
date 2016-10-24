@@ -92,18 +92,28 @@ func (db *Database) Status() DatabaseStatus {
 
 // StacksStatus returns the status of the Stacks of Database.
 func (db *Database) StacksStatus() StacksStatus {
-	status := StacksStatus{}
-
-	var ss = make([]StackStatus, len(db.Stacks))
-	n := 0
+	var n int
+	ss := make([]StackStatus, len(db.Stacks))
 	for _, s := range db.Stacks {
 		ss[n] = s.Status()
 		n++
 	}
-	status.Stacks = ss
-	sort.Sort(status)
 
+	status := StacksStatus{Stacks: ss}
+	sort.Sort(status)
 	return status
+}
+
+// StacksKV returns the status of the Stacks of Database
+// in a key-value format.
+func (db *Database) StacksKV() StacksKV {
+	kv := make(map[string]interface{})
+	for _, s := range db.Stacks {
+		kv[s.Name] = s.Peek()
+	}
+
+	stacksKV := StacksKV{Stacks: kv}
+	return stacksKV
 }
 
 // DatabaseStatus represents the status of a Database.

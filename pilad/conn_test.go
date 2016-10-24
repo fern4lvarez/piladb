@@ -405,30 +405,40 @@ func TestStacksHandler_GET(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
-	request, err := http.NewRequest("GET", "/databases/db/stacks", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	response := httptest.NewRecorder()
-
-	stacksHandle := conn.stacksHandler(db.ID.String())
-	stacksHandle.ServeHTTP(response, request)
-
-	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
-		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	inputOutput := []struct {
+		input  string
+		output string
+	}{
+		{input: "/databases/db/stacks", output: `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`},
+		{input: "/databases/db/stacks?kv", output: `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
-	if response.Code != http.StatusOK {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
-	}
+	for _, io := range inputOutput {
+		request, err := http.NewRequest("GET", io.input, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response := httptest.NewRecorder()
 
-	stacks, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
+		stacksHandle := conn.stacksHandler(db.ID.String())
+		stacksHandle.ServeHTTP(response, request)
 
-	if expected := `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`; string(stacks) != expected {
-		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		stacks, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stacks) != io.output {
+			t.Errorf("stacks are %s, expected %s", string(stacks), io.output)
+		}
 	}
 }
 

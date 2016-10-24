@@ -137,6 +137,28 @@ Returns `410 GONE` if the database does not exist.
 Returns `400 BAD REQUEST` if there's an error serializing the stacks
 response.
 
+#### GET `/databases/$DATABASE_ID/stacks?kv`
+
+Returns `200 OK` and a key-value representation of the stacks of
+the database `$DATABASE_ID`, where key is the Name and value is the Peek.
+You can use either the ID or the Name of the database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "stacks" : {
+    "stack1":"foo",
+    "stack2":8
+  }
+}
+```
+
+Returns `410 GONE` if the database does not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the stacks
+response.
+
 #### PUT `/databases/$DATABASE_ID/stacks?name=$STACK_NAME`
 
 Creates a new $STACK_NAME stack belonging to database $DATABASE_ID.
