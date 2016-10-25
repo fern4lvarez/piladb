@@ -19,9 +19,9 @@ func TestNewConfig(t *testing.T) {
 		input  interface{}
 		output interface{}
 	}{
-		{input: config.Values.Name, output: CONFIG},
-		{input: config.Values.ID, output: uuid.New(CONFIG)},
-		{input: len(config.Values.Stacks), output: 0},
+		{config.Values.Name, CONFIG},
+		{config.Values.ID, uuid.New(CONFIG)},
+		{len(config.Values.Stacks), 0},
 	}
 
 	for _, io := range inputOutput {
@@ -37,7 +37,7 @@ func TestConfigDefault(t *testing.T) {
 		input  string
 		output interface{}
 	}{
-		{input: vars.MaxSizeOfStack, output: 5},
+		{vars.MaxStackSize, -1},
 	}
 	for _, io := range inputOutput {
 		if value := config.Get(io.input); value != io.output {

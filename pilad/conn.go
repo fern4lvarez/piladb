@@ -232,7 +232,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
-			c.checkMaxSizeOfStack(c.pushStackHandler)(w, r, stack)
+			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
 			return
 
 		case r.Method == "DELETE":

@@ -25,7 +25,7 @@ func NewConfig() *Config {
 // Default sets the default values to the Config.
 func (c *Config) Default() *Config {
 	// Infinite size
-	c.Set(vars.MaxSizeOfStack, 5)
+	c.Set(vars.MaxStackSize, -1)
 
 	return c
 }

@@ -1,7 +1,7 @@
 package vars
 
 const (
-	// MaxSizeOfStack is the maximun number
-	// of element that a stack can contain.
-	MaxSizeOfStack = "MAX_NUM_OF_STACK"
+	// MaxStackSize is the maximun number
+	// of elements that a stack can contain.
+	MaxStackSize = "MAX_STACK_SIZE"
 )
