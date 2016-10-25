@@ -11,6 +11,21 @@ import (
 // stackHandlerFunc represents a Handler of a Stack.
 type stackHandlerFunc func(w http.ResponseWriter, r *http.Request, stack *pila.Stack)
 
+// configHandler handles a request to the Conn configuration.
+func (c *Conn) configHandler(w http.ResponseWriter, r *http.Request) {
+	res, err := c.Config.Values.StacksKV().ToJSON()
+	if err != nil {
+		log.Println(r.Method, r.URL, http.StatusBadRequest,
+			"error on response serialization:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+	log.Println(r.Method, r.URL, http.StatusOK)
+}
+
 // checkMaxSizeOfStack checks config value for MaxSizeOfStack and execute the
 // wrapped handler if check is validated.
 func (c *Conn) checkMaxSizeOfStack(handler stackHandlerFunc) stackHandlerFunc {
