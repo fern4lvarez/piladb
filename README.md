@@ -94,7 +94,7 @@ in Berlin and Madrid, with the support of his dog Godín.
 Logo was designed by [GraphicLoads](http://www.iconarchive.com/artist/graphicloads.html).
 
 Typography [_Lily Script One_](http://www.fontspace.com/julia-petretta/lily-script-one) designed
-by [Julia Petretta](http://www.fontspace.com/julia-petretta.)
+by [Julia Petretta](http://www.fontspace.com/julia-petretta).
 
 License
 -------
