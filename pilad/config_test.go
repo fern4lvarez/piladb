@@ -22,10 +22,9 @@ func TestConfigHandler_GET(t *testing.T) {
 	conn.Config.Set("PORT", "8080")
 
 	inputOutput := []struct {
-		input  string
-		output string
+		input, output string
 	}{
-		{input: "/_config", output: `{"stacks":{"PORT":"8080","SIZE":2}}`},
+		{"/_config", `{"stacks":{"PORT":"8080","SIZE":2}}`},
 	}
 
 	for _, io := range inputOutput {
@@ -89,9 +88,8 @@ func TestConfigKeyHandler(t *testing.T) {
 
 	inputOutput := []struct {
 		input struct {
-			method  string
-			key     string
-			payload io.Reader
+			method, key string
+			payload     io.Reader
 		}
 		output struct {
 			value    interface{}
@@ -99,9 +97,8 @@ func TestConfigKeyHandler(t *testing.T) {
 		}
 	}{
 		{struct {
-			method  string
-			key     string
-			payload io.Reader
+			method, key string
+			payload     io.Reader
 		}{"GET", vars.MaxStackSize, nil},
 			struct {
 				value    interface{}
@@ -109,9 +106,8 @@ func TestConfigKeyHandler(t *testing.T) {
 			}{2, expectedElementJSON},
 		},
 		{struct {
-			method  string
-			key     string
-			payload io.Reader
+			method, key string
+			payload     io.Reader
 		}{"POST", vars.MaxStackSize, bytes.NewBuffer(expectedNewElementJSON)},
 			struct {
 				value    interface{}
@@ -228,11 +224,10 @@ func TestCheckMaxStackSize(t *testing.T) {
 	}
 
 	inputOutput := []struct {
-		input  int
-		output int
+		input, output int
 	}{
-		{input: 1, output: http.StatusNotAcceptable},
-		{input: 6, output: http.StatusOK},
+		{1, http.StatusNotAcceptable},
+		{6, http.StatusOK},
 	}
 
 	for _, io := range inputOutput {

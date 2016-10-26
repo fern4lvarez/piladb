@@ -16,8 +16,7 @@ func TestNewConfig(t *testing.T) {
 	}
 
 	inputOutput := []struct {
-		input  interface{}
-		output interface{}
+		input, output interface{}
 	}{
 		{config.Values.Name, CONFIG},
 		{config.Values.ID, uuid.New(CONFIG)},
