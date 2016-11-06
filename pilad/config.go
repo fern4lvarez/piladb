@@ -33,7 +33,7 @@ type flagKey struct {
 // reading from environment variables and cli flags.
 func (c *Conn) buildConfig() {
 	flagKeys := []flagKey{
-		flagKey{maxStackSizeFlag, vars.MaxStackSize, "PILADB_MAX_STACK_SIZE"},
+		flagKey{maxStackSizeFlag, vars.MaxStackSize, vars.Env(vars.MaxStackSize)},
 	}
 
 	for _, fk := range flagKeys {

@@ -18,7 +18,7 @@ import (
 func TestBuildConfig(t *testing.T) {
 	conn := NewConn()
 
-	if err := os.Unsetenv("PILADB_MAX_STACK_SIZE"); err != nil {
+	if err := os.Unsetenv(vars.Env(vars.MaxStackSize)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -29,7 +29,7 @@ func TestBuildConfig(t *testing.T) {
 		t.Errorf("MaxStackSize is %v, expected %d", s, 32)
 	}
 
-	if err := os.Setenv("PILADB_MAX_STACK_SIZE", "42"); err != nil {
+	if err := os.Setenv(vars.Env(vars.MaxStackSize), "42"); err != nil {
 		t.Fatal(err)
 	}
 	conn.buildConfig()
