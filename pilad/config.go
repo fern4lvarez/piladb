@@ -1,14 +1,49 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/gorilla/mux"
 )
+
+// These vars represent the command line flags.
+// They are only used to initialize the Connection
+// Config at pilad start-up.
+var (
+	maxStackSizeFlag int
+)
+
+func init() {
+	flag.IntVar(&maxStackSizeFlag, "max-stack-size", -1, "Max size of Stacks")
+}
+
+type flagKey struct {
+	flag interface{}
+	key  string
+	env  string
+}
+
+// buildConfig sets non-default config values to the Connection
+// reading from environment variables and cli flags.
+func (c *Conn) buildConfig() {
+	flagKeys := []flagKey{
+		flagKey{maxStackSizeFlag, vars.MaxStackSize, "PILADB_MAX_STACK_SIZE"},
+	}
+
+	for _, fk := range flagKeys {
+		if e := os.Getenv(fk.env); e != "" {
+			c.Config.Set(fk.key, e)
+			continue
+		}
+		c.Config.Set(fk.key, fk.flag)
+	}
+}
 
 // stackHandlerFunc represents a Handler of a Stack.
 type stackHandlerFunc func(w http.ResponseWriter, r *http.Request, stack *pila.Stack)

@@ -7,12 +7,37 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 )
+
+func TestBuildConfig(t *testing.T) {
+	conn := NewConn()
+
+	if err := os.Unsetenv("PILADB_MAX_STACK_SIZE"); err != nil {
+		t.Fatal(err)
+	}
+
+	maxStackSizeFlag = 32
+	conn.buildConfig()
+
+	if s := conn.Config.MaxStackSize(); s != 32 {
+		t.Errorf("MaxStackSize is %v, expected %d", s, 32)
+	}
+
+	if err := os.Setenv("PILADB_MAX_STACK_SIZE", "42"); err != nil {
+		t.Fatal(err)
+	}
+	conn.buildConfig()
+
+	if s := conn.Config.MaxStackSize(); s != 42 {
+		t.Errorf("MaxStackSize is %v, expected %d", s, 42)
+	}
+}
 
 func TestConfigHandler_GET(t *testing.T) {
 	conn := NewConn()
