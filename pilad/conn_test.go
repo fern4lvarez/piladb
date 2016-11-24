@@ -406,11 +406,10 @@ func TestStacksHandler_GET(t *testing.T) {
 	conn.Pila = p
 
 	inputOutput := []struct {
-		input  string
-		output string
+		input, output string
 	}{
-		{input: "/databases/db/stacks", output: `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`},
-		{input: "/databases/db/stacks?kv", output: `{"stacks":{"stack1":"foo","stack2":8}}`},
+		{"/databases/db/stacks", `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`},
+		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
 	for _, io := range inputOutput {
@@ -748,9 +747,7 @@ func TestStackHandler_GET(t *testing.T) {
 
 	inputOutput := []struct {
 		input struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}
 		output struct {
 			response []byte
@@ -758,9 +755,7 @@ func TestStackHandler_GET(t *testing.T) {
 		}
 	}{
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.ID.String(), s.ID.String(), ""},
 			struct {
 				response []byte
@@ -768,9 +763,7 @@ func TestStackHandler_GET(t *testing.T) {
 			}{expectedStackStatusJSON, http.StatusOK},
 		},
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.ID.String(), s.ID.String(), "peek"},
 			struct {
 				response []byte
@@ -778,9 +771,7 @@ func TestStackHandler_GET(t *testing.T) {
 			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.ID.String(), s.ID.String(), "size"},
 			struct {
 				response []byte
@@ -918,9 +909,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 
 	inputOutput := []struct {
 		input struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}
 		output struct {
 			response []byte
@@ -928,9 +917,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 		}
 	}{
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.ID.String(), s.ID.String(), ""},
 			struct {
 				response []byte
@@ -938,9 +925,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.Name, s.Name, ""},
 			struct {
 				response []byte
@@ -948,9 +933,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			}{expectedElementJSON, http.StatusOK},
 		},
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.Name, s.Name, "flush"},
 			struct {
 				response []byte
@@ -958,9 +941,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			}{expectedStackStatusJSON, http.StatusOK},
 		},
 		{struct {
-			database string
-			stack    string
-			op       string
+			database, stack, op string
 		}{db.Name, s.Name, "full"},
 			struct {
 				response []byte
@@ -1649,7 +1630,6 @@ func TestDeleteStackHandler(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
-		fmt.Printf("DEBUG %+v %+v \n", db, s)
 		conn.deleteStackHandler(response, request, db, s)
 
 		if expectedStack := db.Stacks[uuid.UUID(vars["stack_id"])]; expectedStack != nil {

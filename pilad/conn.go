@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 	"github.com/fern4lvarez/piladb/pkg/version"
@@ -17,6 +18,7 @@ import (
 // the Pila instance and its status.
 type Conn struct {
 	Pila   *pila.Pila
+	Config *config.Config
 	Status *Status
 }
 
@@ -24,6 +26,7 @@ type Conn struct {
 func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
+	conn.Config = config.NewConfig().Default()
 	conn.Status = NewStatus(version.CommitHash(), time.Now(), MemStats())
 	return conn
 }
@@ -229,7 +232,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
-			c.pushStackHandler(w, r, stack)
+			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
 			return
 
 		case r.Method == "DELETE":

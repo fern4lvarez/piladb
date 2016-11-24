@@ -31,6 +31,58 @@ Returns `200 OK` and a JSON document with the current piladb status.
 }
 ```
 
+### CONFIG
+
+#### GET `/_config`
+
+Returns `200 OK` and a representation of the configuration values
+in key-value format.
+
+```json
+{
+  "stacks": {
+    "MAX_STACK_SIZE": 10
+  }
+}
+```
+
+Returns `400 BAD REQUEST` if there's an error serializing the config
+response.
+
+#### `GET /_config/$CONFIG_KEY`
+
+> GET a Config value.
+
+Returns `200 OK` and value associated to `$CONFIG_KEY`.
+
+```json
+{
+  "element": 10
+}
+```
+
+Returns `410 GONE` if configuration key does not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the config
+response.
+
+#### POST `/_config/$CONFIG_KEY` + `{"element":$CONFIG_VALUE}`
+
+> SET a Config value.
+
+Returns `200 OK` and the new value set to `$CONFIG_KEY`.
+
+```json
+{
+  "element": 10
+}
+```
+
+Returns `410 GONE` if configuration key does not exist.
+
+Returns `400 BAD REQUEST` if `$CONFIG_VALUE` is not provided or there's
+an error serializing the config response.
+
 ### `DATABASES`
 
 #### `GET /databases`

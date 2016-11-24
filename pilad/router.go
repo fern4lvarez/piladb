@@ -15,6 +15,14 @@ func Router(conn *Conn) *mux.Router {
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")
 
+	// GET /_config
+	r.HandleFunc("/_config", conn.configHandler).
+		Methods("GET")
+	// GET /_config/$CONFIG_KEY
+	// POST /_config/$CONFIG_KEY + {element: value}
+	r.Handle("/_config/{key}", conn.configKeyHandler("")).
+		Methods("GET", "POST")
+
 	// GET /databases
 	// PUT /databases?name=DATABASE_NAME
 	r.HandleFunc("/databases", conn.databasesHandler).
