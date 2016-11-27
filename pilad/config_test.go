@@ -25,7 +25,7 @@ func TestBuildConfig(t *testing.T) {
 	maxStackSizeFlag = 32
 	conn.buildConfig()
 
-	if s := conn.Config.MaxStackSize(); s != 32 {
+	if s := conn.Config.Get(vars.MaxStackSize); s != 32 {
 		t.Errorf("MaxStackSize is %v, expected %d", s, 32)
 	}
 
@@ -34,8 +34,17 @@ func TestBuildConfig(t *testing.T) {
 	}
 	conn.buildConfig()
 
-	if s := conn.Config.MaxStackSize(); s != 42 {
+	if s := conn.Config.Get(vars.MaxStackSize); s != 42 {
 		t.Errorf("MaxStackSize is %v, expected %d", s, 42)
+	}
+
+	if err := os.Setenv(vars.Env(vars.MaxStackSize), "foo"); err != nil {
+		t.Fatal(err)
+	}
+	conn.buildConfig()
+
+	if s := conn.Config.Get(vars.MaxStackSize); s != "foo" {
+		t.Errorf("MaxStackSize is %v, expected %v", s, "foo")
 	}
 }
 

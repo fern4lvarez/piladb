@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
@@ -42,7 +43,12 @@ func (c *Conn) buildConfig() {
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
-			c.Config.Set(fk.key, e)
+			if i, err := strconv.Atoi(e); err != nil {
+				c.Config.Set(fk.key, e)
+			} else {
+				c.Config.Set(fk.key, i)
+
+			}
 			continue
 		}
 		c.Config.Set(fk.key, fk.flag)
