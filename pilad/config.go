@@ -29,20 +29,19 @@ func init() {
 type flagKey struct {
 	flag interface{}
 	key  string
-	env  string
 }
 
 // buildConfig sets non-default config values to the Connection
 // reading from environment variables and cli flags.
 func (c *Conn) buildConfig() {
 	flagKeys := []flagKey{
-		flagKey{maxStackSizeFlag, vars.MaxStackSize, vars.Env(vars.MaxStackSize)},
-		flagKey{readTimeoutFlag, vars.ReadTimeout, vars.Env(vars.ReadTimeout)},
-		flagKey{writeTimeoutFlag, vars.WriteTimeout, vars.Env(vars.WriteTimeout)},
+		flagKey{maxStackSizeFlag, vars.MaxStackSize},
+		flagKey{readTimeoutFlag, vars.ReadTimeout},
+		flagKey{writeTimeoutFlag, vars.WriteTimeout},
 	}
 
 	for _, fk := range flagKeys {
-		if e := os.Getenv(fk.env); e != "" {
+		if e := os.Getenv(vars.Env(fk.key)); e != "" {
 			c.Config.Set(fk.key, e)
 			continue
 		}
