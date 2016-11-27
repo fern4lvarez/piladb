@@ -16,11 +16,14 @@ import (
 // They are only used to initialize the Connection
 // Config at pilad start-up.
 var (
-	maxStackSizeFlag int
+	maxStackSizeFlag                  int
+	readTimeoutFlag, writeTimeoutFlag int
 )
 
 func init() {
 	flag.IntVar(&maxStackSizeFlag, "max-stack-size", -1, "Max size of Stacks")
+	flag.IntVar(&readTimeoutFlag, "read-timeout", 30, "Read request timeout")
+	flag.IntVar(&writeTimeoutFlag, "write-timeout", 45, "Write response timeout")
 }
 
 type flagKey struct {
@@ -34,6 +37,8 @@ type flagKey struct {
 func (c *Conn) buildConfig() {
 	flagKeys := []flagKey{
 		flagKey{maxStackSizeFlag, vars.MaxStackSize, vars.Env(vars.MaxStackSize)},
+		flagKey{readTimeoutFlag, vars.ReadTimeout, vars.Env(vars.ReadTimeout)},
+		flagKey{writeTimeoutFlag, vars.WriteTimeout, vars.Env(vars.WriteTimeout)},
 	}
 
 	for _, fk := range flagKeys {
