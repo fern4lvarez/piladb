@@ -5,9 +5,9 @@ piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=mast
 
 > _[pee-lah-dee-bee]_. _pila_ means _stack_ or _battery_ in Spanish.
 
-**piladb** is a RESTful database engine based on the [stack data structure](
+**piladb** is a lightweight RESTful database engine based on the [stack data structure](
 https://en.wikipedia.org/wiki/Stack_%28abstract_data_type%29).
-Create an ilimited number of stacks, which can contain any kind of supported
+Create an unlimited number of stacks, which can contain any kind of JSON-compatible
 data types.
 
 Features
@@ -18,6 +18,7 @@ Features
 * Available `POP`, `PUSH`, `PEEK`,`SIZE`, and `FLUSH` operations for each of the stacks.
 * Manage databases and stacks using a REST API, so you wrap it with
   any programming language.
+* Store content in JSON-compatible data types.
 * Totally configurable using a REST API, or cli parameters.
 * In-memory store, persistence on disk wannabe (https://github.com/fern4lvarez/piladb/issues/11).
 * Written in Go, i.e. binaries are self-contained and distributable.
