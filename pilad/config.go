@@ -46,9 +46,7 @@ func (c *Conn) buildConfig() {
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
-			fmt.Println("DEBUG", fk.key)
 			if i, err := strconv.Atoi(e); err != nil {
-				fmt.Println("DEBUG", vars.DefaultInt(fk.key))
 				c.Config.Set(fk.key, vars.DefaultInt(fk.key))
 			} else {
 				c.Config.Set(fk.key, i)
