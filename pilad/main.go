@@ -18,8 +18,8 @@ func main() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", Port()),
 		Handler:      Router(conn),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  conn.Config.ReadTimeout() * time.Second,
+		WriteTimeout: conn.Config.WriteTimeout() * time.Second,
 	}
 	log.Fatal(srv.ListenAndServe())
 }

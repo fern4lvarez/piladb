@@ -2,6 +2,7 @@ package config
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 )
@@ -14,17 +15,19 @@ func (c *Config) MaxStackSize() int {
 }
 
 // ReadTimeout returns the value of READ_TIMEOUT.
-// Type: int, Default: 30
-func (c *Config) ReadTimeout() int {
+// Type: time.Duration, Default: 30
+func (c *Config) ReadTimeout() time.Duration {
 	readTimeout := c.Get(vars.ReadTimeout)
-	return intValue(readTimeout, 30)
+	t := intValue(readTimeout, 30)
+	return time.Duration(t)
 }
 
 // WriteTimeout returns the value of WRITE_TIMEOUT.
-// Type: int, Default: 45
-func (c *Config) WriteTimeout() int {
+// Type: time.Duration, Default: 45
+func (c *Config) WriteTimeout() time.Duration {
 	writeTimeout := c.Get(vars.WriteTimeout)
-	return intValue(writeTimeout, 45)
+	t := intValue(writeTimeout, 45)
+	return time.Duration(t)
 }
 
 // intValue returns an Integer value given another value as an

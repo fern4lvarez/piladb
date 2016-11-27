@@ -2,6 +2,7 @@ package config
 
 import (
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 )
@@ -35,7 +36,7 @@ func TestReadTimeout(t *testing.T) {
 
 	inputOutput := []struct {
 		input  interface{}
-		output int
+		output time.Duration
 	}{
 		{8, 8},
 		{-1, 30},
@@ -59,7 +60,7 @@ func TestWriteTimeout(t *testing.T) {
 
 	inputOutput := []struct {
 		input  interface{}
-		output int
+		output time.Duration
 	}{
 		{8, 8},
 		{-1, 45},
