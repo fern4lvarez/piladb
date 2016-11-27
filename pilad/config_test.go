@@ -43,8 +43,8 @@ func TestBuildConfig(t *testing.T) {
 	}
 	conn.buildConfig()
 
-	if s := conn.Config.Get(vars.MaxStackSize); s != "foo" {
-		t.Errorf("MaxStackSize is %v, expected %v", s, "foo")
+	if s := conn.Config.Get(vars.MaxStackSize); s != -1 {
+		t.Errorf("MaxStackSize is %v, expected %v", s, -1)
 	}
 }
 

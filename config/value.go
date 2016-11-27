@@ -11,14 +11,14 @@ import (
 // Type: int, Default: -1
 func (c *Config) MaxStackSize() int {
 	maxSize := c.Get(vars.MaxStackSize)
-	return intValue(maxSize, -1)
+	return intValue(maxSize, vars.MaxStackSizeDefault)
 }
 
 // ReadTimeout returns the value of READ_TIMEOUT.
 // Type: time.Duration, Default: 30
 func (c *Config) ReadTimeout() time.Duration {
 	readTimeout := c.Get(vars.ReadTimeout)
-	t := intValue(readTimeout, 30)
+	t := intValue(readTimeout, vars.ReadTimeoutDefault)
 	return time.Duration(t)
 }
 
@@ -26,8 +26,20 @@ func (c *Config) ReadTimeout() time.Duration {
 // Type: time.Duration, Default: 45
 func (c *Config) WriteTimeout() time.Duration {
 	writeTimeout := c.Get(vars.WriteTimeout)
-	t := intValue(writeTimeout, 45)
+	t := intValue(writeTimeout, vars.WriteTimeoutDefault)
 	return time.Duration(t)
+}
+
+// Port returns the value of PORT.
+// Type: int, Default: 1205
+func (c *Config) Port() int {
+	port := c.Get(vars.Port)
+	t := intValue(port, vars.PortDefault)
+
+	if t < 1025 || t > 65536 {
+		return vars.PortDefault
+	}
+	return t
 }
 
 // intValue returns an Integer value given another value as an

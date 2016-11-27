@@ -18,7 +18,7 @@ func logo(conn *Conn) {
 	log.Println()
 	log.Printf("Version: %s", conn.Status.Version)
 	log.Printf("Host:    %s", conn.Status.Host)
-	log.Printf("Port:    :%s", Port())
+	log.Printf("Port:    %d", conn.Config.Port())
 	log.Printf("PID:     %d", conn.Status.PID)
 	log.Println()
 }

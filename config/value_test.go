@@ -78,3 +78,28 @@ func TestWriteTimeout(t *testing.T) {
 		}
 	}
 }
+
+func TestPort(t *testing.T) {
+	c := NewConfig()
+
+	inputOutput := []struct {
+		input  interface{}
+		output int
+	}{
+		{8090, 8090},
+		{-1, 1205},
+		{23676.7, 23676},
+		{"3756", 3756},
+		{"foo", 1205},
+		{[]byte("foo"), 1205},
+		{6736373635, 1205},
+	}
+
+	for _, io := range inputOutput {
+		c.Set(vars.Port, io.input)
+
+		if s := c.Port(); s != io.output {
+			t.Errorf("Port is %d, expected %d", s, io.output)
+		}
+	}
+}

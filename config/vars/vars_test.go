@@ -10,3 +10,22 @@ func TestEnv(t *testing.T) {
 		t.Errorf("Env is %s, expected %s", e, expectedEnv)
 	}
 }
+
+func TestDefaultInt(t *testing.T) {
+	inputOutput := []struct {
+		input  string
+		output int
+	}{
+		{MaxStackSize, MaxStackSizeDefault},
+		{ReadTimeout, ReadTimeoutDefault},
+		{WriteTimeout, WriteTimeoutDefault},
+		{Port, PortDefault},
+		{"foo", -1},
+	}
+
+	for _, io := range inputOutput {
+		if o := DefaultInt(io.input); o != io.output {
+			t.Errorf("DefaultInt is %v, expected %v", o, io.output)
+		}
+	}
+}

@@ -19,12 +19,14 @@ import (
 var (
 	maxStackSizeFlag                  int
 	readTimeoutFlag, writeTimeoutFlag int
+	portFlag                          int
 )
 
 func init() {
 	flag.IntVar(&maxStackSizeFlag, "max-stack-size", -1, "Max size of Stacks")
 	flag.IntVar(&readTimeoutFlag, "read-timeout", 30, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", 45, "Write response timeout")
+	flag.IntVar(&portFlag, "port", 1205, "Port number")
 }
 
 type flagKey struct {
@@ -39,12 +41,15 @@ func (c *Conn) buildConfig() {
 		flagKey{maxStackSizeFlag, vars.MaxStackSize},
 		flagKey{readTimeoutFlag, vars.ReadTimeout},
 		flagKey{writeTimeoutFlag, vars.WriteTimeout},
+		flagKey{portFlag, vars.Port},
 	}
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
+			fmt.Println("DEBUG", fk.key)
 			if i, err := strconv.Atoi(e); err != nil {
-				c.Config.Set(fk.key, e)
+				fmt.Println("DEBUG", vars.DefaultInt(fk.key))
+				c.Config.Set(fk.key, vars.DefaultInt(fk.key))
 			} else {
 				c.Config.Set(fk.key, i)
 
