@@ -23,10 +23,10 @@ var (
 )
 
 func init() {
-	flag.IntVar(&maxStackSizeFlag, "max-stack-size", -1, "Max size of Stacks")
-	flag.IntVar(&readTimeoutFlag, "read-timeout", 30, "Read request timeout")
-	flag.IntVar(&writeTimeoutFlag, "write-timeout", 45, "Write response timeout")
-	flag.IntVar(&portFlag, "port", 1205, "Port number")
+	flag.IntVar(&maxStackSizeFlag, "max-stack-size", vars.MaxStackSizeDefault, "Max size of Stacks")
+	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
+	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
+	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
 }
 
 type flagKey struct {
