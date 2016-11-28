@@ -16,7 +16,7 @@ func main() {
 	logo(conn)
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%s", Port()),
+		Addr:         fmt.Sprintf(":%d", conn.Config.Port()),
 		Handler:      Router(conn),
 		ReadTimeout:  conn.Config.ReadTimeout() * time.Second,
 		WriteTimeout: conn.Config.WriteTimeout() * time.Second,

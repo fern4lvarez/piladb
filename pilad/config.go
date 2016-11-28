@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
@@ -18,12 +19,14 @@ import (
 var (
 	maxStackSizeFlag                  int
 	readTimeoutFlag, writeTimeoutFlag int
+	portFlag                          int
 )
 
 func init() {
-	flag.IntVar(&maxStackSizeFlag, "max-stack-size", -1, "Max size of Stacks")
-	flag.IntVar(&readTimeoutFlag, "read-timeout", 30, "Read request timeout")
-	flag.IntVar(&writeTimeoutFlag, "write-timeout", 45, "Write response timeout")
+	flag.IntVar(&maxStackSizeFlag, "max-stack-size", vars.MaxStackSizeDefault, "Max size of Stacks")
+	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
+	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
+	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
 }
 
 type flagKey struct {
@@ -38,11 +41,17 @@ func (c *Conn) buildConfig() {
 		flagKey{maxStackSizeFlag, vars.MaxStackSize},
 		flagKey{readTimeoutFlag, vars.ReadTimeout},
 		flagKey{writeTimeoutFlag, vars.WriteTimeout},
+		flagKey{portFlag, vars.Port},
 	}
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
-			c.Config.Set(fk.key, e)
+			if i, err := strconv.Atoi(e); err != nil {
+				c.Config.Set(fk.key, vars.DefaultInt(fk.key))
+			} else {
+				c.Config.Set(fk.key, i)
+
+			}
 			continue
 		}
 		c.Config.Set(fk.key, fk.flag)
