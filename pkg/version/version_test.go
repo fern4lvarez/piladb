@@ -21,7 +21,7 @@ func TestCommitHash_Unknown(t *testing.T) {
 	}
 
 	os.Chdir(home)
-	if h := CommitHash(); h != "unknown" {
+	if h := CommitHash(); h != "master" {
 		t.Errorf("CommitHash is %s, expected %s", h, "unknown")
 	}
 

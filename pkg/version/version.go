@@ -13,7 +13,7 @@ func CommitHash() string {
 
 	b, err := cmd.Output()
 	if err != nil {
-		return "unknown"
+		return "master"
 	}
 	return strings.Replace(string(b), "\n", "", -1)
 }

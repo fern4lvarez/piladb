@@ -11,6 +11,7 @@ import (
 
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
+	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
 func TestNewConn(t *testing.T) {
@@ -31,6 +32,37 @@ func TestNewConn(t *testing.T) {
 	if conn.Status.Code != "OK" {
 		t.Errorf("conn.Status is %s, expected %s", conn.Status.Code, "OK")
 	}
+}
+
+func TestRootHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+	expectedRedirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
+
+	conn.rootHandler(response, request)
+
+	fmt.Println("DEBUG", response.Header()["Location"])
+	if response.Code != http.StatusMovedPermanently {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusMovedPermanently)
+	}
+
+	locations, ok := response.Header()["Location"]
+	if !ok {
+		t.Fatal("no Location Header found")
+	}
+
+	if l := len(locations); l != 1 {
+		t.Fatalf("number of redirections is %d, expected %d", l, 1)
+	}
+
+	if l := locations[0]; l != expectedRedirAddress {
+		t.Errorf("redirection Address is %s, expected %s", l, expectedRedirAddress)
+	}
+
 }
 
 func TestStatusHandler(t *testing.T) {

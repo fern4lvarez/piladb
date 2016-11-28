@@ -13,6 +13,10 @@ Endpoints
 
 ### STATUS
 
+#### GET `/`
+
+Redirects to the `pilad` documentation site and returns `301 Moved Permanently`.
+
 #### GET `/_status`
 
 Returns `200 OK` and a JSON document with the current piladb status.

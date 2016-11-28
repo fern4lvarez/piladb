@@ -11,6 +11,10 @@ import (
 func Router(conn *Conn) *mux.Router {
 	r := mux.NewRouter()
 
+	// GET /
+	r.HandleFunc("/", conn.rootHandler).
+		Methods("GET")
+
 	// GET /_status
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")

@@ -33,6 +33,13 @@ func NewConn() *Conn {
 
 // Connection Handlers
 
+// rootHandler redirects to the pilad documentation site hosted on Github.
+func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
+	redirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
+	log.Println(r.Method, r.URL, http.StatusMovedPermanently, "Moved to", redirAddress)
+	http.Redirect(w, r, redirAddress, http.StatusMovedPermanently)
+}
+
 // statusHandler writes the piladb status into the response.
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	c.Status.Update(time.Now(), MemStats())
