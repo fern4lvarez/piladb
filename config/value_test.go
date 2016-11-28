@@ -15,11 +15,12 @@ func TestMaxStackSize(t *testing.T) {
 		output int
 	}{
 		{8, 8},
-		{-1, -1},
 		{23.7, 23},
 		{"3", 3},
-		{"foo", -1},
-		{[]byte("foo"), -1},
+		{-1, vars.MaxStackSizeDefault},
+		{"foo", vars.MaxStackSizeDefault},
+		{-35, vars.MaxStackSizeDefault},
+		{[]byte("foo"), vars.MaxStackSizeDefault},
 	}
 
 	for _, io := range inputOutput {
@@ -39,11 +40,11 @@ func TestReadTimeout(t *testing.T) {
 		output time.Duration
 	}{
 		{8, 8},
-		{-1, 30},
 		{23.7, 23},
 		{"3", 3},
-		{"foo", 30},
-		{[]byte("foo"), 30},
+		{-1, vars.ReadTimeoutDefault},
+		{"foo", vars.ReadTimeoutDefault},
+		{[]byte("foo"), vars.ReadTimeoutDefault},
 	}
 
 	for _, io := range inputOutput {
@@ -63,11 +64,11 @@ func TestWriteTimeout(t *testing.T) {
 		output time.Duration
 	}{
 		{8, 8},
-		{-1, 45},
 		{23.7, 23},
 		{"3", 3},
-		{"foo", 45},
-		{[]byte("foo"), 45},
+		{-1, vars.WriteTimeoutDefault},
+		{"foo", vars.WriteTimeoutDefault},
+		{[]byte("foo"), vars.WriteTimeoutDefault},
 	}
 
 	for _, io := range inputOutput {
@@ -87,12 +88,12 @@ func TestPort(t *testing.T) {
 		output int
 	}{
 		{8090, 8090},
-		{-1, 1205},
 		{23676.7, 23676},
 		{"3756", 3756},
-		{"foo", 1205},
-		{[]byte("foo"), 1205},
-		{6736373635, 1205},
+		{-1, vars.PortDefault},
+		{"foo", vars.PortDefault},
+		{[]byte("foo"), vars.PortDefault},
+		{6736373635, vars.PortDefault},
 	}
 
 	for _, io := range inputOutput {
