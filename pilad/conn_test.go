@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -45,7 +46,6 @@ func TestRootHandler(t *testing.T) {
 
 	conn.rootHandler(response, request)
 
-	fmt.Println("DEBUG", response.Header()["Location"])
 	if response.Code != http.StatusMovedPermanently {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusMovedPermanently)
 	}
@@ -245,7 +245,7 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -289,7 +289,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET_Name(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -420,10 +420,12 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 }
 
 func TestStacksHandler_GET(t *testing.T) {
-	s1 := pila.NewStack("stack1")
+	now1 := time.Now()
+	s1 := pila.NewStack("stack1", now1)
 	s1.Push("foo")
 
-	s2 := pila.NewStack("stack2")
+	now2 := time.Now()
+	s2 := pila.NewStack("stack2", now2)
 	s2.Push(1)
 	s2.Push(8)
 
@@ -440,7 +442,7 @@ func TestStacksHandler_GET(t *testing.T) {
 	inputOutput := []struct {
 		input, output string
 	}{
-		{"/databases/db/stacks", `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`},
+		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v"}]}`, now1.Format("2006-01-02T15:04:05.999999999-07:00"), now2.Format("2006-01-02T15:04:05.999999999-07:00"))},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
@@ -451,7 +453,7 @@ func TestStacksHandler_GET(t *testing.T) {
 		}
 		response := httptest.NewRecorder()
 
-		stacksHandle := conn.stacksHandler(db.ID.String())
+		stacksHandle := conn.stacksHandler(db.ID.String(), time.Now())
 		stacksHandle.ServeHTTP(response, request)
 
 		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -474,10 +476,12 @@ func TestStacksHandler_GET(t *testing.T) {
 }
 
 func TestStacksHandler_GET_Name(t *testing.T) {
-	s1 := pila.NewStack("stack1")
+	now1 := time.Now()
+	s1 := pila.NewStack("stack1", now1)
 	s1.Push("bar")
 
-	s2 := pila.NewStack("stack2")
+	now2 := time.Now()
+	s2 := pila.NewStack("stack2", now2)
 	s2.Push(`{"a":"b"}`)
 
 	db := pila.NewDatabase("db")
@@ -496,7 +500,7 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("db")
+	stacksHandle := conn.stacksHandler("db", time.Now())
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -512,7 +516,7 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1}]}`; string(stacks) != expected {
+	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v"}]}`, now1.Format("2006-01-02T15:04:05.999999999-07:00"), now2.Format("2006-01-02T15:04:05.999999999-07:00")); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
 	}
 }
@@ -532,7 +536,7 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("nodb")
+	stacksHandle := conn.stacksHandler("nodb", time.Now())
 	stacksHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
@@ -543,7 +547,7 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	ch := make(chan int)
 
-	stack := pila.NewStack("test-stack-channel")
+	stack := pila.NewStack("test-stack-channel", time.Now())
 	stack.Push(ch)
 
 	db := pila.NewDatabase("db")
@@ -561,7 +565,7 @@ func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("db")
+	stacksHandle := conn.stacksHandler("db", time.Now())
 	stacksHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -578,6 +582,8 @@ func TestStacksHandler_PUT(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
+	time := time.Now()
+
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
 	if err != nil {
@@ -585,7 +591,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler(db.ID.String())
+	stacksHandle := conn.stacksHandler(db.ID.String(), time)
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -601,7 +607,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v"}`, time.Format("2006-01-02T15:04:05.999999999-07:00"))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -617,6 +623,8 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
+	time := time.Now()
+
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.Name)
 	request, err := http.NewRequest("PUT", path, nil)
 	if err != nil {
@@ -624,7 +632,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler(db.ID.String())
+	stacksHandle := conn.stacksHandler(db.ID.String(), time)
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -640,7 +648,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v"}`, time.Format("2006-01-02T15:04:05.999999999-07:00"))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -656,6 +664,8 @@ func TestCreateStackHandler(t *testing.T) {
 	conn := NewConn()
 	conn.Pila = p
 
+	time := time.Now()
+
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
 	if err != nil {
@@ -663,7 +673,7 @@ func TestCreateStackHandler(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String())
+	conn.createStackHandler(response, request, db.ID.String(), time)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
@@ -678,7 +688,7 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v"}`, time.Format("2006-01-02T15:04:05.999999999-07:00"))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}
@@ -700,7 +710,7 @@ func TestCreateStackHandler_NoName(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String())
+	conn.createStackHandler(response, request, db.ID.String(), time.Now())
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
@@ -720,7 +730,7 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, "12345")
+	conn.createStackHandler(response, request, "12345", time.Now())
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
@@ -728,7 +738,7 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 }
 
 func TestCreateStackHandler_Conflict(t *testing.T) {
-	s := pila.NewStack("test-stack")
+	s := pila.NewStack("test-stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -746,7 +756,7 @@ func TestCreateStackHandler_Conflict(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String())
+	conn.createStackHandler(response, request, db.ID.String(), time.Now())
 
 	if response.Code != http.StatusConflict {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusConflict)
@@ -757,7 +767,7 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -857,7 +867,7 @@ func TestStackHandler_GET(t *testing.T) {
 }
 
 func TestStackHandler_POST(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -921,7 +931,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1036,7 +1046,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 }
 
 func TestStackHandler_DatabaseGone(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1073,7 +1083,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 }
 
 func TestStackHandler_StackGone(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1110,7 +1120,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 }
 
 func TestStatusStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1176,7 +1186,7 @@ func TestStatusStackHandler(t *testing.T) {
 }
 
 func TestPeekStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1229,7 +1239,7 @@ func TestPeekStackHandler(t *testing.T) {
 }
 
 func TestSizeStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1277,7 +1287,7 @@ func TestSizeStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1328,7 +1338,7 @@ func TestPushStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler_Name(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1379,7 +1389,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 }
 
 func TestPushStackHandler_Empty(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1414,7 +1424,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 }
 
 func TestPushStackHandler_BadDecoding(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1454,7 +1464,7 @@ func TestPopStackHandler(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 	s.Push(element.Value)
 
 	db := pila.NewDatabase("db")
@@ -1518,7 +1528,7 @@ func TestPopStackHandler(t *testing.T) {
 }
 
 func TestPopStackHandler_EmptyStack(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1548,7 +1558,7 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 }
 
 func TestFlushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1626,7 +1636,7 @@ func TestFlushStackHandler(t *testing.T) {
 }
 
 func TestDeleteStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1673,7 +1683,7 @@ func TestDeleteStackHandler(t *testing.T) {
 		}
 
 		// restore elements for next table test iteration
-		s = pila.NewStack("stack")
+		s = pila.NewStack("stack", time.Now())
 		_ = db.AddStack(s)
 		s.Push("one")
 	}

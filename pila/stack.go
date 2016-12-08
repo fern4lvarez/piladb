@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -20,16 +21,20 @@ type Stack struct {
 	// Database associated to the Stack
 	Database *Database
 
-	// base represent the Stack data structure
+	// CreatedAt represents the date when the Stack was created
+	CreatedAt time.Time
+
+	// base represents the Stack data structure
 	base *stack.Stack
 }
 
-// NewStack creates a new Stack given a name without
-// an association to any Database.
-func NewStack(name string) *Stack {
+// NewStack creates a new Stack given a name and a date,
+// without an association to any Database.
+func NewStack(name string, now time.Time) *Stack {
 	s := &Stack{}
 	s.Name = name
 	s.SetID()
+	s.CreatedAt = now
 	s.base = stack.NewStack()
 	return s
 }
@@ -93,6 +98,7 @@ func (s *Stack) Status() StackStatus {
 	status.Name = s.Name
 	status.Size = s.Size()
 	status.Peek = s.Peek()
+	status.CreatedAt = s.CreatedAt
 
 	return status
 }

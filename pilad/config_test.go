@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/config/vars"
@@ -241,7 +242,7 @@ func TestConfigKeyHandler_BadRequest(t *testing.T) {
 }
 
 func TestCheckMaxStackSize(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")

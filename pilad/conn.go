@@ -120,7 +120,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 
 // stacksHandler handles the stacks of a database, being able to get the status
 // of them, or create a new one.
-func (c *Conn) stacksHandler(databaseID string) http.Handler {
+func (c *Conn) stacksHandler(databaseID string, time time.Time) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
@@ -139,7 +139,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 		}
 
 		if r.Method == "PUT" {
-			c.createStackHandler(w, r, db.ID.String())
+			c.createStackHandler(w, r, db.ID.String(), time)
 			return
 		}
 
@@ -168,7 +168,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 
 // createStackHandler handles the creation of a stack, given a database
 // by its id. Returns the status of the new stack.
-func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string) {
+func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string, time time.Time) {
 	name := r.FormValue("name")
 	if name == "" {
 		log.Println(r.Method, r.URL, http.StatusBadRequest, "missing name")
@@ -182,7 +182,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 		return
 	}
 
-	stack := pila.NewStack(name)
+	stack := pila.NewStack(name, time)
 	err := db.AddStack(stack)
 	if err != nil {
 		log.Println(r.Method, r.URL, http.StatusConflict, err)

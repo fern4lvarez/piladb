@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestStackStatusJSON(t *testing.T) {
-	stack := NewStack("test-stack")
+	now := time.Now()
+	stack := NewStack("test-stack", now)
 	stack.Push("test")
 	stack.Push(8)
 	stack.Push(5.87)
 	stack.Push([]byte("test"))
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4}`)
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v"}`, now.Format("2006-01-02T15:04:05.999999999-07:00"))
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -22,9 +24,10 @@ func TestStackStatusJSON(t *testing.T) {
 }
 
 func TestStackStatusJSON_Empty(t *testing.T) {
-	stack := NewStack("test-stack")
+	now := time.Now()
+	stack := NewStack("test-stack", now)
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0}`)
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v"}`, now.Format("2006-01-02T15:04:05.999999999-07:00"))
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -41,14 +44,14 @@ func TestStackStatusJSON_Error(t *testing.T) {
 	ch := make(chan int)
 	f := func() string { return "a" }
 
-	stack := NewStack("test-stack-channel")
+	stack := NewStack("test-stack-channel", time.Now())
 	stack.Push(ch)
 
 	if _, err := stack.Status().ToJSON(); err == nil {
 		t.Error("err is nil, expected UnsupportedTypeError")
 	}
 
-	stack = NewStack("test-stack-function")
+	stack = NewStack("test-stack-function", time.Now())
 	stack.Push(f)
 
 	if _, err := stack.Status().ToJSON(); err == nil {
@@ -57,13 +60,14 @@ func TestStackStatusJSON_Error(t *testing.T) {
 }
 
 func TestStacksStatusJSON(t *testing.T) {
-	stack1 := NewStack("test-stack-1")
+	now := time.Now()
+	stack1 := NewStack("test-stack-1", now)
 	stack1.Push("test")
 	stack1.Push(8)
 	stack1.Push(5.87)
 	stack1.Push([]byte("test"))
 
-	stack2 := NewStack("test-stack-2")
+	stack2 := NewStack("test-stack-2", now)
 	stack2.Push("foo")
 	stack2.Push([]byte("bar"))
 	stack2.Push(999)
@@ -72,7 +76,7 @@ func TestStacksStatusJSON(t *testing.T) {
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
 	}
 
-	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3}]}`)
+	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v"}]}`, now.Format("2006-01-02T15:04:05.999999999-07:00"), now.Format("2006-01-02T15:04:05.999999999-07:00"))
 	if status, err := stacksStatus.ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -105,7 +109,7 @@ func TestStacksStatusJSON_Error(t *testing.T) {
 	input := []interface{}{ch, f}
 
 	for _, in := range input {
-		stack := NewStack("test-stack")
+		stack := NewStack("test-stack", time.Now())
 		stack.Push(in)
 
 		stacksStatus := StacksStatus{
@@ -119,8 +123,8 @@ func TestStacksStatusJSON_Error(t *testing.T) {
 }
 
 func TestStacksStatusLen(t *testing.T) {
-	stack1 := NewStack("test-stack-1")
-	stack2 := NewStack("test-stack-2")
+	stack1 := NewStack("test-stack-1", time.Now())
+	stack2 := NewStack("test-stack-2", time.Now())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -133,8 +137,8 @@ func TestStacksStatusLen(t *testing.T) {
 }
 
 func TestStacksStatusLess(t *testing.T) {
-	stack1 := NewStack("test-stack-1")
-	stack2 := NewStack("test-stack-2")
+	stack1 := NewStack("test-stack-1", time.Now())
+	stack2 := NewStack("test-stack-2", time.Now())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -146,8 +150,8 @@ func TestStacksStatusLess(t *testing.T) {
 }
 
 func TestStacksStatusSwap(t *testing.T) {
-	stack1 := NewStack("test-stack-1")
-	stack2 := NewStack("test-stack-2")
+	stack1 := NewStack("test-stack-1", time.Now())
+	stack2 := NewStack("test-stack-2", time.Now())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -163,10 +167,10 @@ func TestStacksStatusSwap(t *testing.T) {
 }
 
 func TestStacksKVJSON(t *testing.T) {
-	stack1 := NewStack("test-stack-1")
+	stack1 := NewStack("test-stack-1", time.Now())
 	stack1.Push("test")
 
-	stack2 := NewStack("test-stack-2")
+	stack2 := NewStack("test-stack-2", time.Now())
 	stack2.Push(999)
 
 	stacksKV := StacksKV{
@@ -195,7 +199,7 @@ func TestStacksKVJSON_Error(t *testing.T) {
 	input := []interface{}{ch, f}
 
 	for _, in := range input {
-		stack := NewStack("test-stack")
+		stack := NewStack("test-stack", time.Now())
 		stack.Push(in)
 
 		stacksKV := StacksKV{
