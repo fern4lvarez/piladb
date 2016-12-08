@@ -24,6 +24,11 @@ type Stack struct {
 	// CreatedAt represents the date when the Stack was created
 	CreatedAt time.Time
 
+	// CreatedAt represents the date when the Stack was updated for the last time.
+	// A Stack is updated when is created, and when receiving a PUSH, POP, or
+	// FLUSH operation.
+	UpdatedAt time.Time
+
 	// base represents the Stack data structure
 	base *stack.Stack
 }
@@ -45,7 +50,7 @@ func (s *Stack) Push(element interface{}) {
 }
 
 // Pop removes and returns the element on top of the Stack.
-//If the Stack was empty, it returns false.
+// If the Stack was empty, it returns false.
 func (s *Stack) Pop() (interface{}, bool) {
 	return s.base.Pop()
 }
@@ -99,6 +104,7 @@ func (s *Stack) Status() StackStatus {
 	status.Size = s.Size()
 	status.Peek = s.Peek()
 	status.CreatedAt = s.CreatedAt
+	status.UpdatedAt = s.UpdatedAt
 
 	return status
 }

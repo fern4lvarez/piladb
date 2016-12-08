@@ -15,7 +15,8 @@ func TestStackStatusJSON(t *testing.T) {
 	stack.Push(5.87)
 	stack.Push([]byte("test"))
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v"}`, now.Format("2006-01-02T15:04:05.999999999-07:00"))
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v"}`,
+		now.Format("2006-01-02T15:04:05.999999999-07:00"), "0001-01-01T00:00:00Z")
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -27,7 +28,8 @@ func TestStackStatusJSON_Empty(t *testing.T) {
 	now := time.Now()
 	stack := NewStack("test-stack", now)
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v"}`, now.Format("2006-01-02T15:04:05.999999999-07:00"))
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
+		now.Format("2006-01-02T15:04:05.999999999-07:00"), "0001-01-01T00:00:00Z")
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -76,7 +78,7 @@ func TestStacksStatusJSON(t *testing.T) {
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
 	}
 
-	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v"}]}`, now.Format("2006-01-02T15:04:05.999999999-07:00"), now.Format("2006-01-02T15:04:05.999999999-07:00"))
+	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v","updated_at":"%v"}]}`, now.Format("2006-01-02T15:04:05.999999999-07:00"), "0001-01-01T00:00:00Z", now.Format("2006-01-02T15:04:05.999999999-07:00"), "0001-01-01T00:00:00Z")
 	if status, err := stacksStatus.ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {

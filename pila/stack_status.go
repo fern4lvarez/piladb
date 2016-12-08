@@ -19,6 +19,7 @@ type StackStatus struct {
 	Peek      interface{} `json:"peek"`
 	Size      int         `json:"size"`
 	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
 // ToJSON converts a StackStatus into JSON.
