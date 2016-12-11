@@ -6,6 +6,11 @@
 # Pull base image.
 FROM golang:latest
 
+# Install basic development tools.
+RUN \
+  apt-get update && \
+  apt-get install -y git vim
+
 # Install dependencies.
 RUN \
   go get github.com/golang/lint/golint
