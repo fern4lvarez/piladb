@@ -38,10 +38,10 @@ type flagKey struct {
 // reading from environment variables and cli flags.
 func (c *Conn) buildConfig() {
 	flagKeys := []flagKey{
-		flagKey{maxStackSizeFlag, vars.MaxStackSize},
-		flagKey{readTimeoutFlag, vars.ReadTimeout},
-		flagKey{writeTimeoutFlag, vars.WriteTimeout},
-		flagKey{portFlag, vars.Port},
+		{maxStackSizeFlag, vars.MaxStackSize},
+		{readTimeoutFlag, vars.ReadTimeout},
+		{writeTimeoutFlag, vars.WriteTimeout},
+		{portFlag, vars.Port},
 	}
 
 	for _, fk := range flagKeys {
