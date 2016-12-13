@@ -20,6 +20,8 @@ type Conn struct {
 	Pila   *pila.Pila
 	Config *config.Config
 	Status *Status
+
+	opDate time.Time
 }
 
 // NewConn creates and returns a new piladb connection.
@@ -120,7 +122,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 
 // stacksHandler handles the stacks of a database, being able to get the status
 // of them, or create a new one.
-func (c *Conn) stacksHandler(databaseID string, time time.Time) http.Handler {
+func (c *Conn) stacksHandler(databaseID string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
@@ -139,7 +141,7 @@ func (c *Conn) stacksHandler(databaseID string, time time.Time) http.Handler {
 		}
 
 		if r.Method == "PUT" {
-			c.createStackHandler(w, r, db.ID.String(), time)
+			c.createStackHandler(w, r, db.ID.String())
 			return
 		}
 
@@ -168,7 +170,7 @@ func (c *Conn) stacksHandler(databaseID string, time time.Time) http.Handler {
 
 // createStackHandler handles the creation of a stack, given a database
 // by its id and the time of creation. Returns the status of the new stack.
-func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string, time time.Time) {
+func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string) {
 	name := r.FormValue("name")
 	if name == "" {
 		log.Println(r.Method, r.URL, http.StatusBadRequest, "missing name")
@@ -182,7 +184,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 		return
 	}
 
-	stack := pila.NewStack(name, time)
+	stack := pila.NewStack(name, c.opDate)
 	err := db.AddStack(stack)
 	if err != nil {
 		log.Println(r.Method, r.URL, http.StatusConflict, err)

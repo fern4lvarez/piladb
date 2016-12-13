@@ -11,6 +11,7 @@ import (
 // handlers.
 func Router(conn *Conn) *mux.Router {
 	r := mux.NewRouter()
+	conn.opDate = time.Now()
 
 	// GET /
 	r.HandleFunc("/", conn.rootHandler).
@@ -40,7 +41,7 @@ func Router(conn *Conn) *mux.Router {
 	// GET /databases/$DATABASE_ID/stacks
 	// GET /databases/$DATABASE_ID/stacks?kv
 	// PUT /databases/$DATABASE_ID/stacks?name=STACK_NAME
-	r.Handle("/databases/{database_id}/stacks", conn.stacksHandler("", time.Now())).
+	r.Handle("/databases/{database_id}/stacks", conn.stacksHandler("")).
 		Methods("GET", "PUT")
 
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID

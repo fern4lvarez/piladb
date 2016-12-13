@@ -455,7 +455,7 @@ func TestStacksHandler_GET(t *testing.T) {
 		}
 		response := httptest.NewRecorder()
 
-		stacksHandle := conn.stacksHandler(db.ID.String(), time.Now())
+		stacksHandle := conn.stacksHandler(db.ID.String())
 		stacksHandle.ServeHTTP(response, request)
 
 		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -502,7 +502,7 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("db", time.Now())
+	stacksHandle := conn.stacksHandler("db")
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -539,7 +539,7 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("nodb", time.Now())
+	stacksHandle := conn.stacksHandler("nodb")
 	stacksHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
@@ -568,7 +568,7 @@ func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler("db", time.Now())
+	stacksHandle := conn.stacksHandler("db")
 	stacksHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -584,8 +584,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-
-	time := time.Now()
+	conn.opDate = time.Now()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -594,7 +593,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler(db.ID.String(), time)
+	stacksHandle := conn.stacksHandler(db.ID.String())
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -611,7 +610,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(time), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -626,8 +625,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-
-	time := time.Now()
+	conn.opDate = time.Now()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.Name)
 	request, err := http.NewRequest("PUT", path, nil)
@@ -636,7 +634,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	stacksHandle := conn.stacksHandler(db.ID.String(), time)
+	stacksHandle := conn.stacksHandler(db.ID.String())
 	stacksHandle.ServeHTTP(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -653,7 +651,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(time), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -668,8 +666,7 @@ func TestCreateStackHandler(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-
-	time := time.Now()
+	conn.opDate = time.Now()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -678,7 +675,7 @@ func TestCreateStackHandler(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String(), time)
+	conn.createStackHandler(response, request, db.ID.String())
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
 		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
@@ -694,7 +691,7 @@ func TestCreateStackHandler(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(time), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}
@@ -716,7 +713,7 @@ func TestCreateStackHandler_NoName(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String(), time.Now())
+	conn.createStackHandler(response, request, db.ID.String())
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
@@ -736,7 +733,7 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, "12345", time.Now())
+	conn.createStackHandler(response, request, "12345")
 
 	if response.Code != http.StatusGone {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusGone)
@@ -762,7 +759,7 @@ func TestCreateStackHandler_Conflict(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
-	conn.createStackHandler(response, request, db.ID.String(), time.Now())
+	conn.createStackHandler(response, request, db.ID.String())
 
 	if response.Code != http.StatusConflict {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusConflict)
