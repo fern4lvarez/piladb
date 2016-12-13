@@ -167,7 +167,7 @@ func (c *Conn) stacksHandler(databaseID string, time time.Time) http.Handler {
 }
 
 // createStackHandler handles the creation of a stack, given a database
-// by its id. Returns the status of the new stack.
+// by its id and the time of creation. Returns the status of the new stack.
 func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string, time time.Time) {
 	name := r.FormValue("name")
 	if name == "" {
@@ -202,8 +202,8 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
-// the PUSH, POP and PEEK methods, and the stack deletion.
-func (c *Conn) stackHandler(params *map[string]string) http.Handler {
+// the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
+func (c *Conn) stackHandler(params *map[string]string, time time.Time) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		// we override the mux vars to be able to test

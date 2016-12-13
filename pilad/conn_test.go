@@ -773,7 +773,9 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack", time.Now())
+	now := time.Now()
+
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -846,7 +848,7 @@ func TestStackHandler_GET(t *testing.T) {
 			"stack_id":    io.input.stack,
 		}
 
-		stackHandle := conn.stackHandler(&params)
+		stackHandle := conn.stackHandler(&params, now)
 		stackHandle.ServeHTTP(response, request)
 
 		if peek := db.Stacks[s.ID].Peek(); peek != element.Value {
@@ -873,7 +875,8 @@ func TestStackHandler_GET(t *testing.T) {
 }
 
 func TestStackHandler_POST(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	now := time.Now()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -911,7 +914,7 @@ func TestStackHandler_POST(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
-		stackHandle := conn.stackHandler(&params)
+		stackHandle := conn.stackHandler(&params, now)
 		stackHandle.ServeHTTP(response, request)
 
 		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -937,7 +940,8 @@ func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack", time.Now())
+	now := time.Now()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1016,7 +1020,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			"stack_id":    io.input.stack,
 		}
 
-		stackHandle := conn.stackHandler(&params)
+		stackHandle := conn.stackHandler(&params, now)
 		stackHandle.ServeHTTP(response, request)
 
 		if io.input.op == "full" {
@@ -1052,7 +1056,8 @@ func TestStackHandler_DELETE(t *testing.T) {
 }
 
 func TestStackHandler_DatabaseGone(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	now := time.Now()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1080,7 +1085,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 		"stack_id":    s.ID.String(),
 	}
 
-	stackHandle := conn.stackHandler(params)
+	stackHandle := conn.stackHandler(params, now)
 	stackHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
@@ -1089,7 +1094,8 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 }
 
 func TestStackHandler_StackGone(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	now := time.Now()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1117,7 +1123,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 		"stack_id":    "non-existing-stack",
 	}
 
-	stackHandle := conn.stackHandler(params)
+	stackHandle := conn.stackHandler(params, now)
 	stackHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
