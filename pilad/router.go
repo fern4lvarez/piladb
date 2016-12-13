@@ -51,7 +51,7 @@ func Router(conn *Conn) *mux.Router {
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID?flush
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID?full
-	r.Handle("/databases/{database_id}/stacks/{stack_id}", conn.stackHandler(nil, time.Now())).
+	r.Handle("/databases/{database_id}/stacks/{stack_id}", conn.stackHandler(nil)).
 		Methods("GET", "POST", "DELETE")
 
 	r.NotFoundHandler = http.HandlerFunc(conn.notFoundHandler)

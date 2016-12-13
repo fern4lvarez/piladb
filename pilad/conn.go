@@ -205,7 +205,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 
 // stackHandler handles operations on a single stack of a database. It holds
 // the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
-func (c *Conn) stackHandler(params *map[string]string, time time.Time) http.Handler {
+func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		// we override the mux vars to be able to test

@@ -770,9 +770,7 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	now := time.Now()
-
-	s := pila.NewStack("stack", now)
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -782,6 +780,7 @@ func TestStackHandler_GET(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now()
 
 	s.Push(element.Value)
 
@@ -845,7 +844,7 @@ func TestStackHandler_GET(t *testing.T) {
 			"stack_id":    io.input.stack,
 		}
 
-		stackHandle := conn.stackHandler(&params, now)
+		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
 		if peek := db.Stacks[s.ID].Peek(); peek != element.Value {
@@ -872,8 +871,7 @@ func TestStackHandler_GET(t *testing.T) {
 }
 
 func TestStackHandler_POST(t *testing.T) {
-	now := time.Now()
-	s := pila.NewStack("stack", now)
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -883,6 +881,7 @@ func TestStackHandler_POST(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now()
 
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
@@ -911,7 +910,7 @@ func TestStackHandler_POST(t *testing.T) {
 
 		response := httptest.NewRecorder()
 
-		stackHandle := conn.stackHandler(&params, now)
+		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
 		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -937,8 +936,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	now := time.Now()
-	s := pila.NewStack("stack", now)
+	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -948,6 +946,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now()
 
 	expectedStackStatusJSON, err := s.Status().ToJSON()
 	if err != nil {
@@ -1017,7 +1016,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			"stack_id":    io.input.stack,
 		}
 
-		stackHandle := conn.stackHandler(&params, now)
+		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
 		if io.input.op == "full" {
@@ -1064,6 +1063,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = now
 
 	request, err := http.NewRequest("GET",
 		fmt.Sprintf("/databases/%s/stacks/%s",
@@ -1082,7 +1082,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 		"stack_id":    s.ID.String(),
 	}
 
-	stackHandle := conn.stackHandler(params, now)
+	stackHandle := conn.stackHandler(params)
 	stackHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
@@ -1102,6 +1102,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = now
 
 	request, err := http.NewRequest("GET",
 		fmt.Sprintf("/databases/%s/stacks/%s",
@@ -1120,7 +1121,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 		"stack_id":    "non-existing-stack",
 	}
 
-	stackHandle := conn.stackHandler(params, now)
+	stackHandle := conn.stackHandler(params)
 	stackHandle.ServeHTTP(response, request)
 
 	if response.Code != http.StatusGone {
