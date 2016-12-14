@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -43,7 +45,7 @@ func (c *Config) Get(key string) interface{} {
 func (c *Config) Set(key string, value interface{}) {
 	s, ok := c.Values.Stacks[uuid.New(CONFIG+key)]
 	if !ok {
-		sID := c.Values.CreateStack(key)
+		sID := c.Values.CreateStack(key, time.Now())
 		s, _ = c.Values.Stacks[sID]
 	}
 

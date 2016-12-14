@@ -22,7 +22,7 @@ func TestNewDatabase(t *testing.T) {
 
 func TestDatabaseCreateStack(t *testing.T) {
 	db := NewDatabase("test-db")
-	id := db.CreateStack("test-stack")
+	id := db.CreateStack("test-stack", time.Now())
 
 	if id == nil {
 		t.Fatal("stack ID is nil")
@@ -138,9 +138,9 @@ func TestDatabaseRemoveStack_False(t *testing.T) {
 
 func TestDatabaseStatus(t *testing.T) {
 	db := NewDatabase("db")
-	s0ID := db.CreateStack("s0")
-	s1ID := db.CreateStack("s1")
-	s2ID := db.CreateStack("s2")
+	s0ID := db.CreateStack("s0", time.Now())
+	s1ID := db.CreateStack("s1", time.Now())
+	s2ID := db.CreateStack("s2", time.Now())
 
 	expectedStatus := DatabaseStatus{
 		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",

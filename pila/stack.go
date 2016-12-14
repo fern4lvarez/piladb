@@ -25,8 +25,10 @@ type Stack struct {
 	CreatedAt time.Time
 
 	// CreatedAt represents the date when the Stack was updated for the last time.
-	// A Stack is updated when is created, and when receiving a PUSH, POP, or
-	// FLUSH operation.
+	// This date must be updated when a Stack is created, and when receives a PUSH,
+	// POP, or FLUSH operation.
+	// Note that unlike CreatedAt, UpdatedAt is not triggered automatically
+	// when one of these events happens, but it needs to be set by hand.
 	UpdatedAt time.Time
 
 	// base represents the Stack data structure

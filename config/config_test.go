@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -48,7 +49,7 @@ func TestConfigDefault(t *testing.T) {
 func TestConfigGet(t *testing.T) {
 	config := NewConfig()
 
-	stackID := config.Values.CreateStack("foo")
+	stackID := config.Values.CreateStack("foo", time.Now())
 	s, _ := config.Values.Stacks[stackID]
 	s.Push("bar")
 	expectedValue := s.Peek()
