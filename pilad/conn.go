@@ -124,6 +124,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 // of them, or create a new one.
 func (c *Conn) stacksHandler(databaseID string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c.opDate = time.Now()
 		vars := mux.Vars(r)
 
 		// we override the mux vars to be able to test
@@ -191,6 +192,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
+	stack.UpdatedAt = c.opDate
 
 	// Do not check error as the Status of a new stack does
 	// not contain types that could cause such case.
@@ -207,6 +209,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 // the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c.opDate = time.Now()
 		vars := mux.Vars(r)
 		// we override the mux vars to be able to test
 		// an arbitrary database and stack ID
@@ -241,6 +244,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
+			fmt.Println("DEBUG", c.opDate)
 			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
 			return
 
@@ -314,6 +318,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	}
 
 	stack.Push(element.Value)
+	stack.UpdatedAt = c.opDate
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
 	w.Header().Set("Content-Type", "application/json")
@@ -332,6 +337,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	stack.UpdatedAt = c.opDate
 
 	element := pila.Element{Value: value}
 
@@ -348,6 +354,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 // the content.
 func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Flush()
+	stack.UpdatedAt = c.opDate
 
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")

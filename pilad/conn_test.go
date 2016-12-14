@@ -610,7 +610,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -651,7 +651,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -691,7 +691,7 @@ func TestCreateStackHandler(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}
@@ -946,12 +946,6 @@ func TestStackHandler_DELETE(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
-
-	expectedStackStatusJSON, err := s.Status().ToJSON()
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	s.Push(element.Value)
 
@@ -986,7 +980,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			struct {
 				response []byte
 				code     int
-			}{expectedStackStatusJSON, http.StatusOK},
+			}{nil, http.StatusOK},
 		},
 		{struct {
 			database, stack, op string
@@ -1019,6 +1013,30 @@ func TestStackHandler_DELETE(t *testing.T) {
 		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
+		if response.Code != io.output.code {
+			t.Errorf("on op %s response code is %v, expected %v", io.input.op, response.Code, io.output.code)
+		}
+
+		responseJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if io.input.op == "flush" {
+			stackStatus := s.Status()
+			stackStatus.UpdatedAt = conn.opDate
+
+			expectedStackStatusJSON, err := stackStatus.ToJSON()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(responseJSON) != string(expectedStackStatusJSON) {
+				t.Errorf("on op %s response is %s, expected %s", io.input.op, string(responseJSON), string(expectedStackStatusJSON))
+			}
+		} else if string(responseJSON) != string(io.output.response) {
+			t.Errorf("on op %s response is %s, expected %s", io.input.op, string(responseJSON), string(io.output.response))
+		}
+
 		if io.input.op == "full" {
 			if s := db.Stacks[uuid.UUID(io.input.stack)]; s != nil {
 				t.Errorf("db contains %v, expected not to", io.input.stack)
@@ -1034,19 +1052,6 @@ func TestStackHandler_DELETE(t *testing.T) {
 
 			// restore element for next table test iteration
 			s.Push(element.Value)
-		}
-
-		if response.Code != io.output.code {
-			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
-		}
-
-		responseJSON, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if string(responseJSON) != string(io.output.response) {
-			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
 		}
 	}
 }

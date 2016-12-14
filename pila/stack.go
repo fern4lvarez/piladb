@@ -37,11 +37,11 @@ type Stack struct {
 
 // NewStack creates a new Stack given a name and a date,
 // without an association to any Database.
-func NewStack(name string, now time.Time) *Stack {
+func NewStack(name string, t time.Time) *Stack {
 	s := &Stack{}
 	s.Name = name
 	s.SetID()
-	s.CreatedAt = now
+	s.CreatedAt = t
 	s.base = stack.NewStack()
 	return s
 }

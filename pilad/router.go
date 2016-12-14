@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -11,7 +10,6 @@ import (
 // handlers.
 func Router(conn *Conn) *mux.Router {
 	r := mux.NewRouter()
-	conn.opDate = time.Now()
 
 	// GET /
 	r.HandleFunc("/", conn.rootHandler).
