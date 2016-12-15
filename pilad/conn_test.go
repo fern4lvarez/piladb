@@ -620,7 +620,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -661,7 +661,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -701,7 +701,7 @@ func TestCreateStackHandler(t *testing.T) {
 	}
 
 	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}
@@ -780,7 +780,9 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack", time.Now())
+	createDate := time.Now()
+	s := pila.NewStack("stack", createDate)
+	s.Update(createDate)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -866,7 +868,7 @@ func TestStackHandler_GET(t *testing.T) {
 		}
 
 		if response.Code != io.output.code {
-			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
+			t.Errorf("on %s response code is %v, expected %v", io.input.op, response.Code, io.output.code)
 		}
 
 		responseJSON, err := ioutil.ReadAll(response.Body)
@@ -874,8 +876,16 @@ func TestStackHandler_GET(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if string(responseJSON) != string(io.output.response) {
-			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
+		if io.input.op == "" {
+			expectedStackStatusJSON, err := s.Status().ToJSON()
+			if err != nil {
+				t.Fatal(err)
+			} else if string(responseJSON) != string(expectedStackStatusJSON) {
+				t.Errorf("on %s response is %s, expected %s", io.input.op, string(responseJSON), string(expectedStackStatusJSON))
+			}
+
+		} else if string(responseJSON) != string(io.output.response) {
+			t.Errorf("on %s response is %s, expected %s", io.input.op, string(responseJSON), string(io.output.response))
 		}
 	}
 }

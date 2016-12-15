@@ -192,7 +192,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
-	stack.UpdatedAt = c.opDate
+	stack.Update(c.opDate)
 
 	// Do not check error as the Status of a new stack does
 	// not contain types that could cause such case.
@@ -244,7 +244,6 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
-			fmt.Println("DEBUG", c.opDate)
 			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
 			return
 
@@ -266,6 +265,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 
 // statusStackHandler returns the status of the Stack.
 func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -279,6 +279,7 @@ func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack 
 func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	var element pila.Element
 	element.Value = stack.Peek()
+	stack.Read(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
 	w.Header().Set("Content-Type", "application/json")
@@ -291,6 +292,7 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 
 // sizeStackHandler returns the size of the Stack.
 func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
 	log.Println(r.Method, r.URL, http.StatusOK, stack.Size())
 	w.Header().Set("Content-Type", "application/json")
 
@@ -318,7 +320,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	}
 
 	stack.Push(element.Value)
-	stack.UpdatedAt = c.opDate
+	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
 	w.Header().Set("Content-Type", "application/json")
@@ -337,7 +339,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	stack.UpdatedAt = c.opDate
+	stack.Update(c.opDate)
 
 	element := pila.Element{Value: value}
 
@@ -354,7 +356,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 // the content.
 func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Flush()
-	stack.UpdatedAt = c.opDate
+	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
