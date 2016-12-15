@@ -79,6 +79,19 @@ func (s *Stack) Flush() {
 	s.base.Flush()
 }
 
+// Update take a date and updates UpdateAt and ReadAt
+// fields of the Stack.
+func (s *Stack) Update(t time.Time) {
+	s.UpdatedAt = t
+	s.ReadAt = t
+}
+
+// Read take a date and updates ReadAt field
+// of the Stack.
+func (s *Stack) Read(t time.Time) {
+	s.ReadAt = t
+}
+
 // SetDatabase links the Stack with a given Database and
 // recalculates its ID.
 func (s *Stack) SetDatabase(db *Database) {

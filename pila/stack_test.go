@@ -133,6 +133,44 @@ func TestStackFlush(t *testing.T) {
 	}
 }
 
+func TestStackUpdated(t *testing.T) {
+	now := time.Now()
+	updateTime := time.Now()
+	stack := NewStack("test-stack", now)
+
+	stack.Update(updateTime)
+
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
+	if stack.UpdatedAt != updateTime {
+		t.Errorf("stack.UpdatedAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+	if stack.ReadAt != updateTime {
+		t.Errorf("stack.ReadAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+}
+
+func TestStackRead(t *testing.T) {
+	now := time.Now()
+	updateTime := time.Now()
+	readTime := time.Now()
+	stack := NewStack("test-stack", now)
+
+	stack.Update(updateTime)
+	stack.Read(readTime)
+
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
+	if stack.UpdatedAt != updateTime {
+		t.Errorf("stack.UpdatedAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+	if stack.ReadAt != readTime {
+		t.Errorf("stack.ReadAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+}
+
 func TestStackSetID(t *testing.T) {
 	db := NewDatabase("test-db")
 
