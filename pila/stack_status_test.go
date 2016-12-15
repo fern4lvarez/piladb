@@ -15,10 +15,15 @@ func TestStackStatusJSON(t *testing.T) {
 	stack.Push("test")
 	stack.Push(8)
 	stack.Push(5.87)
+	after := time.Now()
 	stack.Push([]byte("test"))
+	stack.UpdatedAt = after
+	stack.ReadAt = after
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(now), "0001-01-01T00:00:00Z")
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(now),
+		date.Format(after),
+		date.Format(after))
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -29,9 +34,13 @@ func TestStackStatusJSON(t *testing.T) {
 func TestStackStatusJSON_Empty(t *testing.T) {
 	now := time.Now()
 	stack := NewStack("test-stack", now)
+	stack.UpdatedAt = now
+	stack.ReadAt = now
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(now), "0001-01-01T00:00:00Z")
+	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(now),
+		date.Format(now),
+		date.Format(now))
 	if status, err := stack.Status().ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {
@@ -69,18 +78,23 @@ func TestStacksStatusJSON(t *testing.T) {
 	stack1.Push("test")
 	stack1.Push(8)
 	stack1.Push(5.87)
+	after := time.Now()
 	stack1.Push([]byte("test"))
+	stack1.UpdatedAt = after
 
 	stack2 := NewStack("test-stack-2", now)
 	stack2.Push("foo")
 	stack2.Push([]byte("bar"))
 	stack2.Push(999)
+	stack2.UpdatedAt = after
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
 	}
 
-	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v","updated_at":"%v"}]}`, date.Format(now), "0001-01-01T00:00:00Z", date.Format(now), "0001-01-01T00:00:00Z")
+	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+		date.Format(now), date.Format(after), "0001-01-01T00:00:00Z",
+		date.Format(now), date.Format(after), "0001-01-01T00:00:00Z")
 	if status, err := stacksStatus.ToJSON(); err != nil {
 		t.Fatal(err)
 	} else if string(status) != expectedStatus {

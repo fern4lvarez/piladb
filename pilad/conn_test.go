@@ -423,12 +423,16 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 func TestStacksHandler_GET(t *testing.T) {
 	now1 := time.Now()
 	s1 := pila.NewStack("stack1", now1)
+	after1 := time.Now()
 	s1.Push("foo")
+	s1.UpdatedAt = after1
 
 	now2 := time.Now()
 	s2 := pila.NewStack("stack2", now2)
 	s2.Push(1)
+	after2 := time.Now()
 	s2.Push(8)
+	s2.UpdatedAt = after2
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -443,8 +447,9 @@ func TestStacksHandler_GET(t *testing.T) {
 	inputOutput := []struct {
 		input, output string
 	}{
-		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v"}]}`,
-			date.Format(now1), "0001-01-01T00:00:00Z", date.Format(now2), "0001-01-01T00:00:00Z")},
+		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+			date.Format(now1), date.Format(after1), "0001-01-01T00:00:00Z",
+			date.Format(now2), date.Format(after2), "0001-01-01T00:00:00Z")},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
@@ -479,12 +484,16 @@ func TestStacksHandler_GET(t *testing.T) {
 
 func TestStacksHandler_GET_Name(t *testing.T) {
 	now1 := time.Now()
+	after1 := time.Now()
 	s1 := pila.NewStack("stack1", now1)
 	s1.Push("bar")
+	s1.UpdatedAt = after1
 
 	now2 := time.Now()
+	after2 := time.Now()
 	s2 := pila.NewStack("stack2", now2)
 	s2.Push(`{"a":"b"}`)
+	s2.UpdatedAt = after2
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -518,8 +527,9 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v"}]}`,
-		date.Format(now1), "0001-01-01T00:00:00Z", date.Format(now2), "0001-01-01T00:00:00Z"); string(stacks) != expected {
+	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+		date.Format(now1), date.Format(after1), "0001-01-01T00:00:00Z",
+		date.Format(now2), date.Format(after2), "0001-01-01T00:00:00Z"); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
 	}
 }
@@ -609,8 +619,8 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate))
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -650,8 +660,8 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate))
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -690,8 +700,8 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v"}`,
-		date.Format(conn.opDate), date.Format(conn.opDate))
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), "0001-01-01T00:00:00Z")
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}

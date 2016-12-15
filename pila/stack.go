@@ -31,6 +31,13 @@ type Stack struct {
 	// when one of these events happens, but it needs to be set by hand.
 	UpdatedAt time.Time
 
+	// ReadAt represent the date when the Stack was requested for the last time.
+	// This date must be updated when a Stack is created, accessed, and when it
+	// receives a PUSH, POP, or FLUSH operation.
+	// Note that unlike CreatedAt, ReadAt is not triggered automatically
+	// when one of these events happens, but it needs to be set by hand.
+	ReadAt time.Time
+
 	// base represents the Stack data structure
 	base *stack.Stack
 }
@@ -107,6 +114,7 @@ func (s *Stack) Status() StackStatus {
 	status.Peek = s.Peek()
 	status.CreatedAt = s.CreatedAt
 	status.UpdatedAt = s.UpdatedAt
+	status.ReadAt = s.ReadAt
 
 	return status
 }

@@ -20,6 +20,7 @@ type StackStatus struct {
 	Size      int         `json:"size"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
+	ReadAt    time.Time   `json:"read_at"`
 }
 
 // ToJSON converts a StackStatus into JSON.
