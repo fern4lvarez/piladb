@@ -422,17 +422,18 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 
 func TestStacksHandler_GET(t *testing.T) {
 	now1 := time.Now()
-	s1 := pila.NewStack("stack1", now1)
 	after1 := time.Now()
-	s1.Push("foo")
-	s1.UpdatedAt = after1
-
 	now2 := time.Now()
+	after2 := time.Now()
+
+	s1 := pila.NewStack("stack1", now1)
+	s1.Push("foo")
+	s1.Update(after1)
+
 	s2 := pila.NewStack("stack2", now2)
 	s2.Push(1)
-	after2 := time.Now()
 	s2.Push(8)
-	s2.UpdatedAt = after2
+	s2.Update(after2)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -448,8 +449,8 @@ func TestStacksHandler_GET(t *testing.T) {
 		input, output string
 	}{
 		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
-			date.Format(now1), date.Format(after1), "0001-01-01T00:00:00Z",
-			date.Format(now2), date.Format(after2), "0001-01-01T00:00:00Z")},
+			date.Format(now1), date.Format(after1), date.Format(after1),
+			date.Format(now2), date.Format(after2), date.Format(after2))},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
@@ -485,15 +486,16 @@ func TestStacksHandler_GET(t *testing.T) {
 func TestStacksHandler_GET_Name(t *testing.T) {
 	now1 := time.Now()
 	after1 := time.Now()
-	s1 := pila.NewStack("stack1", now1)
-	s1.Push("bar")
-	s1.UpdatedAt = after1
-
 	now2 := time.Now()
 	after2 := time.Now()
+
+	s1 := pila.NewStack("stack1", now1)
+	s1.Push("bar")
+	s1.Update(after1)
+
 	s2 := pila.NewStack("stack2", now2)
 	s2.Push(`{"a":"b"}`)
-	s2.UpdatedAt = after2
+	s2.Update(after2)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -528,8 +530,8 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 	}
 
 	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
-		date.Format(now1), date.Format(after1), "0001-01-01T00:00:00Z",
-		date.Format(now2), date.Format(after2), "0001-01-01T00:00:00Z"); string(stacks) != expected {
+		date.Format(now1), date.Format(after1), date.Format(after1),
+		date.Format(now2), date.Format(after2), date.Format(after2)); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
 	}
 }
@@ -1043,8 +1045,8 @@ func TestStackHandler_DELETE(t *testing.T) {
 		}
 
 		if io.input.op == "flush" {
+			s.Update(conn.opDate)
 			stackStatus := s.Status()
-			stackStatus.UpdatedAt = conn.opDate
 
 			expectedStackStatusJSON, err := stackStatus.ToJSON()
 			if err != nil {

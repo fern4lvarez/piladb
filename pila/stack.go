@@ -24,14 +24,14 @@ type Stack struct {
 	// CreatedAt represents the date when the Stack was created
 	CreatedAt time.Time
 
-	// CreatedAt represents the date when the Stack was updated for the last time.
+	// UpdatedAt represents the date when the Stack was updated for the last time.
 	// This date must be updated when a Stack is created, and when receives a PUSH,
 	// POP, or FLUSH operation.
 	// Note that unlike CreatedAt, UpdatedAt is not triggered automatically
 	// when one of these events happens, but it needs to be set by hand.
 	UpdatedAt time.Time
 
-	// ReadAt represent the date when the Stack was requested for the last time.
+	// ReadAt represents the date when the Stack was read for the last time.
 	// This date must be updated when a Stack is created, accessed, and when it
 	// receives a PUSH, POP, or FLUSH operation.
 	// Note that unlike CreatedAt, ReadAt is not triggered automatically
@@ -42,7 +42,7 @@ type Stack struct {
 	base *stack.Stack
 }
 
-// NewStack creates a new Stack given a name and a date,
+// NewStack creates a new Stack given a name and a creation date,
 // without an association to any Database.
 func NewStack(name string, t time.Time) *Stack {
 	s := &Stack{}
@@ -79,7 +79,7 @@ func (s *Stack) Flush() {
 	s.base.Flush()
 }
 
-// Update take a date and updates UpdateAt and ReadAt
+// Update takes a date and updates UpdateAt and ReadAt
 // fields of the Stack.
 func (s *Stack) Update(t time.Time) {
 	s.UpdatedAt = t

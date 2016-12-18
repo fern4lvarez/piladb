@@ -11,11 +11,12 @@ import (
 
 func TestStackStatusJSON(t *testing.T) {
 	now := time.Now()
+	after := time.Now()
+
 	stack := NewStack("test-stack", now)
 	stack.Push("test")
 	stack.Push(8)
 	stack.Push(5.87)
-	after := time.Now()
 	stack.Push([]byte("test"))
 	stack.Update(after)
 
@@ -72,11 +73,12 @@ func TestStackStatusJSON_Error(t *testing.T) {
 
 func TestStacksStatusJSON(t *testing.T) {
 	now := time.Now()
+	after := time.Now()
+
 	stack1 := NewStack("test-stack-1", now)
 	stack1.Push("test")
 	stack1.Push(8)
 	stack1.Push(5.87)
-	after := time.Now()
 	stack1.Push([]byte("test"))
 	stack1.Update(after)
 

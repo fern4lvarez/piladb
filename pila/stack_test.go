@@ -133,7 +133,7 @@ func TestStackFlush(t *testing.T) {
 	}
 }
 
-func TestStackUpdated(t *testing.T) {
+func TestStackUpdate(t *testing.T) {
 	now := time.Now()
 	updateTime := time.Now()
 	stack := NewStack("test-stack", now)
