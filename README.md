@@ -5,10 +5,10 @@ piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=mast
 
 > _[pee-lah-dee-bee]_. _pila_ means _stack_ or _battery_ in Spanish.
 
-**piladb** is a lightweight RESTful database engine based on the [stack data structure](
+**piladb** is a lightweight RESTful database engine based on [stack data structures](
 https://en.wikipedia.org/wiki/Stack_%28abstract_data_type%29).
-Create an unlimited number of stacks, which can contain any kind of JSON-compatible
-data types.
+Create as many stacks as you need, `PUSH` or `POP` elements of any kind, and have
+access to the one on top always in constant time.
 
 Features
 --------
@@ -16,11 +16,11 @@ Features
 * Stacks are auto-scalable and are only limited by the capacity of the host
   or by configuration.
 * Available `POP`, `PUSH`, `PEEK`,`SIZE`, and `FLUSH` operations for each of the stacks.
-* Manage databases and stacks using a REST API, so you wrap it with
-  any programming language.
-* Store content in JSON-compatible data types.
-* Totally configurable using a REST API, or cli parameters.
-* In-memory store, persistence on disk wannabe (https://github.com/fern4lvarez/piladb/issues/11).
+* Manage stacks and other resources by using a REST API, so you can use it with
+  your favorite programming language.
+* Manage elements in JSON-compatible data types: strings, numbers, arrays, objects, etc.
+* Totally configurable using a REST API, or CLI parameters.
+* In-memory store.
 * Written in Go, i.e. binaries are self-contained and distributable.
 
 Install
@@ -77,20 +77,22 @@ Alternatively, if you don't have docker installed, you can release `pilad` binar
 with the `make gox` command. For this, you need a configured Go environment and
 [`gox`](https://github.com/mitchellh/gox) installed.
 
-API Documentation
------------------
+Documentation
+-------------
 
-Looking for the API of the Go `pila` package? [Here](https://godoc.org/github.com/fern4lvarez/piladb/pila).
+### Looking for...
 
-Do you refer to the RESTful API? See [`pilad`](pilad/) documentation.
+* [Main documentation page](http://docs.piladb.org).
+* [Go `pila` package documentation](https://godoc.org/github.com/fern4lvarez/piladb/pila).
+* [`pilad`'s RESTful API documentation](pilad/). 
 
 Credits
 -------
 
-**piladb** is documentation-, test-driven developed by [Fernando Álvarez](
-https://www.twitter.com/fern4lvarez) on his Dell XPS 13 laptop, running Ubuntu 14.04, and
-using [`vim-go`](https://github.com/fatih/vim-go) plugin within the `vim` editor,
-in Berlin and Madrid, with the support of his dog Godín.
+**piladb** is developed by [Fernando Álvarez](https://www.twitter.com/fern4lvarez)
+and [≅oscillatingworks](https://www.oscillating.works) on a Dell XPS 13 laptop, running Ubuntu 14.04,
+and using [`vim-go`](https://github.com/fatih/vim-go) plugin within the `vim` editor,
+in Berlin and Madrid, with the support of Gali, Godín and other friends.
 
 Logo was designed by [GraphicLoads](http://www.iconarchive.com/artist/graphicloads.html).
 
