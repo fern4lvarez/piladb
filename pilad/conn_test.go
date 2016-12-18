@@ -246,7 +246,7 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -290,7 +290,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET_Name(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -421,10 +421,10 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 }
 
 func TestStacksHandler_GET(t *testing.T) {
-	now1 := time.Now()
-	after1 := time.Now()
-	now2 := time.Now()
-	after2 := time.Now()
+	now1 := time.Now().UTC()
+	after1 := time.Now().UTC()
+	now2 := time.Now().UTC()
+	after2 := time.Now().UTC()
 
 	s1 := pila.NewStack("stack1", now1)
 	s1.Push("foo")
@@ -484,10 +484,10 @@ func TestStacksHandler_GET(t *testing.T) {
 }
 
 func TestStacksHandler_GET_Name(t *testing.T) {
-	now1 := time.Now()
-	after1 := time.Now()
-	now2 := time.Now()
-	after2 := time.Now()
+	now1 := time.Now().UTC()
+	after1 := time.Now().UTC()
+	now2 := time.Now().UTC()
+	after2 := time.Now().UTC()
 
 	s1 := pila.NewStack("stack1", now1)
 	s1.Push("bar")
@@ -562,7 +562,7 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	ch := make(chan int)
 
-	stack := pila.NewStack("test-stack-channel", time.Now())
+	stack := pila.NewStack("test-stack-channel", time.Now().UTC())
 	stack.Push(ch)
 
 	db := pila.NewDatabase("db")
@@ -596,7 +596,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -637,7 +637,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.Name)
 	request, err := http.NewRequest("PUT", path, nil)
@@ -678,7 +678,7 @@ func TestCreateStackHandler(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -753,7 +753,7 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 }
 
 func TestCreateStackHandler_Conflict(t *testing.T) {
-	s := pila.NewStack("test-stack", time.Now())
+	s := pila.NewStack("test-stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -782,7 +782,7 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	createDate := time.Now()
+	createDate := time.Now().UTC()
 	s := pila.NewStack("stack", createDate)
 	s.Update(createDate)
 
@@ -794,7 +794,7 @@ func TestStackHandler_GET(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
+	conn.opDate = time.Now().UTC()
 
 	s.Push(element.Value)
 
@@ -893,7 +893,7 @@ func TestStackHandler_GET(t *testing.T) {
 }
 
 func TestStackHandler_POST(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -903,7 +903,7 @@ func TestStackHandler_POST(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-	conn.opDate = time.Now()
+	conn.opDate = time.Now().UTC()
 
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
@@ -958,7 +958,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1079,7 +1079,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 }
 
 func TestStackHandler_DatabaseGone(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
@@ -1118,7 +1118,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 }
 
 func TestStackHandler_StackGone(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
@@ -1157,7 +1157,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 }
 
 func TestStatusStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1223,7 +1223,7 @@ func TestStatusStackHandler(t *testing.T) {
 }
 
 func TestPeekStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1276,7 +1276,7 @@ func TestPeekStackHandler(t *testing.T) {
 }
 
 func TestSizeStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1324,7 +1324,7 @@ func TestSizeStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1375,7 +1375,7 @@ func TestPushStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler_Name(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1426,7 +1426,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 }
 
 func TestPushStackHandler_Empty(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1461,7 +1461,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 }
 
 func TestPushStackHandler_BadDecoding(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1501,7 +1501,7 @@ func TestPopStackHandler(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push(element.Value)
 
 	db := pila.NewDatabase("db")
@@ -1565,7 +1565,7 @@ func TestPopStackHandler(t *testing.T) {
 }
 
 func TestPopStackHandler_EmptyStack(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1595,7 +1595,7 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 }
 
 func TestFlushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1673,7 +1673,7 @@ func TestFlushStackHandler(t *testing.T) {
 }
 
 func TestDeleteStackHandler(t *testing.T) {
-	s := pila.NewStack("stack", time.Now())
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1720,7 +1720,7 @@ func TestDeleteStackHandler(t *testing.T) {
 		}
 
 		// restore elements for next table test iteration
-		s = pila.NewStack("stack", time.Now())
+		s = pila.NewStack("stack", time.Now().UTC())
 		_ = db.AddStack(s)
 		s.Push("one")
 	}

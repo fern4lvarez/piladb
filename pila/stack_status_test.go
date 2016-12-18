@@ -10,8 +10,8 @@ import (
 )
 
 func TestStackStatusJSON(t *testing.T) {
-	now := time.Now()
-	after := time.Now()
+	now := time.Now().UTC()
+	after := time.Now().UTC()
 
 	stack := NewStack("test-stack", now)
 	stack.Push("test")
@@ -32,7 +32,7 @@ func TestStackStatusJSON(t *testing.T) {
 }
 
 func TestStackStatusJSON_Empty(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	stack := NewStack("test-stack", now)
 	stack.Update(now)
 
@@ -72,8 +72,8 @@ func TestStackStatusJSON_Error(t *testing.T) {
 }
 
 func TestStacksStatusJSON(t *testing.T) {
-	now := time.Now()
-	after := time.Now()
+	now := time.Now().UTC().UTC()
+	after := time.Now().UTC().UTC()
 
 	stack1 := NewStack("test-stack-1", now)
 	stack1.Push("test")
@@ -127,7 +127,7 @@ func TestStacksStatusJSON_Error(t *testing.T) {
 	input := []interface{}{ch, f}
 
 	for _, in := range input {
-		stack := NewStack("test-stack", time.Now())
+		stack := NewStack("test-stack", time.Now().UTC())
 		stack.Push(in)
 
 		stacksStatus := StacksStatus{
@@ -141,8 +141,8 @@ func TestStacksStatusJSON_Error(t *testing.T) {
 }
 
 func TestStacksStatusLen(t *testing.T) {
-	stack1 := NewStack("test-stack-1", time.Now())
-	stack2 := NewStack("test-stack-2", time.Now())
+	stack1 := NewStack("test-stack-1", time.Now().UTC())
+	stack2 := NewStack("test-stack-2", time.Now().UTC())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -155,8 +155,8 @@ func TestStacksStatusLen(t *testing.T) {
 }
 
 func TestStacksStatusLess(t *testing.T) {
-	stack1 := NewStack("test-stack-1", time.Now())
-	stack2 := NewStack("test-stack-2", time.Now())
+	stack1 := NewStack("test-stack-1", time.Now().UTC())
+	stack2 := NewStack("test-stack-2", time.Now().UTC())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -168,8 +168,8 @@ func TestStacksStatusLess(t *testing.T) {
 }
 
 func TestStacksStatusSwap(t *testing.T) {
-	stack1 := NewStack("test-stack-1", time.Now())
-	stack2 := NewStack("test-stack-2", time.Now())
+	stack1 := NewStack("test-stack-1", time.Now().UTC())
+	stack2 := NewStack("test-stack-2", time.Now().UTC())
 
 	stacksStatus := StacksStatus{
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
@@ -185,10 +185,10 @@ func TestStacksStatusSwap(t *testing.T) {
 }
 
 func TestStacksKVJSON(t *testing.T) {
-	stack1 := NewStack("test-stack-1", time.Now())
+	stack1 := NewStack("test-stack-1", time.Now().UTC())
 	stack1.Push("test")
 
-	stack2 := NewStack("test-stack-2", time.Now())
+	stack2 := NewStack("test-stack-2", time.Now().UTC())
 	stack2.Push(999)
 
 	stacksKV := StacksKV{
@@ -217,7 +217,7 @@ func TestStacksKVJSON_Error(t *testing.T) {
 	input := []interface{}{ch, f}
 
 	for _, in := range input {
-		stack := NewStack("test-stack", time.Now())
+		stack := NewStack("test-stack", time.Now().UTC())
 		stack.Push(in)
 
 		stacksKV := StacksKV{
