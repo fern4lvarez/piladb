@@ -4,10 +4,11 @@ package stack
 
 import "sync"
 
-// Stack represents the stack data structure as a linked list,
-// containing a pointer to the first Frame as a head and the
-// size of the stack. It also contain a mutex to lock and unlock
-// the access to the stack on I/O.
+// Stack implements the Stacker interface, and represents the stack
+// data structure as a linked list, containing a pointer
+// to the first Frame as a head and the size of the stack.
+// It also contain a mutex to lock and unlock
+// the access to the stack at I/O operations.
 type Stack struct {
 	head *frame
 	size int

@@ -39,7 +39,7 @@ type Stack struct {
 	ReadAt time.Time
 
 	// base represents the Stack data structure
-	base *stack.Stack
+	base stack.Stacker
 }
 
 // NewStack creates a new Stack given a name and a creation date,
