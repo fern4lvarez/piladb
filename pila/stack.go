@@ -86,7 +86,7 @@ func (s *Stack) Update(t time.Time) {
 	s.ReadAt = t
 }
 
-// Read take a date and updates ReadAt field
+// Read takes a date and updates ReadAt field
 // of the Stack.
 func (s *Stack) Read(t time.Time) {
 	s.ReadAt = t
