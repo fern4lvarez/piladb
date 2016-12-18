@@ -3,6 +3,7 @@ package pila
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestNewDatabase(t *testing.T) {
@@ -21,7 +22,7 @@ func TestNewDatabase(t *testing.T) {
 
 func TestDatabaseCreateStack(t *testing.T) {
 	db := NewDatabase("test-db")
-	id := db.CreateStack("test-stack")
+	id := db.CreateStack("test-stack", time.Now())
 
 	if id == nil {
 		t.Fatal("stack ID is nil")
@@ -45,7 +46,7 @@ func TestDatabaseCreateStack(t *testing.T) {
 
 func TestDatabaseAddStack(t *testing.T) {
 	db := NewDatabase("test-db")
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 
 	err := db.AddStack(stack)
 	if err != nil {
@@ -67,7 +68,7 @@ func TestDatabaseAddStack(t *testing.T) {
 func TestDatabaseAddStack_ErrorStackAlreadyAdded(t *testing.T) {
 	db := NewDatabase("test-db")
 	db2 := NewDatabase("test-db-2")
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 
 	err := db.AddStack(stack)
 	if err != nil {
@@ -82,8 +83,8 @@ func TestDatabaseAddStack_ErrorStackAlreadyAdded(t *testing.T) {
 
 func TestDatabaseAddStack_ErrorDBAlreadyContainsStack(t *testing.T) {
 	db := NewDatabase("test-db")
-	stack := NewStack("test-stack")
-	stack2 := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
+	stack2 := NewStack("test-stack", time.Now())
 
 	err := db.AddStack(stack)
 	if err != nil {
@@ -98,7 +99,7 @@ func TestDatabaseAddStack_ErrorDBAlreadyContainsStack(t *testing.T) {
 
 func TestDatabaseRemoveStack(t *testing.T) {
 	db := NewDatabase("test-db")
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 
 	err := db.AddStack(stack)
 	if err != nil {
@@ -127,7 +128,7 @@ func TestDatabaseRemoveStack(t *testing.T) {
 
 func TestDatabaseRemoveStack_False(t *testing.T) {
 	db := NewDatabase("test-db")
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 
 	ok := db.RemoveStack(stack.ID)
 	if ok {
@@ -137,9 +138,9 @@ func TestDatabaseRemoveStack_False(t *testing.T) {
 
 func TestDatabaseStatus(t *testing.T) {
 	db := NewDatabase("db")
-	s0ID := db.CreateStack("s0")
-	s1ID := db.CreateStack("s1")
-	s2ID := db.CreateStack("s2")
+	s0ID := db.CreateStack("s0", time.Now())
+	s1ID := db.CreateStack("s1", time.Now())
+	s2ID := db.CreateStack("s2", time.Now())
 
 	expectedStatus := DatabaseStatus{
 		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",
@@ -200,14 +201,14 @@ func TestDatabaseStatusToJSON_Empty(t *testing.T) {
 }
 
 func TestDatabaseStacksStatus(t *testing.T) {
-	s1 := NewStack("stack1")
+	s1 := NewStack("stack1", time.Now())
 	s1.Push("foo")
 
-	s2 := NewStack("stack2")
+	s2 := NewStack("stack2", time.Now())
 	s2.Push(1)
 	s2.Push(8)
 
-	s3 := NewStack("stack3")
+	s3 := NewStack("stack3", time.Now())
 
 	db := NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -236,14 +237,14 @@ func TestDatabaseStacksStatus_Empty(t *testing.T) {
 }
 
 func TestDatabaseStacksKV(t *testing.T) {
-	s1 := NewStack("stack1")
+	s1 := NewStack("stack1", time.Now())
 	s1.Push("foo")
 
-	s2 := NewStack("stack2")
+	s2 := NewStack("stack2", time.Now())
 	s2.Push(1)
 	s2.Push(8)
 
-	s3 := NewStack("stack3")
+	s3 := NewStack("stack3", time.Now())
 
 	db := NewDatabase("db")
 	_ = db.AddStack(s1)

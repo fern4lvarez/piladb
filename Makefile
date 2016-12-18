@@ -8,10 +8,10 @@ get:
 	go get ./...
 
 test:
-	go test -cover ./... | grep -v /vendor/
+	go list ./... | grep -v /vendor/ | xargs -L1 go test -cover
 
 testv:
-	go test -v -cover ./... | grep -v /vendor/
+	go list ./... | grep -v /vendor/ | xargs -L1 go test -v -cover
 
 vet:
 	go list ./... | grep -v /vendor/ | xargs -L1 go vet

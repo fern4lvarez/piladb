@@ -20,6 +20,8 @@ type Conn struct {
 	Pila   *pila.Pila
 	Config *config.Config
 	Status *Status
+
+	opDate time.Time
 }
 
 // NewConn creates and returns a new piladb connection.
@@ -122,6 +124,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 // of them, or create a new one.
 func (c *Conn) stacksHandler(databaseID string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c.opDate = time.Now()
 		vars := mux.Vars(r)
 
 		// we override the mux vars to be able to test
@@ -167,7 +170,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 }
 
 // createStackHandler handles the creation of a stack, given a database
-// by its id. Returns the status of the new stack.
+// by its id and the time of creation. Returns the status of the new stack.
 func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string) {
 	name := r.FormValue("name")
 	if name == "" {
@@ -182,13 +185,14 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 		return
 	}
 
-	stack := pila.NewStack(name)
+	stack := pila.NewStack(name, c.opDate)
 	err := db.AddStack(stack)
 	if err != nil {
 		log.Println(r.Method, r.URL, http.StatusConflict, err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
+	stack.Update(c.opDate)
 
 	// Do not check error as the Status of a new stack does
 	// not contain types that could cause such case.
@@ -202,9 +206,10 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
-// the PUSH, POP and PEEK methods, and the stack deletion.
+// the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c.opDate = time.Now()
 		vars := mux.Vars(r)
 		// we override the mux vars to be able to test
 		// an arbitrary database and stack ID
@@ -260,6 +265,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 
 // statusStackHandler returns the status of the Stack.
 func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -273,6 +279,7 @@ func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack 
 func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	var element pila.Element
 	element.Value = stack.Peek()
+	stack.Read(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
 	w.Header().Set("Content-Type", "application/json")
@@ -285,6 +292,7 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 
 // sizeStackHandler returns the size of the Stack.
 func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
 	log.Println(r.Method, r.URL, http.StatusOK, stack.Size())
 	w.Header().Set("Content-Type", "application/json")
 
@@ -312,6 +320,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	}
 
 	stack.Push(element.Value)
+	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
 	w.Header().Set("Content-Type", "application/json")
@@ -330,6 +339,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	stack.Update(c.opDate)
 
 	element := pila.Element{Value: value}
 
@@ -346,6 +356,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 // the content.
 func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Flush()
+	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")

@@ -176,13 +176,19 @@ is used as default, the latter as fallback.
       "id":"f0306fec639bd57fc2929c8b897b9b37",
       "name":"stack1",
       "peek":"foo",
-      "size":1
+      "size":1,
+      "created_at":"2016-12-08T17:45:50.668575679+01:00",
+      "updated_at":"2016-12-08T18:21:270.813642732+01:00",
+      "read_at":"2016-12-08T18:21:270.813642732+01:00"
     },
     {
       "id":"dde8f895aea2ffa5546336146b9384e7",
       "name":"stack2",
       "peek":8,
-      "size":2
+      "size":2,
+      "created_at": "2016-12-08T17:48:65.122475579+01:00",
+      "updated_at":"2016-12-08T18:16:120.4267723134+01:00",
+      "read_at":"2016-12-08T18:17:32.456823273254+01:00"
     }
   ]
 }
@@ -225,7 +231,10 @@ Creates a new $STACK_NAME stack belonging to database $DATABASE_ID.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78"
+  "id": "714e49277eb730717e413b167b76ef78",
+  "created_at": "2016-12-08T17:45:50.668575679+01:00",
+  "updated_at": "2016-12-08T17:45:50.668575679+01:00",
+  "read_at": "2016-12-08T17:45:50.668575679+01:00"
 }
 ```
 
@@ -247,7 +256,10 @@ is used as default, the latter as fallback.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78"
+  "id": "714e49277eb730717e413b167b76ef78",
+  "created_at": "2016-12-08T17:45:50.668575679+01:00",
+  "updated_at": "2016-12-08T17:45:50.668575679+01:00",
+  "read_at":"2016-12-08T18:17:32.456823273254+01:00"
 }
 ```
 
@@ -340,7 +352,10 @@ is used as default, the latter as fallback.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78"
+  "id": "714e49277eb730717e413b167b76ef78",
+  "created_at": "2016-12-08T17:45:50.668575679+01:00",
+  "updated_at": "2016-12-08T17:46:23.133256135+01:00",
+  "read_at": "2016-12-08T17:46:23.133256135+01:00"
 }
 ```
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -20,16 +21,34 @@ type Stack struct {
 	// Database associated to the Stack
 	Database *Database
 
-	// base represent the Stack data structure
+	// CreatedAt represents the date when the Stack was created
+	CreatedAt time.Time
+
+	// UpdatedAt represents the date when the Stack was updated for the last time.
+	// This date must be updated when a Stack is created, and when receives a PUSH,
+	// POP, or FLUSH operation.
+	// Note that unlike CreatedAt, UpdatedAt is not triggered automatically
+	// when one of these events happens, but it needs to be set by hand.
+	UpdatedAt time.Time
+
+	// ReadAt represents the date when the Stack was read for the last time.
+	// This date must be updated when a Stack is created, accessed, and when it
+	// receives a PUSH, POP, or FLUSH operation.
+	// Note that unlike CreatedAt, ReadAt is not triggered automatically
+	// when one of these events happens, but it needs to be set by hand.
+	ReadAt time.Time
+
+	// base represents the Stack data structure
 	base *stack.Stack
 }
 
-// NewStack creates a new Stack given a name without
-// an association to any Database.
-func NewStack(name string) *Stack {
+// NewStack creates a new Stack given a name and a creation date,
+// without an association to any Database.
+func NewStack(name string, t time.Time) *Stack {
 	s := &Stack{}
 	s.Name = name
 	s.SetID()
+	s.CreatedAt = t
 	s.base = stack.NewStack()
 	return s
 }
@@ -40,7 +59,7 @@ func (s *Stack) Push(element interface{}) {
 }
 
 // Pop removes and returns the element on top of the Stack.
-//If the Stack was empty, it returns false.
+// If the Stack was empty, it returns false.
 func (s *Stack) Pop() (interface{}, bool) {
 	return s.base.Pop()
 }
@@ -58,6 +77,19 @@ func (s *Stack) Peek() interface{} {
 // Flush flushes the content of the Stack.
 func (s *Stack) Flush() {
 	s.base.Flush()
+}
+
+// Update takes a date and updates UpdateAt and ReadAt
+// fields of the Stack.
+func (s *Stack) Update(t time.Time) {
+	s.UpdatedAt = t
+	s.ReadAt = t
+}
+
+// Read takes a date and updates ReadAt field
+// of the Stack.
+func (s *Stack) Read(t time.Time) {
+	s.ReadAt = t
 }
 
 // SetDatabase links the Stack with a given Database and
@@ -93,6 +125,9 @@ func (s *Stack) Status() StackStatus {
 	status.Name = s.Name
 	status.Size = s.Size()
 	status.Peek = s.Peek()
+	status.CreatedAt = s.CreatedAt
+	status.UpdatedAt = s.UpdatedAt
+	status.ReadAt = s.ReadAt
 
 	return status
 }

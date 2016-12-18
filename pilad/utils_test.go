@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -55,7 +56,7 @@ func TestResourceStack(t *testing.T) {
 	inputs := []string{stackName, uuid.New(dbName + stackName).String()}
 
 	for _, input := range inputs {
-		expectedStack := pila.NewStack(stackName)
+		expectedStack := pila.NewStack(stackName, time.Now())
 
 		db := pila.NewDatabase(dbName)
 		_ = db.AddStack(expectedStack)

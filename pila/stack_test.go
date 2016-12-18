@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestNewStack(t *testing.T) {
-	stack := NewStack("test-stack")
+	now := time.Now()
+	stack := NewStack("test-stack", now)
 
 	if stack == nil {
 		t.Fatal("stack is nil")
@@ -22,6 +24,9 @@ func TestNewStack(t *testing.T) {
 	if stack.Database != nil {
 		t.Error("stack.Database is not nil")
 	}
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
 	if stack.base == nil {
 		t.Fatalf("stack.base is nil")
 	}
@@ -32,7 +37,7 @@ func TestNewStack(t *testing.T) {
 
 func TestSetDatabase(t *testing.T) {
 	db := NewDatabase("test-db")
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.SetDatabase(db)
 
 	if !reflect.DeepEqual(stack.Database, db) {
@@ -41,7 +46,7 @@ func TestSetDatabase(t *testing.T) {
 }
 
 func TestStackPush(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Push(1)
 
 	if stack.Size() != 1 {
@@ -57,7 +62,7 @@ func TestStackPush(t *testing.T) {
 }
 
 func TestStackPop(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
 	stack.Push(8)
 
@@ -74,7 +79,7 @@ func TestStackPop(t *testing.T) {
 }
 
 func TestStackPop_False(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	_, ok := stack.Pop()
 	if ok {
 		t.Error("stack.Pop() is ok")
@@ -82,7 +87,7 @@ func TestStackPop_False(t *testing.T) {
 }
 
 func TestStackSize(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	if stack.Size() != 0 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 0)
 	}
@@ -103,7 +108,7 @@ func TestStackSize(t *testing.T) {
 }
 
 func TestStackPeek(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
 	stack.Push(8)
 
@@ -114,7 +119,7 @@ func TestStackPeek(t *testing.T) {
 }
 
 func TestStackFlush(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
 	stack.Push(8)
 	stack.Push(87.443)
@@ -128,10 +133,48 @@ func TestStackFlush(t *testing.T) {
 	}
 }
 
+func TestStackUpdate(t *testing.T) {
+	now := time.Now()
+	updateTime := time.Now()
+	stack := NewStack("test-stack", now)
+
+	stack.Update(updateTime)
+
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
+	if stack.UpdatedAt != updateTime {
+		t.Errorf("stack.UpdatedAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+	if stack.ReadAt != updateTime {
+		t.Errorf("stack.ReadAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+}
+
+func TestStackRead(t *testing.T) {
+	now := time.Now()
+	updateTime := time.Now()
+	readTime := time.Now()
+	stack := NewStack("test-stack", now)
+
+	stack.Update(updateTime)
+	stack.Read(readTime)
+
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
+	if stack.UpdatedAt != updateTime {
+		t.Errorf("stack.UpdatedAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+	if stack.ReadAt != readTime {
+		t.Errorf("stack.ReadAt is %v, expected %v", stack.UpdatedAt, updateTime)
+	}
+}
+
 func TestStackSetID(t *testing.T) {
 	db := NewDatabase("test-db")
 
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Database = db
 	stack.SetID()
 
@@ -141,7 +184,7 @@ func TestStackSetID(t *testing.T) {
 }
 
 func TestStackSetID_NoDatabase(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.SetID()
 
 	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
@@ -150,7 +193,7 @@ func TestStackSetID_NoDatabase(t *testing.T) {
 }
 
 func TestStackSizeToJSON(t *testing.T) {
-	stack := NewStack("test-stack")
+	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
 	stack.Push(8)
 	stack.Push(87.443)

@@ -8,8 +8,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pila"
+	"github.com/fern4lvarez/piladb/pkg/date"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 	"github.com/fern4lvarez/piladb/pkg/version"
 )
@@ -45,7 +47,6 @@ func TestRootHandler(t *testing.T) {
 
 	conn.rootHandler(response, request)
 
-	fmt.Println("DEBUG", response.Header()["Location"])
 	if response.Code != http.StatusMovedPermanently {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusMovedPermanently)
 	}
@@ -245,7 +246,7 @@ func TestCreateDatabaseHandler_Duplicated(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -289,7 +290,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 }
 
 func TestDatabaseHandler_GET_Name(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
 	db := pila.NewDatabase("mydb")
@@ -420,12 +421,19 @@ func TestDatabaseHandler_Gone(t *testing.T) {
 }
 
 func TestStacksHandler_GET(t *testing.T) {
-	s1 := pila.NewStack("stack1")
-	s1.Push("foo")
+	now1 := time.Now().UTC()
+	after1 := time.Now().UTC()
+	now2 := time.Now().UTC()
+	after2 := time.Now().UTC()
 
-	s2 := pila.NewStack("stack2")
+	s1 := pila.NewStack("stack1", now1)
+	s1.Push("foo")
+	s1.Update(after1)
+
+	s2 := pila.NewStack("stack2", now2)
 	s2.Push(1)
 	s2.Push(8)
+	s2.Update(after2)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -440,7 +448,9 @@ func TestStacksHandler_GET(t *testing.T) {
 	inputOutput := []struct {
 		input, output string
 	}{
-		{"/databases/db/stacks", `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2}]}`},
+		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+			date.Format(now1), date.Format(after1), date.Format(after1),
+			date.Format(now2), date.Format(after2), date.Format(after2))},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
 	}
 
@@ -474,11 +484,18 @@ func TestStacksHandler_GET(t *testing.T) {
 }
 
 func TestStacksHandler_GET_Name(t *testing.T) {
-	s1 := pila.NewStack("stack1")
-	s1.Push("bar")
+	now1 := time.Now().UTC()
+	after1 := time.Now().UTC()
+	now2 := time.Now().UTC()
+	after2 := time.Now().UTC()
 
-	s2 := pila.NewStack("stack2")
+	s1 := pila.NewStack("stack1", now1)
+	s1.Push("bar")
+	s1.Update(after1)
+
+	s2 := pila.NewStack("stack2", now2)
 	s2.Push(`{"a":"b"}`)
+	s2.Update(after2)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s1)
@@ -512,7 +529,9 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1}]}`; string(stacks) != expected {
+	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+		date.Format(now1), date.Format(after1), date.Format(after1),
+		date.Format(now2), date.Format(after2), date.Format(after2)); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
 	}
 }
@@ -543,7 +562,7 @@ func TestStacksHandler_GET_Gone(t *testing.T) {
 func TestStacksHandler_GET_BadRequest(t *testing.T) {
 	ch := make(chan int)
 
-	stack := pila.NewStack("test-stack-channel")
+	stack := pila.NewStack("test-stack-channel", time.Now().UTC())
 	stack.Push(ch)
 
 	db := pila.NewDatabase("db")
@@ -577,6 +596,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -601,7 +621,8 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -616,6 +637,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.Name)
 	request, err := http.NewRequest("PUT", path, nil)
@@ -640,7 +662,8 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -655,6 +678,7 @@ func TestCreateStackHandler(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now().UTC()
 
 	path := fmt.Sprintf("/databases/%s/stacks/?name=test-stack", db.ID.String())
 	request, err := http.NewRequest("PUT", path, nil)
@@ -678,7 +702,8 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := `{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0}`
+	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+		date.Format(conn.opDate), date.Format(conn.opDate), date.Format(conn.opDate))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
 	}
@@ -728,7 +753,7 @@ func TestCreateStackHandler_Gone(t *testing.T) {
 }
 
 func TestCreateStackHandler_Conflict(t *testing.T) {
-	s := pila.NewStack("test-stack")
+	s := pila.NewStack("test-stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -757,7 +782,9 @@ func TestStackHandler_GET(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	createDate := time.Now().UTC()
+	s := pila.NewStack("stack", createDate)
+	s.Update(createDate)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -767,6 +794,7 @@ func TestStackHandler_GET(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now().UTC()
 
 	s.Push(element.Value)
 
@@ -842,7 +870,7 @@ func TestStackHandler_GET(t *testing.T) {
 		}
 
 		if response.Code != io.output.code {
-			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
+			t.Errorf("on %s response code is %v, expected %v", io.input.op, response.Code, io.output.code)
 		}
 
 		responseJSON, err := ioutil.ReadAll(response.Body)
@@ -850,14 +878,22 @@ func TestStackHandler_GET(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if string(responseJSON) != string(io.output.response) {
-			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
+		if io.input.op == "" {
+			expectedStackStatusJSON, err := s.Status().ToJSON()
+			if err != nil {
+				t.Fatal(err)
+			} else if string(responseJSON) != string(expectedStackStatusJSON) {
+				t.Errorf("on %s response is %s, expected %s", io.input.op, string(responseJSON), string(expectedStackStatusJSON))
+			}
+
+		} else if string(responseJSON) != string(io.output.response) {
+			t.Errorf("on %s response is %s, expected %s", io.input.op, string(responseJSON), string(io.output.response))
 		}
 	}
 }
 
 func TestStackHandler_POST(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -867,6 +903,7 @@ func TestStackHandler_POST(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = time.Now().UTC()
 
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
@@ -921,7 +958,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -931,11 +968,6 @@ func TestStackHandler_DELETE(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
-
-	expectedStackStatusJSON, err := s.Status().ToJSON()
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	s.Push(element.Value)
 
@@ -970,7 +1002,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 			struct {
 				response []byte
 				code     int
-			}{expectedStackStatusJSON, http.StatusOK},
+			}{nil, http.StatusOK},
 		},
 		{struct {
 			database, stack, op string
@@ -1003,6 +1035,30 @@ func TestStackHandler_DELETE(t *testing.T) {
 		stackHandle := conn.stackHandler(&params)
 		stackHandle.ServeHTTP(response, request)
 
+		if response.Code != io.output.code {
+			t.Errorf("on op %s response code is %v, expected %v", io.input.op, response.Code, io.output.code)
+		}
+
+		responseJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if io.input.op == "flush" {
+			s.Update(conn.opDate)
+			stackStatus := s.Status()
+
+			expectedStackStatusJSON, err := stackStatus.ToJSON()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(responseJSON) != string(expectedStackStatusJSON) {
+				t.Errorf("on op %s response is %s, expected %s", io.input.op, string(responseJSON), string(expectedStackStatusJSON))
+			}
+		} else if string(responseJSON) != string(io.output.response) {
+			t.Errorf("on op %s response is %s, expected %s", io.input.op, string(responseJSON), string(io.output.response))
+		}
+
 		if io.input.op == "full" {
 			if s := db.Stacks[uuid.UUID(io.input.stack)]; s != nil {
 				t.Errorf("db contains %v, expected not to", io.input.stack)
@@ -1019,24 +1075,12 @@ func TestStackHandler_DELETE(t *testing.T) {
 			// restore element for next table test iteration
 			s.Push(element.Value)
 		}
-
-		if response.Code != io.output.code {
-			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
-		}
-
-		responseJSON, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if string(responseJSON) != string(io.output.response) {
-			t.Errorf("response is %s, expected %s", string(responseJSON), string(io.output.response))
-		}
 	}
 }
 
 func TestStackHandler_DatabaseGone(t *testing.T) {
-	s := pila.NewStack("stack")
+	now := time.Now().UTC()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1046,6 +1090,7 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = now
 
 	request, err := http.NewRequest("GET",
 		fmt.Sprintf("/databases/%s/stacks/%s",
@@ -1073,7 +1118,8 @@ func TestStackHandler_DatabaseGone(t *testing.T) {
 }
 
 func TestStackHandler_StackGone(t *testing.T) {
-	s := pila.NewStack("stack")
+	now := time.Now().UTC()
+	s := pila.NewStack("stack", now)
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1083,6 +1129,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 
 	conn := NewConn()
 	conn.Pila = p
+	conn.opDate = now
 
 	request, err := http.NewRequest("GET",
 		fmt.Sprintf("/databases/%s/stacks/%s",
@@ -1110,7 +1157,7 @@ func TestStackHandler_StackGone(t *testing.T) {
 }
 
 func TestStatusStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1176,7 +1223,7 @@ func TestStatusStackHandler(t *testing.T) {
 }
 
 func TestPeekStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1229,7 +1276,7 @@ func TestPeekStackHandler(t *testing.T) {
 }
 
 func TestSizeStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1277,7 +1324,7 @@ func TestSizeStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1328,7 +1375,7 @@ func TestPushStackHandler(t *testing.T) {
 }
 
 func TestPushStackHandler_Name(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1379,7 +1426,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 }
 
 func TestPushStackHandler_Empty(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1414,7 +1461,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 }
 
 func TestPushStackHandler_BadDecoding(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1454,7 +1501,7 @@ func TestPopStackHandler(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
 
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push(element.Value)
 
 	db := pila.NewDatabase("db")
@@ -1518,7 +1565,7 @@ func TestPopStackHandler(t *testing.T) {
 }
 
 func TestPopStackHandler_EmptyStack(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1548,7 +1595,7 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 }
 
 func TestFlushStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1626,7 +1673,7 @@ func TestFlushStackHandler(t *testing.T) {
 }
 
 func TestDeleteStackHandler(t *testing.T) {
-	s := pila.NewStack("stack")
+	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
 	_ = db.AddStack(s)
@@ -1673,7 +1720,7 @@ func TestDeleteStackHandler(t *testing.T) {
 		}
 
 		// restore elements for next table test iteration
-		s = pila.NewStack("stack")
+		s = pila.NewStack("stack", time.Now().UTC())
 		_ = db.AddStack(s)
 		s.Push("one")
 	}

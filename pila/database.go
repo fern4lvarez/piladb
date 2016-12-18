@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
@@ -31,10 +32,10 @@ func NewDatabase(name string) *Database {
 	}
 }
 
-// CreateStack creates a new Stack, given a name, which is associated
-// to the Database.
-func (db *Database) CreateStack(name string) fmt.Stringer {
-	stack := NewStack(name)
+// CreateStack creates a new Stack, given a name and a creation date,
+// which is associated to the Database.
+func (db *Database) CreateStack(name string, t time.Time) fmt.Stringer {
+	stack := NewStack(name, t)
 	stack.SetDatabase(db)
 	db.Stacks[stack.ID] = stack
 	return stack.ID

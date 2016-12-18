@@ -3,6 +3,7 @@ package pila
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestIntegrationBasic(t *testing.T) {
@@ -11,8 +12,8 @@ func TestIntegrationBasic(t *testing.T) {
 	db := NewDatabase("db")
 	pila.AddDatabase(db)
 
-	stack1 := NewStack("stack1")
-	stack2 := NewStack("stack2")
+	stack1 := NewStack("stack1", time.Now())
+	stack2 := NewStack("stack2", time.Now())
 	db.AddStack(stack1)
 	db.AddStack(stack2)
 

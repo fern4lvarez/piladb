@@ -1,6 +1,9 @@
 package pila
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 // StackStatuser represents an interface for
 // types representing the status of stacks or stacks
@@ -11,10 +14,13 @@ type StackStatuser interface {
 
 // StackStatus represents the status of a Stack.
 type StackStatus struct {
-	ID   string      `json:"id"`
-	Name string      `json:"name"`
-	Peek interface{} `json:"peek"`
-	Size int         `json:"size"`
+	ID        string      `json:"id"`
+	Name      string      `json:"name"`
+	Peek      interface{} `json:"peek"`
+	Size      int         `json:"size"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
+	ReadAt    time.Time   `json:"read_at"`
 }
 
 // ToJSON converts a StackStatus into JSON.
