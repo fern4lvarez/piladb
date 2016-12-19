@@ -51,6 +51,7 @@ func (s *Status) ToJSON() []byte {
 	// Do not check error as the Status type does
 	// not contain types that could cause such case.
 	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
+	s.StartedAt = s.StartedAt.Local()
 	b, _ := json.Marshal(s)
 	return b
 }

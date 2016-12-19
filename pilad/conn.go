@@ -29,7 +29,7 @@ func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
 	conn.Config = config.NewConfig().Default()
-	conn.Status = NewStatus(version.CommitHash(), time.Now(), MemStats())
+	conn.Status = NewStatus(version.CommitHash(), time.Now().UTC(), MemStats())
 	return conn
 }
 
@@ -44,7 +44,7 @@ func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
 
 // statusHandler writes the piladb status into the response.
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
-	c.Status.Update(time.Now(), MemStats())
+	c.Status.Update(time.Now().UTC(), MemStats())
 
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
@@ -124,7 +124,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 // of them, or create a new one.
 func (c *Conn) stacksHandler(databaseID string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c.opDate = time.Now()
+		c.opDate = time.Now().UTC()
 		vars := mux.Vars(r)
 
 		// we override the mux vars to be able to test
@@ -209,7 +209,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 // the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c.opDate = time.Now()
+		c.opDate = time.Now().UTC()
 		vars := mux.Vars(r)
 		// we override the mux vars to be able to test
 		// an arbitrary database and stack ID

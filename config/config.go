@@ -45,7 +45,7 @@ func (c *Config) Get(key string) interface{} {
 func (c *Config) Set(key string, value interface{}) {
 	s, ok := c.Values.Stacks[uuid.New(CONFIG+key)]
 	if !ok {
-		sID := c.Values.CreateStack(key, time.Now())
+		sID := c.Values.CreateStack(key, time.Now().UTC())
 		s, _ = c.Values.Stacks[sID]
 	}
 
