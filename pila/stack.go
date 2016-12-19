@@ -125,9 +125,9 @@ func (s *Stack) Status() StackStatus {
 	status.Name = s.Name
 	status.Size = s.Size()
 	status.Peek = s.Peek()
-	status.CreatedAt = s.CreatedAt
-	status.UpdatedAt = s.UpdatedAt
-	status.ReadAt = s.ReadAt
+	status.CreatedAt = s.CreatedAt.Local()
+	status.UpdatedAt = s.UpdatedAt.Local()
+	status.ReadAt = s.ReadAt.Local()
 
 	return status
 }

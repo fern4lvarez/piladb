@@ -96,6 +96,9 @@ func (db *Database) StacksStatus() StacksStatus {
 	var n int
 	ss := make([]StackStatus, len(db.Stacks))
 	for _, s := range db.Stacks {
+		s.CreatedAt = s.CreatedAt.Local()
+		s.UpdatedAt = s.UpdatedAt.Local()
+		s.ReadAt = s.ReadAt.Local()
 		ss[n] = s.Status()
 		n++
 	}

@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"testing"
 	"time"
+
+	"github.com/fern4lvarez/piladb/pkg/date"
 )
 
 func TestNewStatus(t *testing.T) {
@@ -64,7 +66,7 @@ func TestStatusToJSON(t *testing.T) {
 	status := NewStatus("v1", now, nil)
 	oneHourLater := now.Add(60 * time.Minute)
 	mem := runtime.MemStats{Alloc: 0}
-	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","pid":%d,"started_at":"2009-11-10T23:00:00Z","running_for":3600,"number_goroutines":%d,"memory_alloc":"0B"}`, runtime.GOOS, runtime.GOARCH, os.Getpid(), runtime.NumGoroutine())
+	expectedJSON := fmt.Sprintf(`{"status":"OK","version":"v1","host":"%s_%s","pid":%d,"started_at":"%s","running_for":3600,"number_goroutines":%d,"memory_alloc":"0B"}`, runtime.GOOS, runtime.GOARCH, os.Getpid(), date.Format(now.Local()), runtime.NumGoroutine())
 
 	status.Update(oneHourLater, &mem)
 	json := status.ToJSON()
