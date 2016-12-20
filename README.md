@@ -26,8 +26,6 @@ Features
 Documentation
 -------------
 
-### Looking for...
-
 * [Main documentation page](http://docs.piladb.org).
 * [Go `pila` package documentation](https://godoc.org/github.com/fern4lvarez/piladb/pila).
 * [`pilad`'s RESTful API documentation](pilad/).
