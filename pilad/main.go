@@ -11,8 +11,14 @@ import (
 
 func main() {
 	flag.Parse()
+	if versionFlag {
+		fmt.Println(v())
+		return
+	}
+
 	conn := NewConn()
 	conn.buildConfig()
+
 	logo(conn)
 
 	srv := &http.Server{

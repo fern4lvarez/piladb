@@ -20,6 +20,7 @@ var (
 	maxStackSizeFlag                  int
 	readTimeoutFlag, writeTimeoutFlag int
 	portFlag                          int
+	versionFlag                       bool
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
+	flag.BoolVar(&versionFlag, "v", false, "Version")
 }
 
 type flagKey struct {

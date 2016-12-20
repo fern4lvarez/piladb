@@ -6,6 +6,7 @@ import (
 
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
+	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
 // ResourceDatabase will return the right Database resource
@@ -59,4 +60,9 @@ func MemOutput(mem uint64) string {
 	default:
 		return fmt.Sprintf("%.2fGiB", memF64/1073741824)
 	}
+}
+
+// v returns the version using pkg/version
+func v() string {
+	return version.Version(version.VERSION)
 }
