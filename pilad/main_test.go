@@ -13,3 +13,9 @@ func TestMain(t *testing.T) {
 	time.Sleep(5 * time.Millisecond)
 	os.Setenv("PILADB_PORT", "")
 }
+
+func TestMainVersion(t *testing.T) {
+	versionFlag = true
+	go main()
+	t.Log(v())
+}
