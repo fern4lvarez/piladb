@@ -18,7 +18,6 @@ func main() {
 
 	conn := NewConn()
 	conn.buildConfig()
-
 	logo(conn)
 
 	srv := &http.Server{
