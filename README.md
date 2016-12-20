@@ -23,20 +23,21 @@ Features
 * In-memory store.
 * Written in Go, i.e. binaries are self-contained and distributable.
 
+Documentation
+-------------
+
+### Looking for...
+
+* [Main documentation page](http://docs.piladb.org).
+* [Go `pila` package documentation](https://godoc.org/github.com/fern4lvarez/piladb/pila).
+* [`pilad`'s RESTful API documentation](pilad/).
+
 Install
 -------
 
-You can download binaries for Linux and Mac.
-
-**Linux**:
-
-* [0.1.0 (tar.gz)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.linux-amd64.tar.gz)
-* [0.1.0 (zip)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.linux-amd64.zip)
-
-**Mac**:
-
-* [0.1.0 (tar.gz)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.darwin-amd64.tar.gz)
-* [0.1.0 (zip)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.darwin-amd64.zip)
+You can download binaries for Linux and Mac in the
+[**Releases**](https://github.com/fern4lvarez/piladb/releases/latest)
+page.
 
 ### From Source Code
 
@@ -88,15 +89,6 @@ This will cross-compile `pilad` in all available OS's and architectures.
 Alternatively, if you don't have docker installed, you can release `pilad` binary
 with the `make gox` command. For this, you need a configured Go environment and
 [`gox`](https://github.com/mitchellh/gox) installed.
-
-Documentation
--------------
-
-### Looking for...
-
-* [Main documentation page](http://docs.piladb.org).
-* [Go `pila` package documentation](https://godoc.org/github.com/fern4lvarez/piladb/pila).
-* [`pilad`'s RESTful API documentation](pilad/). 
 
 Credits
 -------
