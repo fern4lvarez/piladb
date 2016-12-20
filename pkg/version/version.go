@@ -8,7 +8,7 @@ import (
 )
 
 // VERSION defines piladb version
-const VERSION = ""
+const VERSION = "0.1.0"
 
 // Version returns piladb version given a v version. If v is empty,
 // defaults to CommitHash.
