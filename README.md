@@ -26,7 +26,19 @@ Features
 Install
 -------
 
-Releases not available yet. For now:
+You can download binaries for Linux and Mac.
+
+**Linux**:
+
+* [0.1.0 (tar.gz)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.linux-amd64.tar.gz)
+* [0.1.0 (zip)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.linux-amd64.zip)
+
+**Mac**:
+
+* [0.1.0 (tar.gz)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.darwin-amd64.tar.gz)
+* [0.1.0 (zip)](https://github.com/fern4lvarez/piladb/releases/download/v0.1.0/piladb0.1.0.darwin-amd64.zip)
+
+### From Source Code
 
 > You need Go installed. Version 1.6+ recommended.
 
