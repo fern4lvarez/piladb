@@ -1,4 +1,4 @@
-piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
+piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb) [![codecov](https://codecov.io/gh/fern4lvarez/piladb/branch/master/graph/badge.svg)](https://codecov.io/gh/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
 ======
 
 ![Logo](http://i.imgur.com/tjQbm56.png)
@@ -76,21 +76,13 @@ If you are using a lower Go version, **piladb** will use either your current loc
 version of the dependencies, or the latest one available. Things might break, so
 please consider updating to the latest version.
 
-Test Coverage
+Code Coverage
 -------------
 
-We aim for a universal 100% test coverage for all suppackages. If some
+We aim for a universal 100% code coverage for all suppackages. If some
 piece of code is not testable, it probably needs to be changed.
 
-Check current test coverage of each subpackage:
-
-* https://gocover.io/github.com/fern4lvarez/piladb/config/vars
-* https://gocover.io/github.com/fern4lvarez/piladb/pila
-* https://gocover.io/github.com/fern4lvarez/piladb/pilad
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/date
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/stack
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/uuid
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/version
+Check current code coverage of the project: https://codecov.io/gh/fern4lvarez/piladb
 
 Release
 -------

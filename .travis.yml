@@ -6,3 +6,9 @@ go:
 - 1.7.4
 - 1.6.3
 - tip
+
+script:
+  - ./dev/tests.sh
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
