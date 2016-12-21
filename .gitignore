@@ -1,6 +1,7 @@
 piladb
 pilad/pilad
 coverage.out
+coverage.txt
 dist
 lint
 vet
