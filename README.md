@@ -76,13 +76,13 @@ If you are using a lower Go version, **piladb** will use either your current loc
 version of the dependencies, or the latest one available. Things might break, so
 please consider updating to the latest version.
 
-Test Coverage
+Code Coverage
 -------------
 
-We aim for a universal 100% test coverage for all suppackages. If some
+We aim for a universal 100% code coverage for all suppackages. If some
 piece of code is not testable, it probably needs to be changed.
 
-Check current test coverage of the project: https://codecov.io/gh/fern4lvarez/piladb
+Check current code coverage of the project: https://codecov.io/gh/fern4lvarez/piladb
 
 Release
 -------
