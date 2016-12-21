@@ -82,15 +82,7 @@ Test Coverage
 We aim for a universal 100% test coverage for all suppackages. If some
 piece of code is not testable, it probably needs to be changed.
 
-Check current test coverage of each subpackage:
-
-* https://gocover.io/github.com/fern4lvarez/piladb/config/vars
-* https://gocover.io/github.com/fern4lvarez/piladb/pila
-* https://gocover.io/github.com/fern4lvarez/piladb/pilad
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/date
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/stack
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/uuid
-* https://gocover.io/github.com/fern4lvarez/piladb/pkg/version
+Check current test coverage of the project: https://codecov.io/gh/fern4lvarez/piladb
 
 Release
 -------
