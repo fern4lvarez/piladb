@@ -6,3 +6,5 @@ go:
 - 1.7.4
 - 1.6.3
 - tip
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
