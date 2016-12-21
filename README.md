@@ -1,4 +1,4 @@
-piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
+piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb) [![codecov](https://codecov.io/gh/fern4lvarez/piladb/branch/master/graph/badge.svg)](https://codecov.io/gh/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
 ======
 
 ![Logo](http://i.imgur.com/tjQbm56.png)
