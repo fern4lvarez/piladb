@@ -8,10 +8,10 @@ get:
 	go get ./...
 
 test:
-	go list ./... | grep -v /vendor/ | xargs -L1 go test -cover -coverprofile=coverage.txt -covermode=atomic
+	go list ./... | grep -v /vendor/ | xargs -L1 go test -cover
 
 testv:
-	go list ./... | grep -v /vendor/ | xargs -L1 go test -v -cover -coverprofile=coverage.txt -covermode=atomic
+	go list ./... | grep -v /vendor/ | xargs -L1 go test -v -cover
 
 vet:
 	go list ./... | grep -v /vendor/ | xargs -L1 go vet
