@@ -86,6 +86,34 @@ func TestStackPop_False(t *testing.T) {
 	}
 }
 
+func TestStackSweep(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+
+	element, ok := stack.Sweep()
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.Peek() != 8 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 8)
+	}
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
+	}
+}
+
+func TestStackSweep_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	_, ok := stack.Sweep()
+	if ok {
+		t.Error("stack.Sweep() is ok")
+	}
+}
+
 func TestStackSize(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	if stack.Size() != 0 {
