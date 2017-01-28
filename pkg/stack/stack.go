@@ -45,10 +45,18 @@ func (s *Stack) Push(element interface{}) {
 		prev: nil,
 	}
 	s.head = head
-	if s.Size() == 0 {
-		s.tail = head
-	}
 	s.size++
+
+	// tail and head are the same element
+	// when pushing a first one
+	if s.Size() == 1 {
+		s.tail = head
+		return
+	}
+
+	// update the tail when the pushed
+	// element is the only on top of the
+	// tail
 	if s.Size() == 2 {
 		s.tail.prev = s.head
 	}
@@ -61,7 +69,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if s.head == nil {
+	if s.Size() == 0 {
 		return nil, false
 	}
 
@@ -69,9 +77,12 @@ func (s *Stack) Pop() (interface{}, bool) {
 	s.head = s.head.next
 	s.size--
 
+	// update the tail when it's the
+	// only element after the Pop operation
 	if s.Size() == 1 {
 		s.tail.prev = nil
 	}
+
 	return element, true
 }
 
@@ -82,13 +93,15 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if s.tail == nil {
+	if s.Size() == 0 {
 		return nil, false
 	}
 
 	element := s.tail.data
 	s.size--
 
+	// head becomes the tail when
+	// is the remaining element in Stack
 	if s.Size() == 1 {
 		s.head.next = nil
 		s.head.prev = nil
