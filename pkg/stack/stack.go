@@ -18,11 +18,11 @@ type Stack struct {
 }
 
 // frame represents an element of the stack. It contains
-// data and the link to the next Frame as a pointer.
+// data, and links to the up and down frames as pointers.
 type frame struct {
 	data interface{}
-	next *frame
-	prev *frame
+	down *frame
+	up   *frame
 }
 
 // NewStack returns a blank stack, where head is nil and size
@@ -32,8 +32,8 @@ func NewStack() *Stack {
 }
 
 // Push adds a new element on top of the stack, creating
-// a new head holding this data and updating its head to
-// the previous stack's head. It will update the tail
+// a new head holding this data and updating its head on
+// top of the stack's head. It will update the tail
 // only if the stack was empty.
 func (s *Stack) Push(element interface{}) {
 	s.mux.Lock()
@@ -41,8 +41,8 @@ func (s *Stack) Push(element interface{}) {
 
 	head := &frame{
 		data: element,
-		next: s.head,
-		prev: nil,
+		down: s.head,
+		up:   nil,
 	}
 	s.head = head
 	s.size++
@@ -58,12 +58,12 @@ func (s *Stack) Push(element interface{}) {
 	// element is the only on top of the
 	// tail
 	if s.Size() == 2 {
-		s.tail.prev = s.head
+		s.tail.up = s.head
 	}
 }
 
 // Pop removes and returns the element on top of the stack,
-// updating its head to the next Frame. If the stack was empty,
+// updating its head to the Frame underneath. If the stack was empty,
 // it returns false.
 func (s *Stack) Pop() (interface{}, bool) {
 	s.mux.Lock()
@@ -74,20 +74,20 @@ func (s *Stack) Pop() (interface{}, bool) {
 	}
 
 	element := s.head.data
-	s.head = s.head.next
+	s.head = s.head.down
 	s.size--
 
 	// update the tail when it's the
 	// only element after the Pop operation
 	if s.Size() == 1 {
-		s.tail.prev = nil
+		s.tail.up = nil
 	}
 
 	return element, true
 }
 
 // Sweep removes and returns the element at the bottom of the stack,
-// turning the next Frame into the new tail. If the stack was empty,
+// turning the Frame above into the new tail. If the stack was empty,
 // it returns false.
 func (s *Stack) Sweep() (interface{}, bool) {
 	s.mux.Lock()
@@ -103,13 +103,13 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	// head becomes the tail when
 	// is the remaining element in Stack
 	if s.Size() == 1 {
-		s.head.next = nil
-		s.head.prev = nil
+		s.head.down = nil
+		s.head.up = nil
 		s.tail = s.head
 		return element, true
 	}
 
-	s.tail = s.tail.prev
+	s.tail = s.tail.up
 	return element, true
 }
 
