@@ -8,6 +8,8 @@ type Stacker interface {
 	Push(element interface{})
 	// Pop the topmost element of a stack
 	Pop() (interface{}, bool)
+	// Sweep the bottommost element of a stack
+	Sweep() (interface{}, bool)
 	// Size returns the size of the Stack
 	Size() int
 	// Peek returns the topmost element of the Stack
