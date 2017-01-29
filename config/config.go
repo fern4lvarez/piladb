@@ -3,7 +3,6 @@ package config
 import (
 	"time"
 
-	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
@@ -22,14 +21,6 @@ type Config struct {
 // NewConfig creates a new Config with empty values.
 func NewConfig() *Config {
 	return &Config{Values: pila.NewDatabase(CONFIG)}
-}
-
-// Default sets the default values to the Config.
-func (c *Config) Default() *Config {
-	// Infinite size
-	c.Set(vars.MaxStackSize, -1)
-
-	return c
 }
 
 // Get gets a config value from a key.
