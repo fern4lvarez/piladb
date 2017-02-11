@@ -29,3 +29,19 @@ func TestDefaultInt(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultBool(t *testing.T) {
+	inputOutput := []struct {
+		input  string
+		output bool
+	}{
+		{RotateWhenFull, RotateWhenFullDefault},
+		{"foo", false},
+	}
+
+	for _, io := range inputOutput {
+		if o := DefaultBool(io.input); o != io.output {
+			t.Errorf("DefaultBool is %v, expected %v", o, io.output)
+		}
+	}
+}
