@@ -104,3 +104,28 @@ func TestPort(t *testing.T) {
 		}
 	}
 }
+
+func TestRotateWhenFull(t *testing.T) {
+	c := NewConfig()
+
+	inputOutput := []struct {
+		input  interface{}
+		output bool
+	}{
+		{true, true},
+		{false, false},
+		{"true", true},
+		{"false", false},
+		{"foo", vars.RotateWhenFullDefault},
+		{42, vars.RotateWhenFullDefault},
+		{[]byte("true"), vars.RotateWhenFullDefault},
+	}
+
+	for _, io := range inputOutput {
+		c.Set(vars.RotateWhenFull, io.input)
+
+		if s := c.RotateWhenFull(); s != io.output {
+			t.Errorf("RotateWhenFull is %v, expected %v", s, io.output)
+		}
+	}
+}
