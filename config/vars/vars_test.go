@@ -35,7 +35,7 @@ func TestDefaultBool(t *testing.T) {
 		input  string
 		output bool
 	}{
-		{RotateWhenFull, RotateWhenFullDefault},
+		{PushWhenFull, PushWhenFullDefault},
 		{"foo", false},
 	}
 

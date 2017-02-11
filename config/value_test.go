@@ -105,7 +105,7 @@ func TestPort(t *testing.T) {
 	}
 }
 
-func TestRotateWhenFull(t *testing.T) {
+func TestPushWhenFull(t *testing.T) {
 	c := NewConfig()
 
 	inputOutput := []struct {
@@ -116,16 +116,16 @@ func TestRotateWhenFull(t *testing.T) {
 		{false, false},
 		{"true", true},
 		{"false", false},
-		{"foo", vars.RotateWhenFullDefault},
-		{42, vars.RotateWhenFullDefault},
-		{[]byte("true"), vars.RotateWhenFullDefault},
+		{"foo", vars.PushWhenFullDefault},
+		{42, vars.PushWhenFullDefault},
+		{[]byte("true"), vars.PushWhenFullDefault},
 	}
 
 	for _, io := range inputOutput {
-		c.Set(vars.RotateWhenFull, io.input)
+		c.Set(vars.PushWhenFull, io.input)
 
-		if s := c.RotateWhenFull(); s != io.output {
-			t.Errorf("RotateWhenFull is %v, expected %v", s, io.output)
+		if s := c.PushWhenFull(); s != io.output {
+			t.Errorf("PushWhenFull is %v, expected %v", s, io.output)
 		}
 	}
 }

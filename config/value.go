@@ -42,11 +42,11 @@ func (c *Config) Port() int {
 	return t
 }
 
-// RotateWhenFull returns the value of ROTATE_WHEN_FULL.
+// PushWhenFull returns the value of PUSH_WHEN_FULL.
 // Type: bool, Default: false
-func (c *Config) RotateWhenFull() bool {
-	rotateWhenFull := c.Get(vars.RotateWhenFull)
-	return boolValue(rotateWhenFull, vars.RotateWhenFullDefault)
+func (c *Config) PushWhenFull() bool {
+	pushWhenFull := c.Get(vars.PushWhenFull)
+	return boolValue(pushWhenFull, vars.PushWhenFullDefault)
 }
 
 // intValue returns an Integer value given another value as an

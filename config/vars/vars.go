@@ -33,13 +33,13 @@ const (
 	// of Port.
 	PortDefault = 1205
 
-	// RotateWhenFull enables to keep pushing elements
+	// PushWhenFull enables to keep pushing elements
 	// into a Stack, even if this is full. If this is
 	// the case, the base element will be deleted.
-	RotateWhenFull = "ROTATE_WHEN_FULL"
-	// RotateWhenFullDefault represents the default value
-	// of RotateWhenFull.
-	RotateWhenFullDefault = false
+	PushWhenFull = "PUSH_WHEN_FULL"
+	// PushWhenFullDefault represents the default value
+	// of PushWhenFull.
+	PushWhenFullDefault = false
 )
 
 // Env returns the environment variable name
@@ -68,8 +68,8 @@ func DefaultInt(name string) int {
 // name of boolean type.
 func DefaultBool(name string) bool {
 	switch name {
-	case RotateWhenFull:
-		return RotateWhenFullDefault
+	case PushWhenFull:
+		return PushWhenFullDefault
 	}
 	return false
 }
