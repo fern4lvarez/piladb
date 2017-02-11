@@ -20,6 +20,7 @@ var (
 	maxStackSizeFlag                  int
 	readTimeoutFlag, writeTimeoutFlag int
 	portFlag                          int
+	pushWhenFullFlag                  bool
 	versionFlag                       bool
 )
 
@@ -28,6 +29,7 @@ func init() {
 	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
+	flag.BoolVar(&pushWhenFullFlag, "push-when-full", false, "Allow push when Stack is full")
 	flag.BoolVar(&versionFlag, "v", false, "Version")
 }
 
@@ -44,15 +46,17 @@ func (c *Conn) buildConfig() {
 		{readTimeoutFlag, vars.ReadTimeout},
 		{writeTimeoutFlag, vars.WriteTimeout},
 		{portFlag, vars.Port},
+		{pushWhenFullFlag, vars.PushWhenFull},
 	}
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
-			if i, err := strconv.Atoi(e); err != nil {
+			if e == "true" || e == "false" {
+				c.Config.Set(fk.key, e)
+			} else if i, err := strconv.Atoi(e); err != nil {
 				c.Config.Set(fk.key, vars.DefaultInt(fk.key))
 			} else {
 				c.Config.Set(fk.key, i)
-
 			}
 			continue
 		}
@@ -138,6 +142,14 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 		if s := c.Config.MaxStackSize(); stack.Size() >= s && s != -1 {
+			if c.Config.PushWhenFull() {
+				if element, ok := stack.Sweep(); ok {
+					log.Println(r.Method, r.URL, http.StatusOK, "sweep base element:", element)
+					handler(w, r, stack)
+					return
+				}
+				log.Println(r.Method, r.URL, http.StatusNotAcceptable, "could not sweep base element")
+			}
 			log.Println(r.Method, r.URL, http.StatusNotAcceptable, vars.MaxStackSize, "value reached")
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
