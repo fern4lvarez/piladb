@@ -100,6 +100,14 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	element := s.tail.data
 	s.size--
 
+	// head and tail are nil
+	// if Stack has no elements
+	if s.Size() == 0 {
+		s.head = nil
+		s.tail = nil
+		return element, true
+	}
+
 	// head becomes the tail when
 	// is the remaining element in Stack
 	if s.Size() == 1 {

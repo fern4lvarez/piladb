@@ -154,6 +154,29 @@ func TestStackSweep(t *testing.T) {
 		t.Errorf("stack.size is %v, expected %v", stack.size, 1)
 	}
 }
+
+func TestStackSweep_OneElement(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+
+	element, ok := stack.Sweep()
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.tail != nil {
+		t.Errorf("stack.tail is %v, expected nil", stack.tail)
+	}
+	if stack.head != nil {
+		t.Errorf("stack.tail is %v, expected nil", stack.head)
+	}
+	if stack.size != 0 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 0)
+	}
+}
+
 func TestStackSweep_More(t *testing.T) {
 	stack := NewStack()
 	stack.Push("test")
