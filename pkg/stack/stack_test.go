@@ -95,6 +95,9 @@ func TestStackPop(t *testing.T) {
 	if stack.head.data != "test" {
 		t.Errorf("stack.head data is %v, expected %v", stack.head.data, "test")
 	}
+	if stack.head.up != nil {
+		t.Errorf("stack.head.up data is %v, expected %v", stack.head.up, nil)
+	}
 	if stack.tail == nil {
 		t.Fatal("stack.tail is nil")
 	}

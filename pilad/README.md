@@ -313,6 +313,8 @@ is used as default, the latter as fallback.
 }
 ```
 
+Returns `406 NOT ACCEPTABLE` if the stack is full.
+
 Returns `410 GONE` if the database or stack do not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the element.

@@ -29,7 +29,7 @@ func init() {
 	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
-	flag.BoolVar(&pushWhenFullFlag, "push-when-full", false, "Allow push when Stack is full")
+	flag.BoolVar(&pushWhenFullFlag, "push-when-full", vars.PushWhenFullDefault, "Allow push when Stack is full")
 	flag.BoolVar(&versionFlag, "v", false, "Version")
 }
 
