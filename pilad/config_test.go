@@ -324,7 +324,6 @@ func TestCheckMaxStackSize_PushWhenFull(t *testing.T) {
 	elementJSON, _ := element.ToJSON()
 
 	f := func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-		stack.Push(element.Value)
 		w.WriteHeader(http.StatusOK)
 	}
 
@@ -332,10 +331,11 @@ func TestCheckMaxStackSize_PushWhenFull(t *testing.T) {
 		inputSize                int
 		inputPush                bool
 		outputStatus, outputSize int
-		outputPeek               interface{}
+		outputPeek, outputSweep  interface{}
 	}{
-		{1, false, http.StatusNotAcceptable, 1, "foo"},
-		{1, true, http.StatusOK, 1, element.Value},
+		{1, false, http.StatusNotAcceptable, 1, "foo", nil},
+		{1, false, http.StatusNotAcceptable, 1, "foo", nil},
+		{1, true, http.StatusOK, 1, "foo", true},
 	}
 
 	for _, io := range inputOutput {
@@ -364,10 +364,14 @@ func TestCheckMaxStackSize_PushWhenFull(t *testing.T) {
 		if s.Peek() != io.outputPeek {
 			t.Errorf("Stack peek is %v, expected %v", s.Peek(), io.outputPeek)
 		}
+
+		if sweepBeforePush := conn.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != io.outputSweep {
+			t.Errorf("SWEEP_BEFORE_PUSH is %v, expected %v", sweepBeforePush, io.outputSweep)
+		}
 	}
 }
 
-func TestCheckMaxStackSize_PushWhenFulliWithStackEmpty(t *testing.T) {
+func TestCheckMaxStackSize_PushWhenFullWithStackEmpty(t *testing.T) {
 	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("mydb")
@@ -385,7 +389,6 @@ func TestCheckMaxStackSize_PushWhenFulliWithStackEmpty(t *testing.T) {
 	elementJSON, _ := element.ToJSON()
 
 	f := func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-		stack.Push(element.Value)
 		w.WriteHeader(http.StatusOK)
 	}
 
@@ -395,7 +398,7 @@ func TestCheckMaxStackSize_PushWhenFulliWithStackEmpty(t *testing.T) {
 		outputStatus, outputSize int
 		outputPeek               interface{}
 	}{
-		{0, true, http.StatusNotAcceptable, 0, nil},
+		{0, true, http.StatusOK, 0, nil},
 	}
 
 	for _, io := range inputOutput {

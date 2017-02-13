@@ -137,18 +137,18 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 	})
 }
 
-// checkMaxStackSize checks config value for MaxStackSize and execute the
-// wrapped handler if check is validated.
+// checkMaxStackSize checks config value for MaxStackSize and PushWhenFull
+//and execute the wrapped handler if check is validated.
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 		if s := c.Config.MaxStackSize(); stack.Size() >= s && s != -1 {
 			if c.Config.PushWhenFull() {
-				if element, ok := stack.Sweep(); ok {
-					log.Println(r.Method, r.URL, http.StatusOK, "sweep base element:", element)
-					handler(w, r, stack)
-					return
-				}
-				log.Println(r.Method, r.URL, http.StatusNotAcceptable, "could not sweep base element")
+				// set internal config value to share with
+				// the next handler that we want to sweep
+				// before pushing
+				c.Config.Set("SWEEP_BEFORE_PUSH", true)
+				handler(w, r, stack)
+				return
 			}
 			log.Println(r.Method, r.URL, http.StatusNotAcceptable, vars.MaxStackSize, "value reached")
 			w.WriteHeader(http.StatusNotAcceptable)

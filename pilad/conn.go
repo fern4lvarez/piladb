@@ -319,6 +319,13 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.Sweep(); ok {
+			log.Println(r.Method, r.URL, http.StatusOK, "sweep base element:", swept)
+		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+	}
+
 	stack.Push(element.Value)
 	stack.Update(c.opDate)
 
