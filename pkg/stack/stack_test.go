@@ -208,6 +208,69 @@ func TestStackSweep_More(t *testing.T) {
 	if stack.size != 2 {
 		t.Errorf("stack.size is %v, expected %v", stack.size, 2)
 	}
+
+	element, ok = stack.Sweep()
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != 8 {
+		t.Errorf("element is %v, expected %v", element, 8)
+	}
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != 10 {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, 8)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != 10 {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, 10)
+	}
+	if stack.size != 1 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 1)
+	}
+}
+
+func TestStackSweep_AndPush(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+	stack.Push(8)
+	stack.Push(10)
+
+	_, _ = stack.Sweep()
+	stack.Push("foo")
+
+	_, _ = stack.Sweep()
+	stack.Push(0)
+
+	element, ok := stack.Sweep()
+	stack.Push(true)
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != 10 {
+		t.Errorf("element is %v, expected %v", element, 10)
+	}
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != "foo" {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, "foo")
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != true {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, true)
+	}
+	if stack.size != 3 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 3)
+	}
 }
 
 func TestStackSweep_False(t *testing.T) {

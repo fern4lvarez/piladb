@@ -44,6 +44,13 @@ func (s *Stack) Push(element interface{}) {
 		down: s.head,
 		up:   nil,
 	}
+
+	// connect former head with new head
+	// if Stack had already an element
+	if s.Size() > 0 {
+		s.head.up = head
+	}
+
 	s.head = head
 	s.size++
 
@@ -118,6 +125,7 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	}
 
 	s.tail = s.tail.up
+	s.tail.down = nil
 	return element, true
 }
 
