@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 )
 
@@ -27,21 +26,6 @@ func TestNewConfig(t *testing.T) {
 	for _, io := range inputOutput {
 		if io.input != io.output {
 			t.Errorf("got %v, expected %v", io.input, io.output)
-		}
-	}
-}
-
-func TestConfigDefault(t *testing.T) {
-	config := NewConfig().Default()
-	inputOutput := []struct {
-		input  string
-		output interface{}
-	}{
-		{vars.MaxStackSize, -1},
-	}
-	for _, io := range inputOutput {
-		if value := config.Get(io.input); value != io.output {
-			t.Errorf("Values is %v, expected %v", value, io.output)
 		}
 	}
 }
