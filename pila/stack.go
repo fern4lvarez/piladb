@@ -46,12 +46,12 @@ type Stack struct {
 // without an association to any Database. It uses the default
 // ./pkg/stack implementation as a base Stack.
 func NewStack(name string, t time.Time) *Stack {
-	return NewStackWithCustomImplementation(name, t, stack.NewStack())
+	return NewStackWithBase(name, t, stack.NewStack())
 }
 
-// NewStackWithCustomImplementation creates a new Stack given a name, a creation date,
+// NewStackWithBase creates a new Stack given a name, a creation date,
 // and a stack.Stacker base implementation, without an association to any Database.
-func NewStackWithCustomImplementation(name string, t time.Time, base stack.Stacker) *Stack {
+func NewStackWithBase(name string, t time.Time, base stack.Stacker) *Stack {
 	s := &Stack{}
 	s.Name = name
 	s.SetID()

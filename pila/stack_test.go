@@ -43,9 +43,9 @@ func TestNewStack(t *testing.T) {
 	}
 }
 
-func TestNewStackWithCustomImplementation(t *testing.T) {
+func TestNewStackWithBase(t *testing.T) {
 	now := time.Now()
-	stack := NewStackWithCustomImplementation("test-stack", now, &TestBaseStack{})
+	stack := NewStackWithBase("test-stack", now, &TestBaseStack{})
 
 	if stack == nil {
 		t.Fatal("stack is nil")
