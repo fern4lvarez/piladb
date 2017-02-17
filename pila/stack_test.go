@@ -7,9 +7,45 @@ import (
 	"time"
 )
 
+type TestStack struct{}
+
+func (s *TestStack) Push(element interface{}) { return }
+func (s *TestStack) Pop() (interface{}, bool) { return nil, false }
+func (s *TestStack) Size() int                { return 0 }
+func (s *TestStack) Peek() interface{}        { return nil }
+func (s *TestStack) Flush()                   { return }
+
 func TestNewStack(t *testing.T) {
 	now := time.Now()
 	stack := NewStack("test-stack", now)
+
+	if stack == nil {
+		t.Fatal("stack is nil")
+	}
+
+	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
+	}
+	if stack.Name != "test-stack" {
+		t.Errorf("stack.Name is %s, expected %s", stack.Name, "test-stack")
+	}
+	if stack.Database != nil {
+		t.Error("stack.Database is not nil")
+	}
+	if stack.CreatedAt != now {
+		t.Errorf("stack.CreatedAt is %v, expected %v", stack.CreatedAt, now)
+	}
+	if stack.base == nil {
+		t.Fatalf("stack.base is nil")
+	}
+	if stack.base.Size() != 0 {
+		t.Fatalf("stack.base.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+}
+
+func TestNewStackWithCustomImplementation(t *testing.T) {
+	now := time.Now()
+	stack := NewStackWithCustomImplementation("test-stack", now, &TestStack{})
 
 	if stack == nil {
 		t.Fatal("stack is nil")
