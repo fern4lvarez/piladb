@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-type TestStack struct{}
+type TestBaseStack struct{}
 
-func (s *TestStack) Push(element interface{}) { return }
-func (s *TestStack) Pop() (interface{}, bool) { return nil, false }
-func (s *TestStack) Size() int                { return 0 }
-func (s *TestStack) Peek() interface{}        { return nil }
-func (s *TestStack) Flush()                   { return }
+func (s *TestBaseStack) Push(element interface{}) { return }
+func (s *TestBaseStack) Pop() (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Size() int                { return 0 }
+func (s *TestBaseStack) Peek() interface{}        { return nil }
+func (s *TestBaseStack) Flush()                   { return }
 
 func TestNewStack(t *testing.T) {
 	now := time.Now()
@@ -45,7 +45,7 @@ func TestNewStack(t *testing.T) {
 
 func TestNewStackWithCustomImplementation(t *testing.T) {
 	now := time.Now()
-	stack := NewStackWithCustomImplementation("test-stack", now, &TestStack{})
+	stack := NewStackWithCustomImplementation("test-stack", now, &TestBaseStack{})
 
 	if stack == nil {
 		t.Fatal("stack is nil")
