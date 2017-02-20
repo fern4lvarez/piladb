@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- pilad: Add Go Version to Status
+
 ## [0.1.1] - 2017-02-20
 
 ### Added
