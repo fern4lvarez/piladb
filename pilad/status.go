@@ -13,6 +13,7 @@ import (
 type Status struct {
 	Code             string    `json:"status"`
 	Version          string    `json:"version"`
+	GoVersion        string    `json:"go_version"`
 	Host             string    `json:"host"`
 	PID              int       `json:"pid"`
 	StartedAt        time.Time `json:"started_at"`
@@ -26,6 +27,7 @@ func NewStatus(version string, now time.Time, mem *runtime.MemStats) *Status {
 	status := &Status{}
 	status.Code = "OK"
 	status.Version = version
+	status.GoVersion = runtime.Version()
 	status.Host = fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
 	status.PID = os.Getpid()
 	status.StartedAt = now
