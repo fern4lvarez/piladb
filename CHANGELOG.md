@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - pilad: Add Go Version to Status
+- godoc: Extend packages documentation
 
 ## [0.1.1] - 2017-02-20
 
