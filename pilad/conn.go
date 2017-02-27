@@ -42,6 +42,12 @@ func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirAddress, http.StatusMovedPermanently)
 }
 
+// pingHandler writes pong.
+func (c *Conn) pingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write([]byte("pong"))
+}
+
 // statusHandler writes the piladb status into the response.
 func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	c.Status.Update(time.Now().UTC(), MemStats())

@@ -17,6 +17,14 @@ Endpoints
 
 Redirects to the `pilad` documentation site and returns `301 Moved Permanently`.
 
+#### GET `/_ping`
+
+Returns `pong` and `200 OK`.
+
+#### HEAD `/_ping`
+
+Returns  headers and `200 OK`.
+
 #### GET `/_status`
 
 Returns `200 OK` and a JSON document with the current piladb status.
