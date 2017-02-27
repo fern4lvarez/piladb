@@ -1,3 +1,5 @@
+// Package vars defines the configuration variables and default values
+// for piladb.
 package vars
 
 import "fmt"

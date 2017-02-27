@@ -44,6 +44,30 @@ func TestDatabaseCreateStack(t *testing.T) {
 	}
 }
 
+func TestDatabaseCreateStackWithBase(t *testing.T) {
+	db := NewDatabase("test-db")
+	id := db.CreateStackWithBase("test-stack", time.Now(), &TestBaseStack{})
+
+	if id == nil {
+		t.Fatal("stack ID is nil")
+	}
+
+	stack, ok := db.Stacks[id]
+	if !ok {
+		t.Fatal("stack not found in database")
+	}
+	if stack.ID != id {
+		t.Errorf("stack ID is %v, expected %v", stack.ID, id)
+	}
+	if stack.Name != "test-stack" {
+		t.Errorf("stack Name is %s, expected %s", stack.Name, "test-stack")
+	}
+
+	if !reflect.DeepEqual(stack.Database, db) {
+		t.Errorf("stack Database is %v, expected %v", stack.Database, db)
+	}
+}
+
 func TestDatabaseAddStack(t *testing.T) {
 	db := NewDatabase("test-db")
 	stack := NewStack("test-stack", time.Now())

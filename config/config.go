@@ -1,3 +1,4 @@
+// Package config implements the configuration management of piladb.
 package config
 
 import (
