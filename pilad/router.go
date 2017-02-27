@@ -15,6 +15,11 @@ func Router(conn *Conn) *mux.Router {
 	r.HandleFunc("/", conn.rootHandler).
 		Methods("GET")
 
+	// GET /_ping
+	// HEAD /_ping
+	r.HandleFunc("/_ping", conn.pingHandler).
+		Methods("GET", "HEAD")
+
 	// GET /_status
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")

@@ -66,6 +66,45 @@ func TestRootHandler(t *testing.T) {
 
 }
 
+func TestPingHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/_ping", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.pingHandler(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	pong, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(pong) != "pong" {
+		t.Errorf("pong is %s, expected pong", string(pong))
+	}
+}
+
+func TestPingHandler_HEAD(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("HEAD", "/_ping", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.pingHandler(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+}
+
 func TestStatusHandler(t *testing.T) {
 	conn := NewConn()
 	request, err := http.NewRequest("GET", "/_status", nil)
