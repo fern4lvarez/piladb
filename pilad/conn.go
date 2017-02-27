@@ -17,8 +17,12 @@ import (
 // Conn represents the current piladb connection, containing
 // the Pila instance and its status.
 type Conn struct {
-	Pila   *pila.Pila
+	// Pila is the object that handles all data entities.
+	Pila *pila.Pila
+	// Config handles the connection configuration.
 	Config *config.Config
+	// Status holds the status of the connection and
+	// resources management.
 	Status *Status
 
 	opDate time.Time
@@ -40,6 +44,12 @@ func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
 	redirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
 	log.Println(r.Method, r.URL, http.StatusMovedPermanently, "Moved to", redirAddress)
 	http.Redirect(w, r, redirAddress, http.StatusMovedPermanently)
+}
+
+// pingHandler writes pong.
+func (c *Conn) pingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write([]byte("pong"))
 }
 
 // statusHandler writes the piladb status into the response.
