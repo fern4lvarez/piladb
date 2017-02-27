@@ -17,8 +17,12 @@ import (
 // Conn represents the current piladb connection, containing
 // the Pila instance and its status.
 type Conn struct {
-	Pila   *pila.Pila
+	// Pila is the object that handles all data entities.
+	Pila *pila.Pila
+	// Config handles the connection configuration.
 	Config *config.Config
+	// Status holds the status of the connection and
+	// resources management.
 	Status *Status
 
 	opDate time.Time

@@ -1,3 +1,4 @@
+// Package date export date-related utilities.
 package date
 
 import "time"
