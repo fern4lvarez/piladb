@@ -129,6 +129,45 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	return element, true
 }
 
+// SweepPush makes a Sweep and Push operations as an atomic
+// one, returning the swept element and the validity of
+// the operation. If Stack was empty, it will return false.
+func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	if s.Size() == 0 {
+		return nil, false
+	}
+
+	head := &frame{
+		data: element,
+		down: s.head,
+		up:   nil,
+	}
+
+	swept := s.tail.data
+
+	// head becomes tail when there is
+	// a single element in the Stack
+	if s.Size() == 1 {
+		head.down = nil
+		s.tail = head
+		s.head = head
+		return swept, true
+	}
+
+	// set head
+	s.head.up = head
+	s.head = head
+
+	// sweep tail
+	s.tail = s.tail.up
+	s.tail.down = nil
+
+	return swept, true
+}
+
 // Size returns the number of elements that a stack contains.
 func (s *Stack) Size() int {
 	return s.size
