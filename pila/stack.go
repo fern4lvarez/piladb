@@ -77,6 +77,13 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	return s.base.Sweep()
 }
 
+// SweepPush removes and returns the bottommost element of the Stack,
+// and pushes an element on top of it, as an atomic operation.
+// If the Stack is empty, it returns false.
+func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
+	return s.base.SweepPush(element)
+}
+
 // Size returns the size of the Stack.
 func (s *Stack) Size() int {
 	return s.base.Size()
