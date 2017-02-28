@@ -9,11 +9,12 @@ import (
 
 type TestBaseStack struct{}
 
-func (s *TestBaseStack) Push(element interface{}) { return }
-func (s *TestBaseStack) Pop() (interface{}, bool) { return nil, false }
-func (s *TestBaseStack) Size() int                { return 0 }
-func (s *TestBaseStack) Peek() interface{}        { return nil }
-func (s *TestBaseStack) Flush()                   { return }
+func (s *TestBaseStack) Push(element interface{})   { return }
+func (s *TestBaseStack) Pop() (interface{}, bool)   { return nil, false }
+func (s *TestBaseStack) Sweep() (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Size() int                  { return 0 }
+func (s *TestBaseStack) Peek() interface{}          { return nil }
+func (s *TestBaseStack) Flush()                     { return }
 
 func TestNewStack(t *testing.T) {
 	now := time.Now()
