@@ -33,7 +33,7 @@ func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
 	conn.Config = config.NewConfig()
-	conn.Status = NewStatus(version.Version(version.VERSION), time.Now().UTC(), MemStats())
+	conn.Status = NewStatus(v(), time.Now().UTC(), MemStats())
 	return conn
 }
 
