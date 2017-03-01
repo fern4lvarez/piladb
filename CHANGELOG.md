@@ -7,8 +7,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - pilad: Add Go Version to Status
-- pilad: Add `/_ping` endpoint.
+- pilad: Add `/_ping` endpoint
 - godoc: Extend packages documentation
+- vendor: Update dependencies
 
 ### Fixed
 - Fix decoding bug when pushing a malformed payload
