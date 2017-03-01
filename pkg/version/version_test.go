@@ -26,7 +26,7 @@ func TestCommitHash(t *testing.T) {
 	}
 }
 
-func TestCommitHash_Unknown(t *testing.T) {
+func TestCommitHash_Undefined(t *testing.T) {
 	// normally $HOME is not version controlled
 	home, err := homedir.Dir()
 	if err != nil {
@@ -34,8 +34,8 @@ func TestCommitHash_Unknown(t *testing.T) {
 	}
 
 	os.Chdir(home)
-	if h := CommitHash(); h != "master" {
-		t.Errorf("CommitHash is %s, expected %s", h, "unknown")
+	if h := CommitHash(); h != "undefined" {
+		t.Errorf("CommitHash is %s, expected %s", h, "undefined")
 	}
 
 }
