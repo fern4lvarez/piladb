@@ -1497,6 +1497,44 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 	}
 }
 
+func TestPushStackHandler_NoElement(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+	s.Push(8)
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := []byte(`{"ement": 23}`)
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		bytes.NewBuffer(element))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.pushStackHandler(response, request, s)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != 8 {
+		t.Errorf("Pushed element is %v, expected %v", pushedElement, 8)
+	}
+
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
+	}
+}
+
 func TestPopStackHandler(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
