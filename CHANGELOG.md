@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - pilad: Add Go Version to Status
 - godoc: Extend packages documentation
 
+### Fixed
+- Fix decoding bug when pushing a malformed payload
+
 ## [0.1.1] - 2017-02-20
 
 ### Added
