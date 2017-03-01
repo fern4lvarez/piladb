@@ -29,7 +29,7 @@ func CommitHash() string {
 
 	b, err := cmd.Output()
 	if err != nil {
-		return "master"
+		return "undefined"
 	}
 	return strings.Replace(string(b), "\n", "", -1)
 }
