@@ -26,7 +26,7 @@ for an easier usage of the `piladb` image.
 2. Download an [automated build](https://registry.hub.docker.com/u/fern4lvarez/piladb/)
    from the public [Docker Hub Registry](https://registry.hub.docker.com/): `docker pull fern4lvarez/piladb`
 
-   Alternatively, you can build an image from Dockerfile: `docker build -t="fern4lvarez/piladb" github.com/fern4lvarez/piladb`.
+   Alternatively, you can build an image from Dockerfile: `docker build -t="fern4lvarez/piladb" .`.
 
 
 ### Usage
