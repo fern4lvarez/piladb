@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file.
 - godoc: Extend packages documentation
 - vendor: Update dependencies
 
+### Changed
+- pilad: Show links of interest in `/` endpoint.
+
 ### Fixed
 - Fix decoding bug when pushing a malformed payload
 
