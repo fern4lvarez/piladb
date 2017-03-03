@@ -9,7 +9,6 @@ import (
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
-	"github.com/fern4lvarez/piladb/pkg/version"
 
 	"github.com/gorilla/mux"
 )
@@ -39,11 +38,11 @@ func NewConn() *Conn {
 
 // Connection Handlers
 
-// rootHandler redirects to the pilad documentation site hosted on Github.
+// rootHandler shows information about piladb.
 func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
-	redirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
-	log.Println(r.Method, r.URL, http.StatusMovedPermanently, "Moved to", redirAddress)
-	http.Redirect(w, r, redirAddress, http.StatusMovedPermanently)
+	w.Header().Set("Content-Type", "application/json")
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write(links)
 }
 
 // statusHandler writes the piladb status into the response.
