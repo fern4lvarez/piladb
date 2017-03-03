@@ -6,7 +6,8 @@ databases and stacks. It exposes a RESTful HTTP server that listens to requests
 in order to interact with the engine.
 
 > Note: pilad API does not come with a built-in `pretty` option. We encourage
-  to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal.
+> to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal,
+> or advanced CLI HTTP clients like [HTTPie](https://httpie.org/).
 
 Endpoints
 ---------
@@ -15,7 +16,7 @@ Endpoints
 
 #### GET `/`
 
-Redirects to the `pilad` documentation site and returns `301 Moved Permanently`.
+Returns information about **piladb** and `200 OK`.
 
 #### GET `/_ping`
 

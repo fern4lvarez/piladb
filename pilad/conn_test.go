@@ -13,7 +13,6 @@ import (
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/date"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
-	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
 func TestNewConn(t *testing.T) {
@@ -43,25 +42,24 @@ func TestRootHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	response := httptest.NewRecorder()
-	expectedRedirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
 
 	conn.rootHandler(response, request)
 
-	if response.Code != http.StatusMovedPermanently {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusMovedPermanently)
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	locations, ok := response.Header()["Location"]
-	if !ok {
-		t.Fatal("no Location Header found")
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
-	if l := len(locations); l != 1 {
-		t.Fatalf("number of redirections is %d, expected %d", l, 1)
+	rootJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if l := locations[0]; l != expectedRedirAddress {
-		t.Errorf("redirection Address is %s, expected %s", l, expectedRedirAddress)
+	if string(rootJSON) != string(links) {
+		t.Errorf("response is %s, expected %s", string(rootJSON), string(links))
 	}
 
 }
