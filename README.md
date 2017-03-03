@@ -47,6 +47,16 @@ cd $GOPATH/src/github.com/fern4lvarez/piladb
 make pilad
 ```
 
+Clients
+-------
+
+* shell: https://github.com/oscillatingworks/piladb-sh:
+
+  ```
+  source <(curl -s https://raw.githubusercontent.com/oscillatingworks/piladb-sh/master/piladb.sh)
+  piladb_help
+  ```
+
 Development
 -----------
 
