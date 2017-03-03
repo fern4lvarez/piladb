@@ -9,7 +9,7 @@ FROM golang:latest
 # Install basic development tools.
 RUN \
   apt-get update && \
-  apt-get install -y git vim
+  apt-get install -y git vim httpie
 
 # Install dependencies.
 RUN \
@@ -20,6 +20,10 @@ RUN \
   go get github.com/fern4lvarez/piladb && \
   cd /go/src/github.com/fern4lvarez/piladb && \
   make all
+
+# Install piladb.sh utilities.
+RUN \
+  echo "source <(curl -s https://raw.githubusercontent.com/oscillatingworks/piladb-sh/master/piladb.sh)\nexport PILADB_HOST=127.0.0.1:1205\n" >> /root/.bashrc
 
 # Define mountable directories.
 VOLUME ["/go/src/github.com/fern4lvarez/piladb"]
