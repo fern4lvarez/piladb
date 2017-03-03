@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - pilad: Add `/_ping` endpoint
 - godoc: Extend packages documentation
 - vendor: Update dependencies
+- dev: Add pila.sh utilities to Docker image
 
 ### Changed
 - pilad: Show links of interest in `/` endpoint.
