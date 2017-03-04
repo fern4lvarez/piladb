@@ -954,6 +954,66 @@ func TestStackHandler_POST(t *testing.T) {
 	}
 }
 
+func TestStackHandler_PUT(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+	conn.opDate = time.Now().UTC()
+
+	paramss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, params := range paramss {
+		request, err := http.NewRequest("PUT",
+			fmt.Sprintf("/databases/%s/stacks/%s?block",
+				params["database_id"],
+				params["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.Header.Set("Content-Type", "application/json")
+
+		response := httptest.NewRecorder()
+
+		stackHandle := conn.stackHandler(&params)
+		stackHandle.ServeHTTP(response, request)
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		expectedStackStatusJSON, err := s.Status().ToJSON()
+		stackStatusJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
+			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
+		}
+	}
+}
+
 func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
@@ -1669,6 +1729,71 @@ func TestFlushStackHandler(t *testing.T) {
 		s.Push("one")
 		s.Push("two")
 		s.Push("three")
+	}
+}
+
+func TestBlockStackHandler(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	expectedStackStatusJSON, err := s.Status().ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	varss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, vars := range varss {
+		request, err := http.NewRequest("PUT",
+			fmt.Sprintf("/databases/%s/stacks/%s?block",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.blockStackHandler(response, request, s)
+
+		if db.Stacks[s.ID].Blocked != true {
+			t.Error("stack isn't blocked")
+		}
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		stackStatusJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
+			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
+		}
 	}
 }
 
