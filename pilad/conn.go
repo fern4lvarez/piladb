@@ -206,7 +206,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
-// the PUSH, POP, PEEK and SIZE methods, and the stack deletion.
+// the PUSH, POP, PEEK, SIZE and BLOCK methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c.opDate = time.Now().UTC()
@@ -245,6 +245,14 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 
 		case r.Method == "POST":
 			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
+			return
+
+		case r.Method == "PUT":
+			_ = r.ParseForm()
+			if _, ok := r.Form["block"]; ok {
+				c.blockStackHandler(w, r, stack)
+				return
+			}
 			return
 
 		case r.Method == "DELETE":
@@ -362,6 +370,20 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider that a flushed
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
+	w.Write(b)
+}
+
+// blockStackHandler blocks the Stack, not allowing mutable operations in the stack.
+func (c *Conn) blockStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Block()
+	stack.Update(c.opDate)
+
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a blocked
 	// stack has no JSON encoding issues.
 	b, _ := stack.Status().ToJSON()
 	w.Write(b)

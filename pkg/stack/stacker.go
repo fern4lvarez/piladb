@@ -14,6 +14,4 @@ type Stacker interface {
 	Peek() interface{}
 	// Flush flushes a Stack
 	Flush()
-	// Block blocks a Stack
-	Block()
 }
