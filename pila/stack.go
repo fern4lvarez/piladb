@@ -38,6 +38,8 @@ type Stack struct {
 	// when one of these events happens, but it needs to be set by hand.
 	ReadAt time.Time
 
+	Blocked bool
+
 	// base represents the Stack data structure
 	base stack.Stacker
 }
@@ -58,6 +60,11 @@ func NewStackWithBase(name string, t time.Time, base stack.Stacker) *Stack {
 	s.CreatedAt = t
 	s.base = base
 	return s
+}
+
+// Block blocks the Stack.
+func (s *Stack) Block() {
+	s.Blocked = true
 }
 
 // Push an element on top of the Stack.
