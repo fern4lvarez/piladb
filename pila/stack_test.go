@@ -14,6 +14,7 @@ func (s *TestBaseStack) Pop() (interface{}, bool) { return nil, false }
 func (s *TestBaseStack) Size() int                { return 0 }
 func (s *TestBaseStack) Peek() interface{}        { return nil }
 func (s *TestBaseStack) Flush()                   { return }
+func (s *TestBaseStack) Block() bool              { return false }
 
 func TestNewStack(t *testing.T) {
 	now := time.Now()
@@ -140,6 +141,17 @@ func TestStackSize(t *testing.T) {
 	}
 	if stack.Size() != 10 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 10)
+	}
+}
+
+func TestStackBlock(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+	stack.Block()
+
+	if stack.Blocked != true {
+		t.Errorf("stack isn't blocked")
 	}
 }
 
