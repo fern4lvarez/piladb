@@ -1124,7 +1124,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 				t.Errorf("db contains %v, expected not to", io.input.stack)
 			}
 		} else {
-			if peek, ok := db.Stacks[s.ID].Pop(); ok {
+			if peek, err := db.Stacks[s.ID].Pop(); err == nil {
 				t.Errorf("stack contains %v, expected to be empty", peek)
 			}
 
@@ -1598,7 +1598,7 @@ func TestPopStackHandler(t *testing.T) {
 
 		conn.popStackHandler(response, request, s)
 
-		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+		if peek, err := db.Stacks[s.ID].Pop(); err == nil {
 			t.Errorf("stack contains %v, expected to be empty", peek)
 		}
 
@@ -1700,7 +1700,7 @@ func TestFlushStackHandler(t *testing.T) {
 
 		conn.flushStackHandler(response, request, s)
 
-		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+		if peek, err := db.Stacks[s.ID].Pop(); err == nil {
 			t.Errorf("stack contains %v, expected to be empty", peek)
 		}
 

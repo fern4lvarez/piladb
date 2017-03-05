@@ -2,6 +2,7 @@ package pila
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -68,14 +69,27 @@ func (s *Stack) Block() {
 }
 
 // Push an element on top of the Stack.
-func (s *Stack) Push(element interface{}) {
+func (s *Stack) Push(element interface{}) error {
+	if s.Blocked {
+		return errors.New("Stack is blocked")
+	}
 	s.base.Push(element)
+	return nil
 }
 
 // Pop removes and returns the element on top of the Stack.
 // If the Stack was empty, it returns false.
-func (s *Stack) Pop() (interface{}, bool) {
-	return s.base.Pop()
+func (s *Stack) Pop() (interface{}, error) {
+	if s.Blocked {
+		return nil, errors.New("Stack is blocked")
+	}
+
+	element := s.base.Pop()
+
+	if element != nil {
+		return element, nil
+	}
+	return nil, errors.New("Stack is empty")
 }
 
 // Size returns the size of the Stack.
@@ -89,8 +103,12 @@ func (s *Stack) Peek() interface{} {
 }
 
 // Flush flushes the content of the Stack.
-func (s *Stack) Flush() {
+func (s *Stack) Flush() error {
+	if s.Blocked {
+		return errors.New("Stack is blocked")
+	}
 	s.base.Flush()
+	return nil
 }
 
 // Update takes a date and updates UpdateAt and ReadAt

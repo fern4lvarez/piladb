@@ -7,7 +7,7 @@ type Stacker interface {
 	// Push an element into a Stack
 	Push(element interface{})
 	// Pop the topmost element of a stack
-	Pop() (interface{}, bool)
+	Pop() interface{}
 	// Size returns the size of the Stack
 	Size() int
 	// Peek returns the topmost element of the Stack

@@ -39,10 +39,12 @@ func TestIntegrationBasic(t *testing.T) {
 
 	var ok = true
 	for ok {
-		var element interface{}
-		element, ok = stack1.Pop()
-		if ok {
+		element, _ := stack1.Pop()
+
+		if element != nil {
 			stack2.Push(element)
+		} else {
+			break
 		}
 	}
 

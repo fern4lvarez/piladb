@@ -32,8 +32,8 @@ func TestStackPop(t *testing.T) {
 	stack.Push("test")
 	stack.Push(8)
 
-	element, ok := stack.Pop()
-	if !ok {
+	element := stack.Pop()
+	if element == nil {
 		t.Errorf("stack.Pop() not ok")
 	}
 	if element != 8 {
@@ -52,8 +52,9 @@ func TestStackPop(t *testing.T) {
 
 func TestStackPop_False(t *testing.T) {
 	stack := NewStack()
-	_, ok := stack.Pop()
-	if ok {
+	element := stack.Pop()
+
+	if element != nil {
 		t.Error("stack.Pop() is ok")
 	}
 }

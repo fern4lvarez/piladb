@@ -345,8 +345,8 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 
 // popStackHandler extracts the peek element of a Stack, returns 200 and returns it.
 func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-	value, ok := stack.Pop()
-	if !ok {
+	value, err := stack.Pop()
+	if err != nil {
 		log.Println(r.Method, r.URL, http.StatusNoContent)
 		w.WriteHeader(http.StatusNoContent)
 		return

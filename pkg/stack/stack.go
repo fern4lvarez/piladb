@@ -46,18 +46,18 @@ func (s *Stack) Push(element interface{}) {
 // Pop removes and returns the element on top of the stack,
 // updating its head to the next Frame. If the stack was empty,
 // it returns false.
-func (s *Stack) Pop() (interface{}, bool) {
+func (s *Stack) Pop() interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
 	if s.head == nil {
-		return nil, false
+		return nil
 	}
 
 	element := s.head.data
 	s.head = s.head.next
 	s.size--
-	return element, true
+	return element
 }
 
 // Size returns the number of elements that a stack contains.

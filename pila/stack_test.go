@@ -10,7 +10,7 @@ import (
 type TestBaseStack struct{}
 
 func (s *TestBaseStack) Push(element interface{}) { return }
-func (s *TestBaseStack) Pop() (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Pop() interface{}         { return nil }
 func (s *TestBaseStack) Size() int                { return 0 }
 func (s *TestBaseStack) Peek() interface{}        { return nil }
 func (s *TestBaseStack) Flush()                   { return }
@@ -98,13 +98,33 @@ func TestStackPush(t *testing.T) {
 	}
 }
 
+func TestBlockedStackPush(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push(1)
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+
+	stack.Block()
+	err := stack.Push(2)
+
+	if err == nil {
+		t.Error("stack should be blocked and non-mutable operations are allowed")
+	}
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 1)
+	}
+}
+
 func TestStackPop(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
 	stack.Push(8)
 
-	element, ok := stack.Pop()
-	if !ok {
+	element, err := stack.Pop()
+	if err != nil {
 		t.Errorf("stack.Pop() not ok")
 	}
 	if element != 8 {
@@ -115,11 +135,31 @@ func TestStackPop(t *testing.T) {
 	}
 }
 
-func TestStackPop_False(t *testing.T) {
+func TestBlockedStackPop(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
-	_, ok := stack.Pop()
-	if ok {
-		t.Error("stack.Pop() is ok")
+	stack.Push(1)
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+
+	stack.Block()
+	_, err := stack.Pop()
+
+	if err == nil {
+		t.Error("stack should be blocked and non-mutable operations are allowed")
+	}
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 1)
+	}
+}
+
+func TestStackPop_Error(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	peek, err := stack.Pop()
+	if err == nil {
+		t.Errorf("stack.Pop() returned %v, should be empty", peek)
 	}
 }
 
@@ -178,6 +218,26 @@ func TestStackFlush(t *testing.T) {
 	}
 	if stack.Peek() != nil {
 		t.Errorf("stack peek is not nil")
+	}
+}
+
+func TestBlockedStackFlush(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push(1)
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+
+	stack.Block()
+	err := stack.Flush()
+
+	if err == nil {
+		t.Error("stack should be blocked and non-mutable operations are allowed")
+	}
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 1)
 	}
 }
 
