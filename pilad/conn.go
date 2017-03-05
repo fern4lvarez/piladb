@@ -40,6 +40,7 @@ func NewConn() *Conn {
 
 // rootHandler shows information about piladb.
 func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
+	var links = []byte(`{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`)
 	w.Header().Set("Content-Type", "application/json")
 	log.Println(r.Method, r.URL, http.StatusOK)
 	w.Write(links)

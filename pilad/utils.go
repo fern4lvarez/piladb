@@ -9,8 +9,6 @@ import (
 	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
-var links = []byte(`{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`)
-
 // ResourceDatabase will return the right Database resource
 // given a Conn and a database ID or Name.
 func ResourceDatabase(conn *Conn, databaseInput string) (*pila.Database, bool) {

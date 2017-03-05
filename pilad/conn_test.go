@@ -43,6 +43,8 @@ func TestRootHandler(t *testing.T) {
 	}
 	response := httptest.NewRecorder()
 
+	var expectedRoot = `{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`
+
 	conn.rootHandler(response, request)
 
 	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
@@ -58,8 +60,8 @@ func TestRootHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(rootJSON) != string(links) {
-		t.Errorf("response is %s, expected %s", string(rootJSON), string(links))
+	if string(rootJSON) != expectedRoot {
+		t.Errorf("response is %s, expected %s", string(rootJSON), expectedRoot)
 	}
 
 }
