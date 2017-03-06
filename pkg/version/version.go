@@ -11,7 +11,7 @@ import (
 // It must be set when creating a new release,
 // otherwise people building the project from
 // source will get an inaccurate version.
-const VERSION = "0.1.2"
+const VERSION = ""
 
 // Version returns piladb version given a v version. If v is empty,
 // defaults to CommitHash.
