@@ -1,0 +1,29 @@
+{
+    "memo": "56e9e2eb8dff4ae328332bf64aba30efaed5e2351b1dd942d089b814a3eac77c",
+    "projects": [
+        {
+            "name": "github.com/gorilla/context",
+            "version": "v1.1",
+            "revision": "a85d2e53ba63bdea074dbbbb5983f0516974e87b",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/gorilla/mux",
+            "version": "v1.3.0",
+            "revision": "392c28fe23e1c45ddba891b0320b3b5df220beea",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/mitchellh/go-homedir",
+            "branch": "master",
+            "revision": "b8bc1bf767474819792c23f32d8286a45736f1c6",
+            "packages": [
+                "."
+            ]
+        }
+    ]
+}
