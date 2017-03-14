@@ -352,6 +352,7 @@ func TestElementDecode(t *testing.T) {
 		`{"element":3.14}`,
 		`{"element":"aGVsbG8="}`,
 		`{"element":{"one":1}}`,
+		`{"element":null}`,
 	}
 	expectedElements := []Element{
 		{Value: "foo"},
@@ -359,6 +360,7 @@ func TestElementDecode(t *testing.T) {
 		{Value: 3.14},
 		{Value: "aGVsbG8="},                         // does not decode into []byte
 		{Value: map[string]interface{}{"one": 1.0}}, // decode inner int into float
+		{Value: nil},
 	}
 
 	for i, elementReader := range elementReaders {
@@ -382,6 +384,7 @@ func TestElementDecode_Error(t *testing.T) {
 		` `,
 		`$`,
 		`%{}`,
+		`{"ement":"foo"}`,
 	}
 
 	for _, elementReader := range elementReaders {

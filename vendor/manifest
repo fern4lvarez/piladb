@@ -13,7 +13,7 @@
 			"importpath": "github.com/gorilla/mux",
 			"repository": "https://github.com/gorilla/mux",
 			"vcs": "git",
-			"revision": "757bef944d0f21880861c2dd9c871ca543023cba",
+			"revision": "599cba5e7b6137d46ddf58fb1765f5d928e69604",
 			"branch": "master",
 			"notests": true
 		},
@@ -21,7 +21,7 @@
 			"importpath": "github.com/mitchellh/go-homedir",
 			"repository": "https://github.com/mitchellh/go-homedir",
 			"vcs": "git",
-			"revision": "756f7b183b7ab78acdbbee5c7f392838ed459dda",
+			"revision": "b8bc1bf767474819792c23f32d8286a45736f1c6",
 			"branch": "master",
 			"notests": true
 		}

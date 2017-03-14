@@ -241,6 +241,7 @@ func TestConfigKeyHandler_BadRequest(t *testing.T) {
 		{"GET", nil},
 		{"POST", nil},
 		{"POST", bytes.NewBuffer([]byte("{"))},
+		{"POST", bytes.NewBuffer([]byte(`{"elemnt":8}`))},
 	}
 
 	for _, in := range input {

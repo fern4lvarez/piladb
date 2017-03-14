@@ -1,7 +1,9 @@
 package pila
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -164,6 +166,13 @@ func (element Element) ToJSON() ([]byte, error) {
 
 // Decode decodes json data into an Element.
 func (element *Element) Decode(r io.Reader) error {
-	decoder := json.NewDecoder(r)
+	elementBuffer := new(bytes.Buffer)
+	elementBuffer.ReadFrom(r)
+
+	if !bytes.HasPrefix(elementBuffer.Bytes(), []byte(`{"element"`)) {
+		return errors.New("malformed payload, missing element key?")
+	}
+
+	decoder := json.NewDecoder(elementBuffer)
 	return decoder.Decode(element)
 }

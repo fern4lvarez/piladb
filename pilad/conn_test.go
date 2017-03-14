@@ -13,7 +13,6 @@ import (
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/date"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
-	"github.com/fern4lvarez/piladb/pkg/version"
 )
 
 func TestNewConn(t *testing.T) {
@@ -43,27 +42,67 @@ func TestRootHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	response := httptest.NewRecorder()
-	expectedRedirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
+
+	var expectedRoot = `{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`
 
 	conn.rootHandler(response, request)
 
-	if response.Code != http.StatusMovedPermanently {
-		t.Errorf("response code is %v, expected %v", response.Code, http.StatusMovedPermanently)
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
 	}
 
-	locations, ok := response.Header()["Location"]
-	if !ok {
-		t.Fatal("no Location Header found")
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
 	}
 
-	if l := len(locations); l != 1 {
-		t.Fatalf("number of redirections is %d, expected %d", l, 1)
+	rootJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if l := locations[0]; l != expectedRedirAddress {
-		t.Errorf("redirection Address is %s, expected %s", l, expectedRedirAddress)
+	if string(rootJSON) != expectedRoot {
+		t.Errorf("response is %s, expected %s", string(rootJSON), expectedRoot)
 	}
 
+}
+
+func TestPingHandler(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("GET", "/_ping", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.pingHandler(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	pong, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(pong) != "pong" {
+		t.Errorf("pong is %s, expected pong", string(pong))
+	}
+}
+
+func TestPingHandler_HEAD(t *testing.T) {
+	conn := NewConn()
+	request, err := http.NewRequest("HEAD", "/_ping", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+
+	conn.pingHandler(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
 }
 
 func TestStatusHandler(t *testing.T) {
@@ -1547,6 +1586,44 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
 		t.Errorf("Pushed element is %v, expected nil", pushedElement)
+	}
+
+	if response.Code != http.StatusBadRequest {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
+	}
+}
+
+func TestPushStackHandler_NoElement(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+	s.Push(8)
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := []byte(`{"ement": 23}`)
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		bytes.NewBuffer(element))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.pushStackHandler(response, request, s)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != 8 {
+		t.Errorf("Pushed element is %v, expected %v", pushedElement, 8)
 	}
 
 	if response.Code != http.StatusBadRequest {
