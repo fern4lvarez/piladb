@@ -9,11 +9,13 @@ import (
 
 type TestBaseStack struct{}
 
-func (s *TestBaseStack) Push(element interface{}) { return }
-func (s *TestBaseStack) Pop() (interface{}, bool) { return nil, false }
-func (s *TestBaseStack) Size() int                { return 0 }
-func (s *TestBaseStack) Peek() interface{}        { return nil }
-func (s *TestBaseStack) Flush()                   { return }
+func (s *TestBaseStack) Push(element interface{})                          { return }
+func (s *TestBaseStack) Pop() (interface{}, bool)                          { return nil, false }
+func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
+func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Size() int                                         { return 0 }
+func (s *TestBaseStack) Peek() interface{}                                 { return nil }
+func (s *TestBaseStack) Flush()                                            { return }
 
 func TestNewStack(t *testing.T) {
 	now := time.Now()
@@ -119,6 +121,62 @@ func TestStackPop_False(t *testing.T) {
 	_, ok := stack.Pop()
 	if ok {
 		t.Error("stack.Pop() is ok")
+	}
+}
+
+func TestStackSweep(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+
+	element, ok := stack.Sweep()
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.Peek() != 8 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 8)
+	}
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
+	}
+}
+
+func TestStackSweep_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	_, ok := stack.Sweep()
+	if ok {
+		t.Error("stack.Sweep() is ok")
+	}
+}
+
+func TestStackSweepPush(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+
+	element, ok := stack.SweepPush("foo")
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.Peek() != "foo" {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), "foo")
+	}
+	if stack.Size() != 2 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 2)
+	}
+}
+
+func TestStackSweepPush_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	_, ok := stack.SweepPush(8)
+	if ok {
+		t.Error("stack.SweepPush(8) is ok")
 	}
 }
 

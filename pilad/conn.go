@@ -329,7 +329,16 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
-	stack.Push(element.Value)
+	// Depending on the scenario, we sweep and push, or we only push.
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.SweepPush(element.Value); ok {
+			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+	} else {
+		stack.Push(element.Value)
+	}
+
 	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)

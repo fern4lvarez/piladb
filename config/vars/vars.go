@@ -34,6 +34,14 @@ const (
 	// PortDefault represents the default value
 	// of Port.
 	PortDefault = 1205
+
+	// PushWhenFull enables to keep pushing elements
+	// into a Stack, even if this is full. If this is
+	// the case, the base element will be deleted.
+	PushWhenFull = "PUSH_WHEN_FULL"
+	// PushWhenFullDefault represents the default value
+	// of PushWhenFull.
+	PushWhenFullDefault = false
 )
 
 // Env returns the environment variable name
@@ -56,4 +64,14 @@ func DefaultInt(name string) int {
 		return PortDefault
 	}
 	return -1
+}
+
+// DefaultBool returns the default value of a config
+// name of boolean type.
+func DefaultBool(name string) bool {
+	switch name {
+	case PushWhenFull:
+		return PushWhenFullDefault
+	}
+	return false
 }

@@ -1464,6 +1464,63 @@ func TestPushStackHandler_Name(t *testing.T) {
 	}
 }
 
+func TestPushStackHandler_SweepBefore(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+	s.Push("foo")
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := pila.Element{Value: "test-element"}
+	expectedElementJSON, _ := element.ToJSON()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		bytes.NewBuffer(expectedElementJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.Config.Set("SWEEP_BEFORE_PUSH", true)
+	conn.pushStackHandler(response, request, s)
+
+	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
+		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
+	}
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	if size := db.Stacks[s.ID].Size(); size != 1 {
+		t.Errorf("Stack size is %d, expected %d", size, 1)
+	}
+
+	elementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(elementJSON) != string(expectedElementJSON) {
+		t.Errorf("pushed element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+	}
+}
+
 func TestPushStackHandler_Empty(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
