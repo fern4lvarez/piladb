@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add option to allow pushing on a Stack when this is full
+
 ## [0.1.2] - 2017-03-05
 
 ### Added
