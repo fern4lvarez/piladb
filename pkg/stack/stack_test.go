@@ -121,3 +121,12 @@ func TestStackFlush(t *testing.T) {
 		t.Errorf("stack is not empty")
 	}
 }
+
+func TestRace(t *testing.T) {
+	stack := NewStack()
+	go func() { stack.Push(1) }()
+	go func() { stack.Pop() }()
+	go func() { stack.Size() }()
+	go func() { stack.Peek() }()
+	go func() { stack.Flush() }()
+}
