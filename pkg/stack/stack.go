@@ -64,6 +64,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 func (s *Stack) Size() int {
 	s.mux.Lock()
 	defer s.mux.Unlock()
+
 	return s.size
 }
 
@@ -71,6 +72,7 @@ func (s *Stack) Size() int {
 func (s *Stack) Peek() interface{} {
 	s.mux.Lock()
 	defer s.mux.Unlock()
+
 	if s.head == nil {
 		return nil
 	}

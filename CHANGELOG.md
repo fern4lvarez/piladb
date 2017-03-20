@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- pkg/stack: fix data race conditions on Size and Peek
+
 ## [0.1.2] - 2017-03-05
 
 ### Added
