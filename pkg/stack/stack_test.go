@@ -122,7 +122,7 @@ func TestStackFlush(t *testing.T) {
 	}
 }
 
-func TestRace(t *testing.T) {
+func TestStackRace(t *testing.T) {
 	stack := NewStack()
 	go func() { stack.Push(1) }()
 	go func() { stack.Pop() }()
