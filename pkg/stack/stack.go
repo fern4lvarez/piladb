@@ -12,7 +12,7 @@ import "sync"
 type Stack struct {
 	head *frame
 	size int
-	mux  sync.Mutex
+	mux  sync.RWMutex
 }
 
 // frame represents an element of the stack. It contains
@@ -62,16 +62,16 @@ func (s *Stack) Pop() (interface{}, bool) {
 
 // Size returns the number of elements that a stack contains.
 func (s *Stack) Size() int {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.mux.RLock()
+	defer s.mux.RUnlock()
 
 	return s.size
 }
 
 // Peek returns the element on top of the stack.
 func (s *Stack) Peek() interface{} {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.mux.RLock()
+	defer s.mux.RUnlock()
 
 	if s.head == nil {
 		return nil
