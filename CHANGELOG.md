@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- pkg/stack: Use RWMutex for concurrent reads
+
 ### Fixed
 - pkg/stack: Fix data race conditions on Size and Peek
-- pkg/stack: Use RWMutex for concurrent reads
 
 ## [0.1.2] - 2017-03-05
 
