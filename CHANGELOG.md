@@ -5,8 +5,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- pkg/stack: Use RWMutex for concurrent reads
+
 ### Fixed
-- pkg/stack: fix data race conditions on Size and Peek
+- pkg/stack: Fix data race conditions on Size and Peek
 
 ## [0.1.2] - 2017-03-05
 
@@ -18,7 +21,7 @@ All notable changes to this project will be documented in this file.
 - dev: Add pila.sh utilities to Docker image
 
 ### Changed
-- pilad: Show links of interest in `/` endpoint.
+- pilad: Show links of interest in `/` endpoint
 
 ### Fixed
 - Fix decoding bug when pushing a malformed payload
