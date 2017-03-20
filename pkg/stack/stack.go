@@ -62,11 +62,15 @@ func (s *Stack) Pop() (interface{}, bool) {
 
 // Size returns the number of elements that a stack contains.
 func (s *Stack) Size() int {
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	return s.size
 }
 
 // Peek returns the element on top of the stack.
 func (s *Stack) Peek() interface{} {
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	if s.head == nil {
 		return nil
 	}
