@@ -73,6 +73,12 @@ func (s *Stack) Pop() (interface{}, bool) {
 	return s.base.Pop()
 }
 
+// Base bases the Stack on an element, so this becomes
+// the bottommost one of the Stack.
+func (s *Stack) Base(element interface{}) {
+	s.base.Base(element)
+}
+
 // Sweep removes and returns the bottommost element of the Stack.
 // If the Stack is empty, it returns false.
 func (s *Stack) Sweep() (interface{}, bool) {
