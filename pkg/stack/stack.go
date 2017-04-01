@@ -47,7 +47,7 @@ func (s *Stack) Push(element interface{}) {
 
 	// connect former head with new head
 	// if Stack had already an element
-	if s.Size() > 0 {
+	if s.size > 0 {
 		s.head.up = head
 	}
 
@@ -56,7 +56,7 @@ func (s *Stack) Push(element interface{}) {
 
 	// tail and head are the same element
 	// when pushing a first one
-	if s.Size() == 1 {
+	if s.size == 1 {
 		s.tail = head
 		return
 	}
@@ -64,7 +64,7 @@ func (s *Stack) Push(element interface{}) {
 	// update the tail when the pushed
 	// element is the only on top of the
 	// tail
-	if s.Size() == 2 {
+	if s.size == 2 {
 		s.tail.up = s.head
 	}
 }
@@ -76,7 +76,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if s.Size() == 0 {
+	if s.size == 0 {
 		return nil, false
 	}
 
@@ -86,7 +86,7 @@ func (s *Stack) Pop() (interface{}, bool) {
 
 	// update the tail when it's the
 	// only element after the Pop operation
-	if s.Size() == 1 {
+	if s.size == 1 {
 		s.tail.up = nil
 	}
 
@@ -100,7 +100,7 @@ func (s *Stack) Sweep() (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if s.Size() == 0 {
+	if s.size == 0 {
 		return nil, false
 	}
 
@@ -109,7 +109,7 @@ func (s *Stack) Sweep() (interface{}, bool) {
 
 	// head and tail are nil
 	// if Stack has no elements
-	if s.Size() == 0 {
+	if s.size == 0 {
 		s.head = nil
 		s.tail = nil
 		return element, true
@@ -117,7 +117,7 @@ func (s *Stack) Sweep() (interface{}, bool) {
 
 	// head becomes the tail when
 	// is the remaining element in Stack
-	if s.Size() == 1 {
+	if s.size == 1 {
 		s.head.down = nil
 		s.head.up = nil
 		s.tail = s.head
@@ -136,7 +136,7 @@ func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if s.Size() == 0 {
+	if s.size == 0 {
 		return nil, false
 	}
 
@@ -150,7 +150,7 @@ func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
 
 	// head becomes tail when there is
 	// a single element in the Stack
-	if s.Size() == 1 {
+	if s.size == 1 {
 		head.down = nil
 		s.tail = head
 		s.head = head
