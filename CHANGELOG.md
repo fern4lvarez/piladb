@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Add option to allow pushing on a Stack when this is full
+
 ### Changed
 - pkg/stack: Use RWMutex for concurrent reads
 
