@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"encoding/json"
 
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
@@ -250,6 +251,10 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.sizeStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["empty"]; ok {
+				c.emptyStackHandler(w, r, stack)
+				return
+			}
 			c.statusStackHandler(w, r, stack)
 			return
 
@@ -309,6 +314,16 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	// Do not check error as we consider the size
 	// of a stack valid for a JSON encoding.
 	w.Write(stack.SizeToJSON())
+}
+
+// emptyStackHandler check if the Stack is empty.
+func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Size(), stack.Empty())
+	w.Header().Set("Content-Type", "application/json")
+	emptyHandlerResponse, _ := json.Marshal(stack.Empty())
+
+	w.Write(emptyHandlerResponse)
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
