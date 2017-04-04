@@ -324,9 +324,9 @@ func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *
 
 	// Do not check error as we consider a boolean
 	// valid for a JSON encoding.
-	emptyHandlerResponse, _ := json.Marshal(stack.Empty())
+	emptyStackHandlerResponse, _ := json.Marshal(stack.Empty())
 
-	w.Write(emptyHandlerResponse)
+	w.Write(emptyStackHandlerResponse)
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
