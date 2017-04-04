@@ -147,14 +147,14 @@ func TestStackSize(t *testing.T) {
 func TestStackEmpty(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	if !stack.Empty() {
-		t.Errorf("stack.Empty() is %d, expected %d", stack.Empty(), true)
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), true)
 	}
 
 	for i := 0; i < 2; i++ {
 		stack.Push(i)
 	}
 	if stack.Empty() {
-		t.Errorf("stack.Empty() is %d, expected %d", stack.Empty(), false)
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), false)
 	}
 }
 
