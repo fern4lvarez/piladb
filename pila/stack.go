@@ -91,7 +91,7 @@ func (s *Stack) Size() int {
 	return s.base.Size()
 }
 
-// Empty returns if a stack is empty.
+// Empty returns true if a stack is empty.
 func (s *Stack) Empty() bool {
 	return s.base.Size() == 0
 }

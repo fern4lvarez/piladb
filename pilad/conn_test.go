@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"encoding/json"
 
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/date"
@@ -844,7 +843,7 @@ func TestStackHandler_GET(t *testing.T) {
 	}
 
 	expectedSizeJSON := s.SizeToJSON()
-	expectedEmptyResponseJSON, _ := json.Marshal(s.Empty())
+	expectedEmptyResponseJSON := []byte("false")
 
 	inputOutput := []struct {
 		input struct {
@@ -1412,12 +1411,10 @@ func TestEmptyStackHandler_Empty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedEmptyJSON, _ := json.Marshal(s.Empty())
-
-	if string(emptyJSON) != string(expectedEmptyJSON) {
-		t.Errorf("is empty response is %v, expected %v", string(emptyJSON), string(expectedEmptyJSON))
+	expectedEmpty := "true"
+	if string(emptyJSON) != expectedEmpty {
+		t.Errorf("empty is %v, expected %v", string(emptyJSON), expectedEmpty)
 	}
-
 }
 
 func TestEmptyStackHandler_NonEmpty(t *testing.T) {
@@ -1461,10 +1458,10 @@ func TestEmptyStackHandler_NonEmpty(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedEmptyJSON, _ := json.Marshal(s.Empty())
 
-	if string(emptyJSON) != string(expectedEmptyJSON) {
-		t.Errorf("is empty response is %v, expected %v", string(emptyJSON), string(expectedEmptyJSON))
+	expectedEmpty := "false"
+	if string(emptyJSON) != expectedEmpty {
+		t.Errorf("is empty response is %v, expected %v", string(emptyJSON), expectedEmpty)
 	}
 
 }

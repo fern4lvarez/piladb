@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"encoding/json"
 
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
@@ -316,11 +316,14 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(stack.SizeToJSON())
 }
 
-// emptyStackHandler check if the Stack is empty.
+// emptyStackHandler checks if the Stack is empty.
 func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Read(c.opDate)
-	log.Println(r.Method, r.URL, http.StatusOK, stack.Size(), stack.Empty())
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Empty())
 	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider a boolean
+	//  valid for a JSON encoding.
 	emptyHandlerResponse, _ := json.Marshal(stack.Empty())
 
 	w.Write(emptyHandlerResponse)
