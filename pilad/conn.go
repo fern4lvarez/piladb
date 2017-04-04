@@ -323,7 +323,7 @@ func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider a boolean
-	//  valid for a JSON encoding.
+	// valid for a JSON encoding.
 	emptyHandlerResponse, _ := json.Marshal(stack.Empty())
 
 	w.Write(emptyHandlerResponse)
