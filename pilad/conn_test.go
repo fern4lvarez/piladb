@@ -1466,7 +1466,7 @@ func TestEmptyStackHandler_NonEmpty(t *testing.T) {
 
 }
 
-func TestPushStackHandler(t *testing.T) {
+func TestAddElementStackHandler(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
@@ -1493,7 +1493,7 @@ func TestPushStackHandler(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
@@ -1517,7 +1517,7 @@ func TestPushStackHandler(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler_Name(t *testing.T) {
+func TestAddElementStackHandler_Name(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
@@ -1544,7 +1544,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
@@ -1568,7 +1568,7 @@ func TestPushStackHandler_Name(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler_SweepBefore(t *testing.T) {
+func TestAddElementStackHandler_SweepBefore(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
@@ -1597,7 +1597,7 @@ func TestPushStackHandler_SweepBefore(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	conn.Config.Set("SWEEP_BEFORE_PUSH", true)
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != element.Value {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, element.Value)
@@ -1625,7 +1625,7 @@ func TestPushStackHandler_SweepBefore(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler_Empty(t *testing.T) {
+func TestAddElementStackHandler_Empty(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
@@ -1649,7 +1649,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
 		t.Errorf("Pushed element is %v, expected nil", pushedElement)
@@ -1660,7 +1660,7 @@ func TestPushStackHandler_Empty(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler_BadDecoding(t *testing.T) {
+func TestAddElementStackHandler_BadDecoding(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
@@ -1686,7 +1686,7 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != nil {
 		t.Errorf("Pushed element is %v, expected nil", pushedElement)
@@ -1697,7 +1697,7 @@ func TestPushStackHandler_BadDecoding(t *testing.T) {
 	}
 }
 
-func TestPushStackHandler_NoElement(t *testing.T) {
+func TestAddElementStackHandler_NoElement(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push(8)
 
@@ -1724,7 +1724,7 @@ func TestPushStackHandler_NoElement(t *testing.T) {
 
 	response := httptest.NewRecorder()
 
-	conn.pushStackHandler(response, request, s)
+	conn.addElementStackHandler(response, request, s)
 
 	if pushedElement := db.Stacks[s.ID].Peek(); pushedElement != 8 {
 		t.Errorf("Pushed element is %v, expected %v", pushedElement, 8)

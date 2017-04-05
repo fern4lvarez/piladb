@@ -259,7 +259,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
-			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
+			c.checkMaxStackSize(c.addElementStackHandler)(w, r, stack)
 			return
 
 		case r.Method == "DELETE":
@@ -329,8 +329,9 @@ func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	w.Write(emptyStackHandlerResponse)
 }
 
-// pushStackHandler adds an element into a Stack and returns 200 and the element.
-func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+// addElementStackHandler adds an element into a Stack and returns 200 and the element.
+// It can be as a PUSH or a BASE operation.
+func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	if r.Body == nil {
 		log.Println(r.Method, r.URL, http.StatusBadRequest,
 			"no element provided")
@@ -347,14 +348,22 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
-	// Depending on the scenario, we sweep and push, or we only push.
-	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
-		if swept, ok := stack.SweepPush(element.Value); ok {
-			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+	var base bool
+	_ = r.ParseForm()
+	if _, ok := r.Form["base"]; ok {
+		base = true
+	}
+
+	if !base {
+		// Depending on the scenario, we sweep and push, or we only push.
+		if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+			if swept, ok := stack.SweepPush(element.Value); ok {
+				log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+			}
+			c.Config.Set("SWEEP_BEFORE_PUSH", false)
+		} else {
+			stack.Push(element.Value)
 		}
-		c.Config.Set("SWEEP_BEFORE_PUSH", false)
-	} else {
-		stack.Push(element.Value)
 	}
 
 	stack.Update(c.opDate)
