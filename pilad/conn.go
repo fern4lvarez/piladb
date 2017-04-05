@@ -362,22 +362,20 @@ func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, st
 
 // addElementStackHelper adds an element to a Stack as PUSH or BASE depending on the operation.
 func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element pila.Element) {
-	var base bool
 	_ = r.ParseForm()
 	if _, ok := r.Form["base"]; ok {
-		base = true
+		stack.Base(element.Value)
+		return
 	}
 
-	if !base {
-		// Depending on the scenario, we sweep and push, or we only push.
-		if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
-			if swept, ok := stack.SweepPush(element.Value); ok {
-				log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
-			}
-			c.Config.Set("SWEEP_BEFORE_PUSH", false)
-		} else {
-			stack.Push(element.Value)
+	// Depending on the scenario, we sweep and push, or we only push.
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.SweepPush(element.Value); ok {
+			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
 		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+	} else {
+		stack.Push(element.Value)
 	}
 }
 
