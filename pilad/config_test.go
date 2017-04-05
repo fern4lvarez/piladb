@@ -47,6 +47,25 @@ func TestBuildConfig(t *testing.T) {
 	if s := conn.Config.Get(vars.MaxStackSize); s != -1 {
 		t.Errorf("MaxStackSize is %v, expected %v", s, -1)
 	}
+
+	pushWhenFullFlag = true
+	if err := os.Setenv(vars.Env(vars.PushWhenFull), "false"); err != nil {
+		t.Fatal(err)
+	}
+	conn.buildConfig()
+
+	if s := conn.Config.PushWhenFull(); s != false {
+		t.Errorf("PushWhenFull is %v, expected %v", s, false)
+	}
+
+	if err := os.Setenv(vars.Env(vars.PushWhenFull), "true"); err != nil {
+		t.Fatal(err)
+	}
+	conn.buildConfig()
+
+	if s := conn.Config.PushWhenFull(); s != true {
+		t.Errorf("PushWhenFull is %v, expected %v", s, true)
+	}
 }
 
 func TestConfigHandler_GET(t *testing.T) {
@@ -268,7 +287,11 @@ func TestCheckMaxStackSize(t *testing.T) {
 
 	for _, io := range inputOutput {
 		conn.Config.Set(vars.MaxStackSize, io.input)
-		request, err := http.NewRequest("GET", "", nil)
+		request, err := http.NewRequest("POST",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				db.ID.String(),
+				s.ID.String()),
+			nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -279,6 +302,131 @@ func TestCheckMaxStackSize(t *testing.T) {
 
 		if response.Code != io.output {
 			t.Errorf("response code is %v, expected %v", response.Code, io.output)
+		}
+	}
+}
+
+func TestCheckMaxStackSize_PushWhenFull(t *testing.T) {
+	s := pila.NewStack("stack", time.Now())
+	s.Push("foo")
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	conn.Config.Set(vars.PushWhenFull, true)
+
+	element := pila.Element{Value: "test-element"}
+	elementJSON, _ := element.ToJSON()
+
+	f := func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	inputOutput := []struct {
+		inputSize                int
+		inputPush                bool
+		outputStatus, outputSize int
+		outputPeek, outputSweep  interface{}
+	}{
+		{1, false, http.StatusNotAcceptable, 1, "foo", nil},
+		{1, false, http.StatusNotAcceptable, 1, "foo", nil},
+		{1, true, http.StatusOK, 1, "foo", true},
+	}
+
+	for _, io := range inputOutput {
+		conn.Config.Set(vars.MaxStackSize, io.inputSize)
+		conn.Config.Set(vars.PushWhenFull, io.inputPush)
+		request, err := http.NewRequest("POST",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				db.ID.String(),
+				s.ID.String()),
+			bytes.NewBuffer(elementJSON))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.checkMaxStackSize(f)(response, request, s)
+
+		if response.Code != io.outputStatus {
+			t.Errorf("response code is %v, expected %v", response.Code, io.outputStatus)
+		}
+
+		if s.Size() != io.outputSize {
+			t.Errorf("Stack size is %v, expected %v", s.Size(), io.outputSize)
+		}
+		if s.Peek() != io.outputPeek {
+			t.Errorf("Stack peek is %v, expected %v", s.Peek(), io.outputPeek)
+		}
+
+		if sweepBeforePush := conn.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != io.outputSweep {
+			t.Errorf("SWEEP_BEFORE_PUSH is %v, expected %v", sweepBeforePush, io.outputSweep)
+		}
+	}
+}
+
+func TestCheckMaxStackSize_PushWhenFullWithStackEmpty(t *testing.T) {
+	s := pila.NewStack("stack", time.Now())
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	conn.Config.Set(vars.PushWhenFull, true)
+
+	element := pila.Element{Value: "test-element"}
+	elementJSON, _ := element.ToJSON()
+
+	f := func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	inputOutput := []struct {
+		inputSize                int
+		inputPush                bool
+		outputStatus, outputSize int
+		outputPeek               interface{}
+	}{
+		{0, true, http.StatusOK, 0, nil},
+	}
+
+	for _, io := range inputOutput {
+		conn.Config.Set(vars.MaxStackSize, io.inputSize)
+		conn.Config.Set(vars.PushWhenFull, io.inputPush)
+		request, err := http.NewRequest("POST",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				db.ID.String(),
+				s.ID.String()),
+			bytes.NewBuffer(elementJSON))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.checkMaxStackSize(f)(response, request, s)
+
+		if response.Code != io.outputStatus {
+			t.Errorf("response code is %v, expected %v", response.Code, io.outputStatus)
+		}
+
+		if s.Size() != io.outputSize {
+			t.Errorf("Stack size is %v, expected %v", s.Size(), io.outputSize)
+		}
+		if s.Peek() != io.outputPeek {
+			t.Errorf("Stack peek is %v, expected %v", s.Peek(), io.outputPeek)
 		}
 	}
 }

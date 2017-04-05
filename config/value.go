@@ -42,6 +42,13 @@ func (c *Config) Port() int {
 	return t
 }
 
+// PushWhenFull returns the value of PUSH_WHEN_FULL.
+// Type: bool, Default: false
+func (c *Config) PushWhenFull() bool {
+	pushWhenFull := c.Get(vars.PushWhenFull)
+	return boolValue(pushWhenFull, vars.PushWhenFullDefault)
+}
+
 // intValue returns an Integer value given another value as an
 // interface. If conversion fails, a default value is used.
 func intValue(value interface{}, defaultValue int) int {
@@ -59,6 +66,25 @@ func intValue(value interface{}, defaultValue int) int {
 			return defaultValue
 		}
 		return i
+	default:
+		return defaultValue
+	}
+}
+
+// boolValue returns a Boolean value given another value as an
+// interface. If conversion fails, a default value is used.
+func boolValue(value interface{}, defaultValue bool) bool {
+	switch value.(type) {
+	case bool:
+		return value.(bool)
+	case string:
+		if value == "true" {
+			return true
+		}
+		if value == "false" {
+			return false
+		}
+		return defaultValue
 	default:
 		return defaultValue
 	}

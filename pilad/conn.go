@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"encoding/json"
 
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
@@ -316,14 +316,17 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(stack.SizeToJSON())
 }
 
-// emptyStackHandler check if the Stack is empty.
+// emptyStackHandler checks if the Stack is empty.
 func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Read(c.opDate)
-	log.Println(r.Method, r.URL, http.StatusOK, stack.Size(), stack.Empty())
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Empty())
 	w.Header().Set("Content-Type", "application/json")
-	emptyHandlerResponse, _ := json.Marshal(stack.Empty())
 
-	w.Write(emptyHandlerResponse)
+	// Do not check error as we consider a boolean
+	// valid for a JSON encoding.
+	emptyStackHandlerResponse, _ := json.Marshal(stack.Empty())
+
+	w.Write(emptyStackHandlerResponse)
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
@@ -344,7 +347,16 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
-	stack.Push(element.Value)
+	// Depending on the scenario, we sweep and push, or we only push.
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.SweepPush(element.Value); ok {
+			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+	} else {
+		stack.Push(element.Value)
+	}
+
 	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)

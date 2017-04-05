@@ -104,3 +104,28 @@ func TestPort(t *testing.T) {
 		}
 	}
 }
+
+func TestPushWhenFull(t *testing.T) {
+	c := NewConfig()
+
+	inputOutput := []struct {
+		input  interface{}
+		output bool
+	}{
+		{true, true},
+		{false, false},
+		{"true", true},
+		{"false", false},
+		{"foo", vars.PushWhenFullDefault},
+		{42, vars.PushWhenFullDefault},
+		{[]byte("true"), vars.PushWhenFullDefault},
+	}
+
+	for _, io := range inputOutput {
+		c.Set(vars.PushWhenFull, io.input)
+
+		if s := c.PushWhenFull(); s != io.output {
+			t.Errorf("PushWhenFull is %v, expected %v", s, io.output)
+		}
+	}
+}
