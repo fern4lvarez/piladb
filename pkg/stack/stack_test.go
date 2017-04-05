@@ -561,6 +561,140 @@ func TestStackSweepPush_False(t *testing.T) {
 	}
 }
 
+func TestStackRotate(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+	stack.Push(true)
+	stack.Push(8)
+
+	ok := stack.Rotate()
+	if !ok {
+		t.Errorf("stack.Rotate() not ok")
+	}
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != true {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, true)
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != 8 {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, 8)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down.data != 8 {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, 8)
+	}
+	if stack.head.up != nil {
+		t.Errorf("stack.head.up is %v, expected nil", stack.head.up)
+	}
+	if stack.size != 3 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 3)
+	}
+}
+
+func TestStackRotate_Complete(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+	stack.Push(true)
+	stack.Push(8)
+
+	for i := 0; i < 3; i++ {
+		if ok := stack.Rotate(); !ok {
+			t.Errorf("stack.Rotate() not ok")
+		}
+	}
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != "test" {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, "test")
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != true {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, true)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != 8 {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, 8)
+	}
+	if stack.head.down.data != true {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, true)
+	}
+	if stack.head.up != nil {
+		t.Errorf("stack.head.up is %v, expected nil", stack.head.up)
+	}
+	if stack.size != 3 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 3)
+	}
+}
+
+func TestStackRotate_OneElement(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+
+	ok := stack.Rotate()
+	if !ok {
+		t.Errorf("stack.Rotate() not ok")
+	}
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != "test" {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, "test")
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up != nil {
+		t.Errorf("stack.tail.up is %v, expected nil", stack.tail.up)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down != nil {
+		t.Errorf("stack.head.down is %v, expected nil", stack.head.down)
+	}
+	if stack.head.up != nil {
+		t.Errorf("stack.head.up is %v, expected nil", stack.head.up)
+	}
+	if stack.size != 1 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 1)
+	}
+}
+
+func TestStackRotate_Empty(t *testing.T) {
+	stack := NewStack()
+
+	ok := stack.Rotate()
+	if ok {
+		t.Errorf("stack.Rotate() is ok")
+	}
+	if stack.tail != nil {
+		t.Errorf("stack.tail is %v, expected nil", stack.tail)
+	}
+	if stack.head != nil {
+		t.Errorf("stack.tail is %v, expected nil", stack.head)
+	}
+	if stack.size != 0 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 0)
+	}
+}
+
 func TestStackSize(t *testing.T) {
 	stack := NewStack()
 	if stack.Size() != 0 {
