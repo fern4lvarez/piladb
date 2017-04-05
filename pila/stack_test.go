@@ -198,6 +198,39 @@ func TestStackSweepPush_False(t *testing.T) {
 	}
 }
 
+func TestStackRotate(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	for i := 0; i < 3; i++ {
+		stack.Push(i)
+	}
+
+	if !stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", false, true)
+	}
+
+	if stack.Peek() != 0 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 0)
+	}
+	if stack.Size() != 3 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
+	}
+}
+
+func TestStackRotate_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+
+	if stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", true, false)
+	}
+
+	if stack.Peek() != nil {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), nil)
+	}
+	if stack.Size() != 0 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 0)
+	}
+}
+
 func TestStackSize(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	if stack.Size() != 0 {
