@@ -15,7 +15,7 @@ Features
 
 * Stacks are auto-scalable and are only limited by the capacity of the host
   or by configuration.
-* Available `POP`, `PUSH`, `PEEK`,`SIZE`, and `FLUSH` operations for each of the stacks.
+* Available `POP`, `PUSH`, `BASE`, `PEEK`,`SIZE`, `EMPTY`, and `FLUSH` operations for each of the stacks.
 * Manage stacks and other resources by using a REST API, so you can use it with
   your favorite programming language.
 * Manage elements in JSON-compatible data types: strings, numbers, arrays, objects, etc.
