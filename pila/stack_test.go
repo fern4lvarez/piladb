@@ -14,8 +14,8 @@ func (s *TestBaseStack) Pop() (interface{}, bool)                          { ret
 func (s *TestBaseStack) Base(element interface{})                          { return }
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Rotate() bool                                      { return false }
 func (s *TestBaseStack) Size() int                                         { return 0 }
-func (s *TestBaseStack) Empty() bool                                       { return true }
 func (s *TestBaseStack) Peek() interface{}                                 { return nil }
 func (s *TestBaseStack) Flush()                                            { return }
 
