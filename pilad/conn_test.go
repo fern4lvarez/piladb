@@ -1568,7 +1568,7 @@ func TestAddElementStackHandler_Name(t *testing.T) {
 	}
 }
 
-func TestAddElementStackHandler_SweepBefore(t *testing.T) {
+func TestAddElementStackHandler_PUSHSweepBefore(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 	s.Push("foo")
 
@@ -1732,6 +1732,38 @@ func TestAddElementStackHandler_NoElement(t *testing.T) {
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusBadRequest)
+	}
+}
+
+func TestAddElementStackHelper(t *testing.T) {
+	stack := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(stack)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	element := pila.Element{Value: "test-element"}
+	elementJSON, _ := element.ToJSON()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			stack.ID.String()),
+		bytes.NewBuffer(elementJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	conn.addElementStackHelper(request, stack, element)
+
+	if addedElement := db.Stacks[stack.ID].Peek(); addedElement != "test-element" {
+		t.Errorf("Added element is %v, expected %v", addedElement, "test-element")
 	}
 }
 

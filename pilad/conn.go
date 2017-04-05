@@ -348,6 +348,20 @@ func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, st
 		return
 	}
 
+	c.addElementStackHelper(r, stack, element)
+	stack.Update(c.opDate)
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// addElementStackHelper adds an element to a Stack as PUSH or BASE depending on the operation.
+func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element pila.Element) {
 	var base bool
 	_ = r.ParseForm()
 	if _, ok := r.Form["base"]; ok {
@@ -365,16 +379,6 @@ func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, st
 			stack.Push(element.Value)
 		}
 	}
-
-	stack.Update(c.opDate)
-
-	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
-	w.Header().Set("Content-Type", "application/json")
-
-	// Do not check error as we consider our element
-	// suitable for a JSON encoding.
-	b, _ := element.ToJSON()
-	w.Write(b)
 }
 
 // popStackHandler extracts the peek element of a Stack, returns 200 and returns it.
