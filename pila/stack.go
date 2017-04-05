@@ -91,6 +91,11 @@ func (s *Stack) Size() int {
 	return s.base.Size()
 }
 
+// Empty returns true if a stack is empty.
+func (s *Stack) Empty() bool {
+	return s.base.Size() == 0
+}
+
 // Peek returns the element on top of the Stack.
 func (s *Stack) Peek() interface{} {
 	return s.base.Peek()

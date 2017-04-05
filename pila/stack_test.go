@@ -14,6 +14,7 @@ func (s *TestBaseStack) Pop() (interface{}, bool)                          { ret
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
 func (s *TestBaseStack) Size() int                                         { return 0 }
+func (s *TestBaseStack) Empty() bool                                       { return true }
 func (s *TestBaseStack) Peek() interface{}                                 { return nil }
 func (s *TestBaseStack) Flush()                                            { return }
 
@@ -198,6 +199,20 @@ func TestStackSize(t *testing.T) {
 	}
 	if stack.Size() != 10 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 10)
+	}
+}
+
+func TestStackEmpty(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	if !stack.Empty() {
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), true)
+	}
+
+	for i := 0; i < 2; i++ {
+		stack.Push(i)
+	}
+	if stack.Empty() {
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), false)
 	}
 }
 

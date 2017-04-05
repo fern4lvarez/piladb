@@ -306,6 +306,22 @@ is used as default, the latter as fallback.
 
 Returns `410 GONE` if the database or stack do not exist.
 
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?empty`
+
+> EMPTY operation.
+
+Returns true if the stack identify by `$STACK_ID` in database `$DATABASE_ID` is empty,
+and `200 OK`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+false
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.

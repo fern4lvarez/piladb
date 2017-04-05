@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -250,6 +251,10 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.sizeStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["empty"]; ok {
+				c.emptyStackHandler(w, r, stack)
+				return
+			}
 			c.statusStackHandler(w, r, stack)
 			return
 
@@ -309,6 +314,19 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	// Do not check error as we consider the size
 	// of a stack valid for a JSON encoding.
 	w.Write(stack.SizeToJSON())
+}
+
+// emptyStackHandler checks if the Stack is empty.
+func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Empty())
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider a boolean
+	// valid for a JSON encoding.
+	emptyStackHandlerResponse, _ := json.Marshal(stack.Empty())
+
+	w.Write(emptyStackHandlerResponse)
 }
 
 // pushStackHandler adds an element into a Stack and returns 200 and the element.

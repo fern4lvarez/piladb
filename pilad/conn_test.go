@@ -843,6 +843,7 @@ func TestStackHandler_GET(t *testing.T) {
 	}
 
 	expectedSizeJSON := s.SizeToJSON()
+	expectedEmptyResponseJSON := []byte("false")
 
 	inputOutput := []struct {
 		input struct {
@@ -876,6 +877,14 @@ func TestStackHandler_GET(t *testing.T) {
 				response []byte
 				code     int
 			}{expectedSizeJSON, http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.ID.String(), s.ID.String(), "empty"},
+			struct {
+				response []byte
+				code     int
+			}{expectedEmptyResponseJSON, http.StatusOK},
 		},
 	}
 
@@ -1360,6 +1369,101 @@ func TestSizeStackHandler(t *testing.T) {
 	if string(sizeJSON) != string(expectedSizeJSON) {
 		t.Errorf("size is %v, expected %v", string(sizeJSON), string(expectedSizeJSON))
 	}
+}
+
+func TestEmptyStackHandler_Empty(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s?empty",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.emptyStackHandler(response, request, s)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	emptyJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedEmpty := "true"
+	if string(emptyJSON) != expectedEmpty {
+		t.Errorf("empty is %v, expected %v", string(emptyJSON), expectedEmpty)
+	}
+}
+
+func TestEmptyStackHandler_NonEmpty(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Push("element")
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s?empty",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.emptyStackHandler(response, request, s)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	emptyJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedEmpty := "false"
+	if string(emptyJSON) != expectedEmpty {
+		t.Errorf("is empty response is %v, expected %v", string(emptyJSON), expectedEmpty)
+	}
+
 }
 
 func TestPushStackHandler(t *testing.T) {
