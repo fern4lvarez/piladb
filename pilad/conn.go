@@ -263,6 +263,12 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
+			_ = r.ParseForm()
+			if _, ok := r.Form["rotate"]; ok {
+				c.rotateStackHandler(w, r, stack)
+				return
+			}
+
 			c.checkMaxStackSize(c.addElementStackHandler)(w, r, stack)
 			return
 
@@ -345,6 +351,29 @@ func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	fullStackHandlerResponse, _ := json.Marshal(isStackFull)
 
 	w.Write(fullStackHandlerResponse)
+}
+
+// rotateStackHandler rotates the bottommost element of the Stack
+// to the top.
+func (c *Conn) rotateStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	ok := stack.Rotate()
+	if !ok {
+		log.Println(r.Method, r.URL, http.StatusNoContent)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	stack.Update(c.opDate)
+
+	var element pila.Element
+	element.Value = stack.Peek()
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
 }
 
 // addElementStackHandler adds an element into a Stack and returns 200 and the element.
