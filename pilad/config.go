@@ -158,3 +158,12 @@ func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 		handler(w, r, stack)
 	}
 }
+
+// If stack is full return true else return false
+// Default stack maxSize -1 can never be full
+func (c *Conn) isMaxStackSize(stack *pila.Stack) bool {
+	if c.Config.MaxStackSize() == -1 {
+		return false;
+	}
+	return c.Config.MaxStackSize() <= stack.Size()
+}
