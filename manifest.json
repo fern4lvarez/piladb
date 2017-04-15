@@ -1,0 +1,10 @@
+{
+    "dependencies": {
+        "github.com/gorilla/context": {
+            "branch": "master"
+        },
+        "github.com/gorilla/mux": {
+            "branch": "master"
+        }
+    }
+}
