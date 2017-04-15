@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file.
 - Add option to allow pushing on a Stack when this is full
 - Add `EMPTY` operation
 
+## [0.1.3] - 2017-04-15
+
+### Added
+- Build `pilad` with go1.8.1
+
 ### Changed
 - pkg/stack: Use RWMutex for concurrent reads
 
@@ -46,7 +51,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - First release!
 
-[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/fern4lvarez/piladb/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/fern4lvarez/piladb/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/fern4lvarez/piladb/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/fern4lvarez/piladb/compare/dda6b656cbd635dab8e9fc6c254a46f01e4e43ca...v0.1.0
