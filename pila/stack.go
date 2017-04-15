@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
@@ -39,6 +40,10 @@ type Stack struct {
 	// Note that unlike CreatedAt, ReadAt is not triggered automatically
 	// when one of these events happens, but it needs to be set by hand.
 	ReadAt time.Time
+
+	// dateMu serves as a mutex to lock dates on concurrent
+	// updates in order to avoid race conditions.
+	dateMu sync.Mutex
 
 	// base represents the Stack data structure
 	base stack.Stacker
@@ -91,14 +96,18 @@ func (s *Stack) Flush() {
 // Update takes a date and updates UpdateAt and ReadAt
 // fields of the Stack.
 func (s *Stack) Update(t time.Time) {
+	s.dateMu.Lock()
 	s.UpdatedAt = t
 	s.ReadAt = t
+	s.dateMu.Unlock()
 }
 
 // Read takes a date and updates ReadAt field
 // of the Stack.
 func (s *Stack) Read(t time.Time) {
+	s.dateMu.Lock()
 	s.ReadAt = t
+	s.dateMu.Unlock()
 }
 
 // SetDatabase links the Stack with a given Database and

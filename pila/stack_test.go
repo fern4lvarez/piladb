@@ -240,6 +240,24 @@ func TestStackSizeToJSON(t *testing.T) {
 	}
 }
 
+func TestStackRace(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Push(1) }()
+	go func() { stack.Pop() }()
+	go func() { stack.Size() }()
+	go func() { stack.Peek() }()
+	go func() { stack.Flush() }()
+}
+
+func TestStackRace_UpdateRead(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
+}
+
 func TestElementJSON(t *testing.T) {
 	elements := []Element{
 		{Value: "foo"},
