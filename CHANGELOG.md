@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Build `pilad` with go1.8.1
+
 ### Changed
 - pkg/stack: Use RWMutex for concurrent reads
 
