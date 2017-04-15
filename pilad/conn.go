@@ -333,15 +333,17 @@ func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	w.Write(emptyStackHandlerResponse)
 }
 
-// fullStackHandler checks if the Stack is full.
+// fullStackHandler checks if the Stack is full, based on the configuration value.
 func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Read(c.opDate)
-	isMaxStackSize := c.isMaxStackSize(stack) // caching to prevent re-lock
-	log.Println(r.Method, r.URL, http.StatusOK, isMaxStackSize)
+	isStackFull := c.isStackFull(stack) // caching to prevent re-lock
+	log.Println(r.Method, r.URL, http.StatusOK, isStackFull)
 	w.Header().Set("Content-Type", "application/json")
+
 	// Do not check error as we consider a boolean
 	// valid for a JSON encoding.
-	fullStackHandlerResponse, _ := json.Marshal(isMaxStackSize)
+	fullStackHandlerResponse, _ := json.Marshal(isStackFull)
+
 	w.Write(fullStackHandlerResponse)
 }
 

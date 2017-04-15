@@ -431,7 +431,7 @@ func TestCheckMaxStackSize_PushWhenFullWithStackEmpty(t *testing.T) {
 	}
 }
 
-func TestIsMaxStackSize(t *testing.T) {
+func TestIsStackFull(t *testing.T) {
 	s := pila.NewStack("stack", time.Now())
 
 	db := pila.NewDatabase("mydb")
@@ -455,7 +455,7 @@ func TestIsMaxStackSize(t *testing.T) {
 		outputPeek               interface{}
 	}{
 		{-1, true, http.StatusOK, 0, nil}, // Test when stack max size is -1 (which signify no max size), isMaxStackSize should always return false
-		{0, true, http.StatusOK, 0, nil}, // Test when stack max size is 0, isMaxStackSize should always return true
+		{0, true, http.StatusOK, 0, nil},  // Test when stack max size is 0, isMaxStackSize should always return true
 		{1, true, http.StatusOK, 0, nil},
 		{10, true, http.StatusOK, 0, nil},
 	}
@@ -472,7 +472,7 @@ func TestIsMaxStackSize(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		isStackFull := conn.isMaxStackSize(s)
+		isStackFull := conn.isStackFull(s)
 
 		var expectedIsStackFull bool
 
@@ -482,8 +482,8 @@ func TestIsMaxStackSize(t *testing.T) {
 			expectedIsStackFull = s.Size() >= io.inputSize
 		}
 
-		if expectedIsStackFull && !isStackFull{
-			t.Errorf("Stack size is %v, expected isMaxStackSize to return %v but %v is returned", s.Size(), s.Size() >=  io.inputSize, isStackFull)
+		if expectedIsStackFull && !isStackFull {
+			t.Errorf("Stack size is %v, expected isMaxStackSize to return %v but %v is returned", s.Size(), s.Size() >= io.inputSize, isStackFull)
 		}
 	}
 }

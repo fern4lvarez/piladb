@@ -10,12 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/date"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
-	"github.com/fern4lvarez/piladb/config/vars"
 )
-
 
 func TestNewConn(t *testing.T) {
 	conn := NewConn()
