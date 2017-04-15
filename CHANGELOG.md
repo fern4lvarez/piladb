@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - pkg/stack: Fix data race conditions on Size and Peek
+- pila: Fix data race conditions on concurrent updates of Stack dates
 
 ## [0.1.2] - 2017-03-05
 
