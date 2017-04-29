@@ -255,6 +255,10 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.emptyStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["full"]; ok {
+				c.fullStackHandler(w, r, stack)
+				return
+			}
 			c.statusStackHandler(w, r, stack)
 			return
 
@@ -327,6 +331,20 @@ func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	emptyStackHandlerResponse, _ := json.Marshal(stack.Empty())
 
 	w.Write(emptyStackHandlerResponse)
+}
+
+// fullStackHandler checks if the Stack is full, based on the configuration value.
+func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
+	isStackFull := c.isStackFull(stack) // caching to prevent re-lock
+	log.Println(r.Method, r.URL, http.StatusOK, isStackFull)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider a boolean
+	// valid for a JSON encoding.
+	fullStackHandlerResponse, _ := json.Marshal(isStackFull)
+
+	w.Write(fullStackHandlerResponse)
 }
 
 // addElementStackHandler adds an element into a Stack and returns 200 and the element.

@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/fern4lvarez/piladb/config/vars"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/date"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
@@ -844,6 +845,7 @@ func TestStackHandler_GET(t *testing.T) {
 
 	expectedSizeJSON := s.SizeToJSON()
 	expectedEmptyResponseJSON := []byte("false")
+	expectedFullResponseJSON := []byte("false")
 
 	inputOutput := []struct {
 		input struct {
@@ -885,6 +887,14 @@ func TestStackHandler_GET(t *testing.T) {
 				response []byte
 				code     int
 			}{expectedEmptyResponseJSON, http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.ID.String(), s.ID.String(), "full"},
+			struct {
+				response []byte
+				code     int
+			}{expectedFullResponseJSON, http.StatusOK},
 		},
 	}
 
@@ -1463,7 +1473,102 @@ func TestEmptyStackHandler_NonEmpty(t *testing.T) {
 	if string(emptyJSON) != expectedEmpty {
 		t.Errorf("is empty response is %v, expected %v", string(emptyJSON), expectedEmpty)
 	}
+}
 
+func TestFullStackHandler_Full(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+	conn.Config.Set(vars.MaxStackSize, 0)
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s?full",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.emptyStackHandler(response, request, s)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	fullJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedFull := "true"
+	if string(fullJSON) != expectedFull {
+		t.Errorf("is full stack handler response is %v, expected %v", string(fullJSON), expectedFull)
+	}
+}
+
+func TestFullStackHandler_NotFull(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+	conn.Config.Set(vars.MaxStackSize, 2)
+
+	s.Push("element")
+
+	request, err := http.NewRequest("GET",
+		fmt.Sprintf("/databases/%s/stacks/%s?full",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.emptyStackHandler(response, request, s)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	fullJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedFull := "false"
+	if string(fullJSON) != expectedFull {
+		t.Errorf("is full stack handler response is %v, expected %v", string(fullJSON), expectedFull)
+	}
 }
 
 func TestAddElementStackHandler(t *testing.T) {

@@ -138,10 +138,10 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 }
 
 // checkMaxStackSize checks config value for MaxStackSize and PushWhenFull
-//and execute the wrapped handler if check is validated.
+// and execute the wrapped handler if check is validated.
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-		if s := c.Config.MaxStackSize(); stack.Size() >= s && s != -1 {
+		if c.isStackFull(stack) {
 			if c.Config.PushWhenFull() {
 				// set internal config value to share with
 				// the next handler that we want to sweep
@@ -157,4 +157,11 @@ func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 
 		handler(w, r, stack)
 	}
+}
+
+// isStackFull returns true if Stack is full based on the Config value,
+// else returns false. Default Stack with size -1 can never be full.
+func (c *Conn) isStackFull(stack *pila.Stack) bool {
+	s := c.Config.MaxStackSize()
+	return stack.Size() >= s && s != -1
 }

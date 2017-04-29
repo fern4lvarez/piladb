@@ -430,3 +430,60 @@ func TestCheckMaxStackSize_PushWhenFullWithStackEmpty(t *testing.T) {
 		}
 	}
 }
+
+func TestIsStackFull(t *testing.T) {
+	s := pila.NewStack("stack", time.Now())
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	conn.Config.Set(vars.PushWhenFull, true)
+
+	element := pila.Element{Value: "test-element"}
+	elementJSON, _ := element.ToJSON()
+
+	inputOutput := []struct {
+		inputSize                int
+		inputPush                bool
+		outputStatus, outputSize int
+		outputPeek               interface{}
+	}{
+		{-1, true, http.StatusOK, 0, nil}, // Test when stack max size is -1 (which signify no max size), isMaxStackSize should always return false
+		{0, true, http.StatusOK, 0, nil},  // Test when stack max size is 0, isMaxStackSize should always return true
+		{1, true, http.StatusOK, 0, nil},
+		{10, true, http.StatusOK, 0, nil},
+	}
+
+	for _, io := range inputOutput {
+		conn.Config.Set(vars.MaxStackSize, io.inputSize)
+		conn.Config.Set(vars.PushWhenFull, io.inputPush)
+		_, err := http.NewRequest("POST",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				db.ID.String(),
+				s.ID.String()),
+			bytes.NewBuffer(elementJSON))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		isStackFull := conn.isStackFull(s)
+
+		var expectedIsStackFull bool
+
+		if io.inputSize == -1 {
+			expectedIsStackFull = false
+		} else {
+			expectedIsStackFull = s.Size() >= io.inputSize
+		}
+
+		if expectedIsStackFull && !isStackFull {
+			t.Errorf("Stack size is %v, expected isMaxStackSize to return %v but %v is returned", s.Size(), s.Size() >= io.inputSize, isStackFull)
+		}
+	}
+}
