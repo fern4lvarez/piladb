@@ -11,6 +11,7 @@ type TestBaseStack struct{}
 
 func (s *TestBaseStack) Push(element interface{})                          { return }
 func (s *TestBaseStack) Pop() (interface{}, bool)                          { return nil, false }
+func (s *TestBaseStack) Base(element interface{})                          { return }
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
 func (s *TestBaseStack) Size() int                                         { return 0 }
@@ -96,7 +97,7 @@ func TestStackPush(t *testing.T) {
 	stack.Push(struct{ id string }{id: "test"})
 
 	if stack.Size() != 3 {
-		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 3)
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
 	}
 }
 
@@ -122,6 +123,22 @@ func TestStackPop_False(t *testing.T) {
 	_, ok := stack.Pop()
 	if ok {
 		t.Error("stack.Pop() is ok")
+	}
+}
+
+func TestStackBase(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Base(1)
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+
+	stack.Base(2)
+	stack.Base(struct{ id string }{id: "test"})
+
+	if stack.Size() != 3 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
 	}
 }
 
@@ -311,6 +328,24 @@ func TestStackSizeToJSON(t *testing.T) {
 	if string(stack.SizeToJSON()) != expectedSize {
 		t.Errorf("size is %s, expected %s", string(stack.SizeToJSON()), expectedSize)
 	}
+}
+
+func TestStackRace(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Push(1) }()
+	go func() { stack.Pop() }()
+	go func() { stack.Size() }()
+	go func() { stack.Peek() }()
+	go func() { stack.Flush() }()
+}
+
+func TestStackRace_UpdateRead(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
 }
 
 func TestElementJSON(t *testing.T) {

@@ -263,7 +263,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			return
 
 		case r.Method == "POST":
-			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
+			c.checkMaxStackSize(c.addElementStackHandler)(w, r, stack)
 			return
 
 		case r.Method == "DELETE":
@@ -347,8 +347,9 @@ func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(fullStackHandlerResponse)
 }
 
-// pushStackHandler adds an element into a Stack and returns 200 and the element.
-func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+// addElementStackHandler adds an element into a Stack and returns 200 and the element.
+// It can be as a PUSH or a BASE operation.
+func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	if r.Body == nil {
 		log.Println(r.Method, r.URL, http.StatusBadRequest,
 			"no element provided")
@@ -365,16 +366,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
-	// Depending on the scenario, we sweep and push, or we only push.
-	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
-		if swept, ok := stack.SweepPush(element.Value); ok {
-			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
-		}
-		c.Config.Set("SWEEP_BEFORE_PUSH", false)
-	} else {
-		stack.Push(element.Value)
-	}
-
+	c.addElementStackHelper(r, stack, element)
 	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
@@ -384,6 +376,28 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	// suitable for a JSON encoding.
 	b, _ := element.ToJSON()
 	w.Write(b)
+}
+
+// addElementStackHelper adds an element to a Stack as PUSH or BASE depending on the operation.
+func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element pila.Element) {
+	// BASE
+	_ = r.ParseForm()
+	if _, ok := r.Form["base"]; ok {
+		stack.Base(element.Value)
+		return
+	}
+
+	// Sweep + PUSH
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.SweepPush(element.Value); ok {
+			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+		return
+	}
+
+	// PUSH
+	stack.Push(element.Value)
 }
 
 // popStackHandler extracts the peek element of a Stack, returns 200 and returns it.

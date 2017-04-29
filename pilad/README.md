@@ -343,6 +343,28 @@ Returns `406 NOT ACCEPTABLE` if the stack is full.
 Returns `410 GONE` if the database or stack do not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the element.
+``
+#### POST `/databases/$DATABASE_ID/stacks/$STACK_ID?base` + `{"element":$ELEMENT}`
+
+> BASE operation.
+
+Puts an `ELEMENT` on the bottom of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+returns `200 OK`, and the based element.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "element": "this is an element"
+}
+```
+
+Returns `406 NOT ACCEPTABLE` if the stack is full.
+
+Returns `410 GONE` if the database or stack do not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the element.
 
 #### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID`
 

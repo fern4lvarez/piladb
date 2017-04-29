@@ -8,6 +8,8 @@ type Stacker interface {
 	Push(element interface{})
 	// Pop the topmost element of a stack
 	Pop() (interface{}, bool)
+	// Base bases a new element at the bottom of the stack
+	Base(element interface{})
 	// Sweep the bottommost element of a stack
 	Sweep() (interface{}, bool)
 	// SweepPush sweeps the bottommost element of a stack
