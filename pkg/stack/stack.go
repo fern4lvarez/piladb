@@ -93,6 +93,36 @@ func (s *Stack) Pop() (interface{}, bool) {
 	return element, true
 }
 
+// Base bases the stack on top of a new element, so
+// this element becomes the bottommost element of the
+// stack.
+func (s *Stack) Base(element interface{}) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	tail := &frame{
+		data: element,
+		down: nil,
+		up:   s.tail,
+	}
+
+	s.tail = tail
+	s.size++
+
+	// tail and head are the same element
+	// when basing a first one
+	if s.size == 1 {
+		s.head = tail
+		return
+	}
+
+	// link the element above with new
+	// tail
+	if s.size > 1 {
+		s.tail.up.down = tail
+	}
+}
+
 // Sweep removes and returns the element at the bottom of the stack,
 // turning the Frame above into the new tail. If the stack was empty,
 // it returns false.

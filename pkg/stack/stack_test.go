@@ -120,6 +120,164 @@ func TestStackPop_False(t *testing.T) {
 	}
 }
 
+func TestStackBase(t *testing.T) {
+	stack := NewStack()
+	stack.Base("test")
+
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != "test" {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, "data")
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up != nil {
+		t.Errorf("stack.tail.up is %v, expected nil", stack.tail)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down != nil {
+		t.Errorf("stack.head.down is %v, expected nil", stack.head.down)
+	}
+	if stack.size != 1 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 1)
+	}
+}
+
+func TestStackBase_TwoElements(t *testing.T) {
+	stack := NewStack()
+	stack.Base("test")
+	stack.Base(8)
+
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != 8 {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, 8)
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != "test" {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, "test")
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down.data != 8 {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, 8)
+	}
+	if stack.size != 2 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 2)
+	}
+}
+
+func TestStackBase_MoreElements(t *testing.T) {
+	stack := NewStack()
+	stack.Base("test")
+	stack.Base(8)
+	stack.Base(true)
+
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != true {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, true)
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != 8 {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, 8)
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down.data != 8 {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, 8)
+	}
+	if stack.size != 3 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 3)
+	}
+}
+
+func TestStackBase_NoEmpty(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+	stack.Base(8)
+
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != 8 {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, 8)
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != "test" {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, "test")
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != "test" {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, "test")
+	}
+	if stack.head.down.data != 8 {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, 8)
+	}
+	if stack.size != 2 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 2)
+	}
+}
+
+func TestStackBase_NoEmptyMore(t *testing.T) {
+	stack := NewStack()
+	stack.Push("test")
+	stack.Push(3.14)
+	stack.Push(false)
+	stack.Base("foo")
+	stack.Base(8)
+
+	if stack.tail == nil {
+		t.Fatal("stack.tail is nil")
+	}
+	if stack.tail.data != 8 {
+		t.Errorf("stack.tail data is %v, expected %v", stack.tail.data, 8)
+	}
+	if stack.tail.down != nil {
+		t.Errorf("stack.tail.down is %v, expected nil", stack.tail.down)
+	}
+	if stack.tail.up.data != "foo" {
+		t.Errorf("stack.tail.up is %v, expected %v", stack.tail.up.data, "foo")
+	}
+	if stack.head == nil {
+		t.Fatal("stack.head is nil")
+	}
+	if stack.head.data != false {
+		t.Errorf("stack.head.data is %v, expected %v", stack.head.data, false)
+	}
+	if stack.head.down.data != 3.14 {
+		t.Errorf("stack.head.down is %v, expected %v", stack.head.down.data, 3.14)
+	}
+	if stack.size != 5 {
+		t.Errorf("stack.size is %v, expected %v", stack.size, 5)
+	}
+}
+
 func TestStackSweep(t *testing.T) {
 	stack := NewStack()
 	stack.Push("test")
