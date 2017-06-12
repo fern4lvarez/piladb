@@ -244,7 +244,9 @@ func TestStackRace(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	go func() { stack.Push(1) }()
 	go func() { stack.Pop() }()
+	go func() { stack.Update(time.Now()) }()
 	go func() { stack.Size() }()
+	go func() { stack.Read(time.Now()) }()
 	go func() { stack.Peek() }()
 	go func() { stack.Flush() }()
 }
@@ -256,6 +258,14 @@ func TestStackRace_UpdateRead(t *testing.T) {
 	go func() { stack.Read(time.Now()) }()
 	go func() { stack.Update(time.Now()) }()
 	go func() { stack.Read(time.Now()) }()
+}
+
+func TestStackRace_ID(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { _ = stack.UUID() }()
+	go func() { stack.SetID() }()
+	go func() { _ = stack.UUID() }()
+	go func() { _ = stack.Status() }()
 }
 
 func TestElementJSON(t *testing.T) {
