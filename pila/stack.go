@@ -16,6 +16,9 @@ import (
 // Stack represents a stack entity in piladb.
 type Stack struct {
 	// ID is a unique identifier of the Stack
+	// Note: Do not use this field to read the ID,
+	// as this method is not thread-safe. See UUID()
+	// instead.
 	ID fmt.Stringer
 
 	// Name of the Stack
@@ -44,6 +47,10 @@ type Stack struct {
 	// dateMu serves as a mutex to lock dates on concurrent
 	// updates in order to avoid race conditions.
 	dateMu sync.Mutex
+
+	// IDMU provides a mute to lock and unlock read and
+	// writes on the Stack ID.
+	IDMu sync.RWMutex
 
 	// base represents the Stack data structure
 	base stack.Stacker
@@ -117,9 +124,20 @@ func (s *Stack) SetDatabase(db *Database) {
 	s.SetID()
 }
 
+// UUID returns the unique Stack ID providing thread safety.
+func (s *Stack) UUID() fmt.Stringer {
+	s.IDMu.RLock()
+	defer s.IDMu.RUnlock()
+
+	return s.ID
+}
+
 // SetID recalculates the id of the Stack based on its
 // Database name and its own name.
 func (s *Stack) SetID() {
+	s.IDMu.Lock()
+	defer s.IDMu.Unlock()
+
 	if s.Database != nil {
 		s.ID = uuid.New(s.Database.Name + s.Name)
 		return
@@ -139,7 +157,7 @@ func (s *Stack) SizeToJSON() []byte {
 // Status returns the status of the Stack  in json format.
 func (s *Stack) Status() StackStatus {
 	status := StackStatus{}
-	status.ID = s.ID.String()
+	status.ID = s.UUID().String()
 	status.Name = s.Name
 	status.Size = s.Size()
 	status.Peek = s.Peek()

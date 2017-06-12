@@ -258,6 +258,14 @@ func TestStackRace_UpdateRead(t *testing.T) {
 	go func() { stack.Read(time.Now()) }()
 }
 
+func TestStackRace_ID(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { _ = stack.UUID() }()
+	go func() { stack.SetID() }()
+	go func() { _ = stack.UUID() }()
+	go func() { _ = stack.Status() }()
+}
+
 func TestElementJSON(t *testing.T) {
 	elements := []Element{
 		{Value: "foo"},
