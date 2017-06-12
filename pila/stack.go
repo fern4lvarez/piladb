@@ -48,7 +48,7 @@ type Stack struct {
 	// updates in order to avoid race conditions.
 	dateMu sync.Mutex
 
-	// IDMU provides a mute to lock and unlock read and
+	// IDMU provides a mutex to handle concurrent reads and
 	// writes on the Stack ID.
 	IDMu sync.RWMutex
 

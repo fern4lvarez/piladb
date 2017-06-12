@@ -21,7 +21,7 @@ type Database struct {
 	Pila *Pila
 	// Stacks associated to Database mapped by their ID
 	Stacks map[fmt.Stringer]*Stack
-	// mu provides a Mutex mechanism to avoid data races
+	// mu provides a mutex mechanism to avoid data races
 	// when manipulating Databases concurrently.
 	mu sync.Mutex
 }
