@@ -322,6 +322,22 @@ false
 
 Returns `410 GONE` if the database or stack do not exist.
 
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?full`
+
+> FULL operation.
+
+Returns true if the stack identify by `$STACK_ID` in database `$DATABASE_ID` is full,
+and `200 OK`. Full means that the size of the Stack is equals or bigger to the `MAX_STACK_SIZE` config value, if set.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+false
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.

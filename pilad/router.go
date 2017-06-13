@@ -51,6 +51,7 @@ func Router(conn *Conn) *mux.Router {
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?peek
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?size
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?empty
+	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?full
 	// POST /databases/$DATABASE_ID/stacks/$STACK_ID + {element: value}
 	// POST /databases/$DATABASE_ID/stacks/$STACK_ID?base + {element: value}
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID
