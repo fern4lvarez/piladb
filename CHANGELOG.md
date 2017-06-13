@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - Add option to allow pushing on a Stack when this is full
 - Add `EMPTY` operation
 
+### Fixed
+- pila: Fix data race conditions on Database and Stack ID
+
 ## [0.1.3] - 2017-04-15
 
 ### Added
