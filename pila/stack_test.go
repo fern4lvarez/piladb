@@ -489,3 +489,10 @@ func TestElementDecode_Error(t *testing.T) {
 		}
 	}
 }
+
+func TestElementDecode_Nil(t *testing.T) {
+	var element Element
+	if err := element.Decode(nil); err == nil {
+		t.Fatal("err is nil, expected error")
+	}
+}

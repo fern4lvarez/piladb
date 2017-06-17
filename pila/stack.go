@@ -209,12 +209,23 @@ func (element Element) ToJSON() ([]byte, error) {
 }
 
 // Decode decodes json data into an Element.
+// If the payload is nil, empty, or doesn't
+// follow a {"element":...} pattern, it will
+// return an error.
 func (element *Element) Decode(r io.Reader) error {
+	if r == nil {
+		return errors.New("payload is nil")
+	}
+
 	elementBuffer := new(bytes.Buffer)
 	elementBuffer.ReadFrom(r)
 
+	if len(elementBuffer.Bytes()) == 0 {
+		return errors.New("payload is empty")
+	}
+
 	if !bytes.HasPrefix(elementBuffer.Bytes(), []byte(`{"element"`)) {
-		return errors.New("malformed payload, missing element key?")
+		return errors.New("payload is malformed, missing element key?")
 	}
 
 	decoder := json.NewDecoder(elementBuffer)

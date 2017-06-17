@@ -379,13 +379,6 @@ func (c *Conn) rotateStackHandler(w http.ResponseWriter, r *http.Request, stack 
 // addElementStackHandler adds an element into a Stack and returns 200 and the element.
 // It can be as a PUSH or a BASE operation.
 func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-	if r.Body == nil {
-		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"no element provided")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	var element pila.Element
 	err := element.Decode(r.Body)
 	if err != nil {
