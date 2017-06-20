@@ -973,6 +973,26 @@ func TestStackHandler_POST(t *testing.T) {
 			"op":          "",
 		},
 		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.UUID().String(),
+			"op":          "base",
+		},
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.UUID().String(),
+			"op":          "rotate",
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+			"op":          "",
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+			"op":          "base",
+		},
+		{
 			"database_id": db.Name,
 			"stack_id":    s.Name,
 			"op":          "rotate",
