@@ -12,6 +12,13 @@ All notable changes to this project will be documented in this file.
 - Add `FULL` operation
 - Add `ROTATE` operation
 
+## [0.1.4] - 2017-06-20
+
+### Added
+- Build `pilad` with go1.8.3
+- Introduce `make race` to identify data races in tests
+- pila: Add `Stack.UUID()` function to get thread-safe Stack ID
+
 ### Fixed
 - pila: Fix data race conditions on Database and Stack ID
 
@@ -57,7 +64,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - First release!
 
-[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/fern4lvarez/piladb/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/fern4lvarez/piladb/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/fern4lvarez/piladb/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/fern4lvarez/piladb/compare/v0.1.0...v0.1.1
