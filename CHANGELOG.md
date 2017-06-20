@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Build `pilad` with go1.8.3
 - Introduce `make race` to identify data races in tests
+- pila: Add `Stack.UUID()` function to get thread-safe Stack ID
 
 ### Fixed
 - pila: Fix data race conditions on Database and Stack ID
