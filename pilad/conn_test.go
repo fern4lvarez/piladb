@@ -969,19 +969,42 @@ func TestStackHandler_POST(t *testing.T) {
 	paramss := []map[string]string{
 		{
 			"database_id": db.ID.String(),
-			"stack_id":    s.ID.String(),
+			"stack_id":    s.UUID().String(),
+			"op":          "",
+		},
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.UUID().String(),
+			"op":          "base",
+		},
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.UUID().String(),
+			"op":          "rotate",
 		},
 		{
 			"database_id": db.Name,
 			"stack_id":    s.Name,
+			"op":          "",
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+			"op":          "base",
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+			"op":          "rotate",
 		},
 	}
 
 	for _, params := range paramss {
 		request, err := http.NewRequest("POST",
-			fmt.Sprintf("/databases/%s/stacks/%s",
+			fmt.Sprintf("/databases/%s/stacks/%s?%s",
 				params["database_id"],
-				params["stack_id"]),
+				params["stack_id"],
+				params["op"]),
 			bytes.NewBuffer(expectedElementJSON))
 		if err != nil {
 			t.Fatal(err)
@@ -1007,7 +1030,7 @@ func TestStackHandler_POST(t *testing.T) {
 		}
 
 		if string(elementJSON) != string(expectedElementJSON) {
-			t.Errorf("pushed element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+			t.Errorf("element returned is %v, expected %v", string(elementJSON), string(expectedElementJSON))
 		}
 	}
 }
@@ -1568,6 +1591,113 @@ func TestFullStackHandler_NotFull(t *testing.T) {
 	expectedFull := "false"
 	if string(fullJSON) != expectedFull {
 		t.Errorf("is full stack handler response is %v, expected %v", string(fullJSON), expectedFull)
+	}
+}
+
+func TestRotateStackHandler(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	expectedPeekElement := pila.Element{Value: "test-element"}
+	expectedPeekElementJSON, _ := expectedPeekElement.ToJSON()
+
+	expectedBottomElement := pila.Element{Value: 42}
+
+	s.Push(expectedPeekElement.Value)
+	s.Push(expectedBottomElement.Value)
+	s.Push(true)
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s?rotate",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.rotateStackHandler(response, request, s)
+
+	if peekElement := db.Stacks[s.ID].Peek(); peekElement != expectedPeekElement.Value {
+		t.Errorf("rotated as peek element is %v, expected %v", peekElement, expectedPeekElement.Value)
+	}
+
+	if bottomElement, ok := db.Stacks[s.ID].Sweep(); !ok {
+		t.Errorf("ok is %v, expected true", ok)
+	} else if bottomElement != expectedBottomElement.Value {
+		t.Errorf("rotated as bottom element is %v, expected %v", bottomElement, expectedBottomElement.Value)
+	}
+	s.Base(expectedBottomElement.Value)
+
+	if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+	}
+
+	if response.Code != http.StatusOK {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+	}
+
+	if size := db.Stacks[s.ID].Size(); size != 3 {
+		t.Errorf("Stack size is %d, expected %d", size, 3)
+	}
+
+	expectedElementJSON, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(expectedPeekElementJSON) != string(expectedElementJSON) {
+		t.Errorf("Peek  element is %v, expected %v", string(expectedPeekElementJSON), string(expectedElementJSON))
+	}
+}
+
+func TestRotateStackHandler_Empty(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s?rotate",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.rotateStackHandler(response, request, s)
+
+	if peekElement := db.Stacks[s.ID].Peek(); peekElement != nil {
+		t.Errorf("rotated as peek element is %v, expected %v", peekElement, nil)
+	}
+
+	if response.Code != http.StatusNoContent {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
+	}
+
+	if size := db.Stacks[s.ID].Size(); size != 0 {
+		t.Errorf("Stack size is %d, expected %d", size, 0)
 	}
 }
 

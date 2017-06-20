@@ -14,8 +14,8 @@ func (s *TestBaseStack) Pop() (interface{}, bool)                          { ret
 func (s *TestBaseStack) Base(element interface{})                          { return }
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Rotate() bool                                      { return false }
 func (s *TestBaseStack) Size() int                                         { return 0 }
-func (s *TestBaseStack) Empty() bool                                       { return true }
 func (s *TestBaseStack) Peek() interface{}                                 { return nil }
 func (s *TestBaseStack) Flush()                                            { return }
 
@@ -195,6 +195,39 @@ func TestStackSweepPush_False(t *testing.T) {
 	_, ok := stack.SweepPush(8)
 	if ok {
 		t.Error("stack.SweepPush(8) is ok")
+	}
+}
+
+func TestStackRotate(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	for i := 0; i < 3; i++ {
+		stack.Push(i)
+	}
+
+	if !stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", false, true)
+	}
+
+	if stack.Peek() != 0 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 0)
+	}
+	if stack.Size() != 3 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
+	}
+}
+
+func TestStackRotate_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+
+	if stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", true, false)
+	}
+
+	if stack.Peek() != nil {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), nil)
+	}
+	if stack.Size() != 0 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 0)
 	}
 }
 
@@ -454,5 +487,12 @@ func TestElementDecode_Error(t *testing.T) {
 		if err := element.Decode(r); err == nil {
 			t.Fatal("err is nil, expected error")
 		}
+	}
+}
+
+func TestElementDecode_Nil(t *testing.T) {
+	var element Element
+	if err := element.Decode(nil); err == nil {
+		t.Fatal("err is nil, expected error")
 	}
 }

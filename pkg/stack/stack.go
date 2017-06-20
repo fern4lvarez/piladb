@@ -198,6 +198,37 @@ func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
 	return swept, true
 }
 
+// Rotate puts the bottommost element of the Stack into the top,
+// as an action of rotating the contents. Return false if the Stack
+// is empty.
+func (s *Stack) Rotate() bool {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
+	if s.size == 0 {
+		return false
+	}
+
+	if s.size == 1 {
+		return true
+	}
+
+	// build new head
+	head := s.tail
+	head.down = s.head
+
+	// set new tail
+	s.tail = s.tail.up
+	s.tail.down = nil
+
+	// set new head
+	s.head = head
+	s.head.down.up = head
+	s.head.up = nil
+
+	return true
+}
+
 // Size returns the number of elements that a stack contains.
 func (s *Stack) Size() int {
 	s.mux.RLock()

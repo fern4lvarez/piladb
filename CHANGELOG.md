@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Add `BASE` operation
 - Add `EMPTY` operation
 - Add `FULL` operation
+- Add `ROTATE` operation
 
 ### Fixed
 - pila: Fix data race conditions on Database and Stack ID
