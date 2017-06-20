@@ -1,6 +1,6 @@
 uuid
 ====
 
-Special thanks to [dynport](http://github.com/dynport) for influencing on this UUID
-implementation.
+It uses UUID Version 5, based on SHA-1 hashing (RFC 4122), implemented by @satori.
 
+See https://github.com/satori/go.uuid

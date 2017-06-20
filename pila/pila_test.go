@@ -123,7 +123,7 @@ func TestPilaStatusToJSON(t *testing.T) {
 	db0 := NewDatabase("db0")
 	pila.AddDatabase(db0)
 
-	expectedStatus := `{"number_of_databases":1,"databases":[{"id":"714e49277eb730717e413b167b76ef78","name":"db0","number_of_stacks":0}]}`
+	expectedStatus := `{"number_of_databases":1,"databases":[{"id":"23fdcd2d-6391-5530-b3bc-0123ce2be69e","name":"db0","number_of_stacks":0}]}`
 
 	if status := pila.Status().ToJSON(); string(status) != expectedStatus {
 		t.Errorf("status is %s, expected %s", string(status), expectedStatus)
