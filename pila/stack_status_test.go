@@ -20,7 +20,7 @@ func TestStackStatusJSON(t *testing.T) {
 	stack.Push([]byte("test"))
 	stack.Update(after)
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStatus := fmt.Sprintf(`{"id":"de009dba-4ad2-50e5-b020-e9d4c26d7a33","name":"test-stack","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(now.Local()),
 		date.Format(after.Local()),
 		date.Format(after.Local()))
@@ -36,7 +36,7 @@ func TestStackStatusJSON_Empty(t *testing.T) {
 	stack := NewStack("test-stack", now)
 	stack.Update(now)
 
-	expectedStatus := fmt.Sprintf(`{"id":"2f44edeaa249ba81db20e9ddf000ba65","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStatus := fmt.Sprintf(`{"id":"de009dba-4ad2-50e5-b020-e9d4c26d7a33","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(now.Local()),
 		date.Format(now.Local()),
 		date.Format(now.Local()))
@@ -92,7 +92,7 @@ func TestStacksStatusJSON(t *testing.T) {
 		Stacks: []StackStatus{stack1.Status(), stack2.Status()},
 	}
 
-	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"a0bfff209889f6f782997a7bd5b3d536","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"f0d682fdfb3396c6f21e6f4d1d0da1cd","name":"test-stack-2","peek":999,"size":3,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+	expectedStatus := fmt.Sprintf(`{"stacks":[{"id":"52d45e8a-2535-51f3-be38-db3cbbde1805","name":"test-stack-1","peek":"dGVzdA==","size":4,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"0fe738cb-d8a1-5871-b6d7-8fe51d957582","name":"test-stack-2","peek":999,"size":3,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
 		date.Format(now.Local()), date.Format(after.Local()), date.Format(after.Local()),
 		date.Format(now.Local()), date.Format(after.Local()), date.Format(after.Local()))
 	if status, err := stacksStatus.ToJSON(); err != nil {

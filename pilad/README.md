@@ -182,7 +182,7 @@ is used as default, the latter as fallback.
 {
   "stacks" : [
     {
-      "id":"f0306fec639bd57fc2929c8b897b9b37",
+      "id":"e73d14e1-dd73-5643-a6dc-a1b2d985c122",
       "name":"stack1",
       "peek":"foo",
       "size":1,
@@ -191,7 +191,7 @@ is used as default, the latter as fallback.
       "read_at":"2016-12-08T18:21:270.813642732+01:00"
     },
     {
-      "id":"dde8f895aea2ffa5546336146b9384e7",
+      "id":"b5f3f218-728d-5d8e-ae5f-56a8a31e970c",
       "name":"stack2",
       "peek":8,
       "size":2,

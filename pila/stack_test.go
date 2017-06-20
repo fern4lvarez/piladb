@@ -27,8 +27,8 @@ func TestNewStack(t *testing.T) {
 		t.Fatal("stack is nil")
 	}
 
-	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
-		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
+	if stack.ID.String() != "de009dba-4ad2-50e5-b020-e9d4c26d7a33" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "de009dba-4ad2-50e5-b020-e9d4c26d7a33")
 	}
 	if stack.Name != "test-stack" {
 		t.Errorf("stack.Name is %s, expected %s", stack.Name, "test-stack")
@@ -55,8 +55,8 @@ func TestNewStackWithBase(t *testing.T) {
 		t.Fatal("stack is nil")
 	}
 
-	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
-		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
+	if stack.ID.String() != "de009dba-4ad2-50e5-b020-e9d4c26d7a33" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "de009dba-4ad2-50e5-b020-e9d4c26d7a33")
 	}
 	if stack.Name != "test-stack" {
 		t.Errorf("stack.Name is %s, expected %s", stack.Name, "test-stack")
@@ -337,8 +337,8 @@ func TestStackSetID(t *testing.T) {
 	stack.Database = db
 	stack.SetID()
 
-	if stack.ID.String() != "378c2601e338a49341d9858081452226" {
-		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "378c2601e338a49341d9858081452226")
+	if stack.ID.String() != "7ea60de7-88f9-5163-8cc1-ed77ba1ee534" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "7ea60de7-88f9-5163-8cc1-ed77ba1ee534")
 	}
 }
 
@@ -346,8 +346,8 @@ func TestStackSetID_NoDatabase(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.SetID()
 
-	if stack.ID.String() != "2f44edeaa249ba81db20e9ddf000ba65" {
-		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "2f44edeaa249ba81db20e9ddf000ba65")
+	if stack.ID.String() != "de009dba-4ad2-50e5-b020-e9d4c26d7a33" {
+		t.Errorf("stack.ID is %s, expected %s", stack.ID.String(), "de009dba-4ad2-50e5-b020-e9d4c26d7a33")
 	}
 }
 
