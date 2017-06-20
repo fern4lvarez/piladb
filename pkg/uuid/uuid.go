@@ -1,12 +1,9 @@
-// Package uuid provides the UUID type and
+// Package uuid provides the UUID type Version 5,
+// based on SHA-1 hashing (RFC 4122), and
 // helper functions.
 package uuid
 
-import (
-	"crypto/hmac"
-	"crypto/md5"
-	"fmt"
-)
+import gouuid "github.com/satori/go.uuid"
 
 // seed must never change
 const seed = "bsa9phh6keet1ogh9ChoeNoK1jae8ro0"
@@ -17,11 +14,11 @@ type UUID string
 
 // New creates a new UUID given a string.
 func New(s string) UUID {
-	h := hmac.New(md5.New, []byte(seed))
-	// we ignore errors, since it is not
-	// testable
-	_, _ = h.Write([]byte(s))
-	return UUID(fmt.Sprintf("%x", h.Sum(nil)))
+	// we ignore errors, since we consider
+	// our seed valid to be converted to UUID
+	seedUUID, _ := gouuid.FromString(seed)
+	u := gouuid.NewV5(seedUUID, s)
+	return UUID(u.String())
 }
 
 // String returns a string representation of the
