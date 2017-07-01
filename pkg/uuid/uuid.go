@@ -37,12 +37,21 @@ func (u UUID) String() string {
 
 // Canonical converts an array of bytes into the
 // canonical representation of UUID:
-// xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+// xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx.
+// The one to three most significant bits of digit N
+// indicate the UUID variant and the four bits of digit M
+// indicate the UUID version.
 func Canonical(b []byte) string {
 	if len(b) < 16 {
 		z := make([]byte, 16-len(b))
 		b = append(z, b...)
 	}
+
+	// set UUID Version 5
+	b[6] = (b[6] & 0x0f) | (5 << 4)
+
+	// set variants
+	b[8] = (b[8] & 0xbf) | 0x80
 
 	buf := make([]byte, 36)
 
