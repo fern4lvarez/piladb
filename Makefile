@@ -13,6 +13,9 @@ test:
 testv:
 	go list ./... | grep -v /vendor/ | xargs -L1 go test -v -cover
 
+race:
+	go list ./... | grep -v /vendor/ | xargs -L1 go test -race
+
 vet:
 	go list ./... | grep -v /vendor/ | xargs -L1 go vet
 

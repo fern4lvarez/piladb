@@ -20,6 +20,7 @@ var (
 	maxStackSizeFlag                  int
 	readTimeoutFlag, writeTimeoutFlag int
 	portFlag                          int
+	pushWhenFullFlag                  bool
 	versionFlag                       bool
 )
 
@@ -28,6 +29,7 @@ func init() {
 	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
+	flag.BoolVar(&pushWhenFullFlag, "push-when-full", vars.PushWhenFullDefault, "Allow push when Stack is full")
 	flag.BoolVar(&versionFlag, "v", false, "Version")
 }
 
@@ -44,15 +46,17 @@ func (c *Conn) buildConfig() {
 		{readTimeoutFlag, vars.ReadTimeout},
 		{writeTimeoutFlag, vars.WriteTimeout},
 		{portFlag, vars.Port},
+		{pushWhenFullFlag, vars.PushWhenFull},
 	}
 
 	for _, fk := range flagKeys {
 		if e := os.Getenv(vars.Env(fk.key)); e != "" {
-			if i, err := strconv.Atoi(e); err != nil {
+			if e == "true" || e == "false" {
+				c.Config.Set(fk.key, e)
+			} else if i, err := strconv.Atoi(e); err != nil {
 				c.Config.Set(fk.key, vars.DefaultInt(fk.key))
 			} else {
 				c.Config.Set(fk.key, i)
-
 			}
 			continue
 		}
@@ -133,11 +137,19 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 	})
 }
 
-// checkMaxStackSize checks config value for MaxStackSize and execute the
-// wrapped handler if check is validated.
+// checkMaxStackSize checks config value for MaxStackSize and PushWhenFull
+// and execute the wrapped handler if check is validated.
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-		if s := c.Config.MaxStackSize(); stack.Size() >= s && s != -1 {
+		if c.isStackFull(stack) {
+			if c.Config.PushWhenFull() {
+				// set internal config value to share with
+				// the next handler that we want to sweep
+				// before pushing
+				c.Config.Set("SWEEP_BEFORE_PUSH", true)
+				handler(w, r, stack)
+				return
+			}
 			log.Println(r.Method, r.URL, http.StatusNotAcceptable, vars.MaxStackSize, "value reached")
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
@@ -145,4 +157,11 @@ func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 
 		handler(w, r, stack)
 	}
+}
+
+// isStackFull returns true if Stack is full based on the Config value,
+// else returns false. Default Stack with size -1 can never be full.
+func (c *Conn) isStackFull(stack *pila.Stack) bool {
+	s := c.Config.MaxStackSize()
+	return stack.Size() >= s && s != -1
 }

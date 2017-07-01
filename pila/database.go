@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
@@ -20,6 +21,9 @@ type Database struct {
 	Pila *Pila
 	// Stacks associated to Database mapped by their ID
 	Stacks map[fmt.Stringer]*Stack
+	// mu provides a mutex mechanism to avoid data races
+	// when manipulating Databases concurrently.
+	mu sync.Mutex
 }
 
 // NewDatabase creates a new Database given a name,
@@ -42,26 +46,32 @@ func (db *Database) CreateStack(name string, t time.Time) fmt.Stringer {
 // CreateStackWithBase creates a new Stack, given a name, a creation date,
 // and a stack.Stacker base implementation, which is associated to the Database.
 func (db *Database) CreateStackWithBase(name string, t time.Time, base stack.Stacker) fmt.Stringer {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
 	stack := NewStackWithBase(name, t, base)
 	stack.SetDatabase(db)
-	db.Stacks[stack.ID] = stack
-	return stack.ID
+	db.Stacks[stack.UUID()] = stack
+	return stack.UUID()
 }
 
 // AddStack adds a given Stack to the Database, returning
 // an error if any was found.
 func (db *Database) AddStack(stack *Stack) error {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
 	if stack.Database != nil {
 		return fmt.Errorf("stack %v already added to database %v", stack.Name, stack.Database.Name)
 	}
 
 	stack.SetDatabase(db)
-	if _, ok := db.Stacks[stack.ID]; ok {
+	if _, ok := db.Stacks[stack.UUID()]; ok {
 		stack.Database = nil
 		return fmt.Errorf("database %v already contains stack %v", db.Name, stack.Name)
 	}
 
-	db.Stacks[stack.ID] = stack
+	db.Stacks[stack.UUID()] = stack
 	return nil
 }
 
@@ -69,6 +79,9 @@ func (db *Database) AddStack(stack *Stack) error {
 // returning true if it succeeded. It will return false if the
 // Stack wasn't added to the Database.
 func (db *Database) RemoveStack(id fmt.Stringer) bool {
+	db.mu.Lock()
+	defer db.mu.Unlock()
+
 	stack, ok := db.Stacks[id]
 	if !ok {
 		return false

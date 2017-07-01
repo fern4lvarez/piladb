@@ -299,3 +299,16 @@ func TestDatabaseStacksKV_Empty(t *testing.T) {
 		t.Errorf("key-value is %v, expected %v", kv, expectedKV)
 	}
 }
+
+func TestDatabaseRace(t *testing.T) {
+	db := NewDatabase("db")
+	stack := NewStack("test-stack", time.Now())
+
+	go func() { _ = db.CreateStack("a", time.Now()) }()
+	go func() { _ = db.AddStack(stack) }()
+	go func() { _ = NewDatabase("db2") }()
+	go func() { _ = db.CreateStack("b", time.Now()) }()
+	go func() { _ = db.RemoveStack(stack.UUID()) }()
+	go func() { _ = NewStack("test-stack-2", time.Now()) }()
+	go func() { _ = db.AddStack(stack) }()
+}

@@ -1,10 +1,12 @@
 package pila
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/fern4lvarez/piladb/pkg/stack"
@@ -14,6 +16,9 @@ import (
 // Stack represents a stack entity in piladb.
 type Stack struct {
 	// ID is a unique identifier of the Stack
+	// Note: Do not use this field to read the ID,
+	// as this method is not thread-safe. See UUID()
+	// instead.
 	ID fmt.Stringer
 
 	// Name of the Stack
@@ -40,6 +45,14 @@ type Stack struct {
 	ReadAt time.Time
 
 	Blocked bool
+  
+	// dateMu serves as a mutex to lock dates on concurrent
+	// updates in order to avoid race conditions.
+	dateMu sync.Mutex
+
+	// IDMU provides a mutex to handle concurrent reads and
+	// writes on the Stack ID.
+	IDMu sync.RWMutex
 
 	// base represents the Stack data structure
 	base stack.Stacker
@@ -92,9 +105,39 @@ func (s *Stack) Pop() (interface{}, error) {
 	return nil, errors.New("Stack is empty")
 }
 
+// Base bases the Stack on an element, so this becomes
+// the bottommost one of the Stack.
+func (s *Stack) Base(element interface{}) {
+	s.base.Base(element)
+}
+
+// Sweep removes and returns the bottommost element of the Stack.
+// If the Stack is empty, it returns false.
+func (s *Stack) Sweep() (interface{}, bool) {
+	return s.base.Sweep()
+}
+
+// SweepPush removes and returns the bottommost element of the Stack,
+// and pushes an element on top of it, as an atomic operation.
+// If the Stack is empty, it returns false.
+func (s *Stack) SweepPush(element interface{}) (interface{}, bool) {
+	return s.base.SweepPush(element)
+}
+
+// Rotate moves the bottommost element of the Stack
+// to the top.
+func (s *Stack) Rotate() bool {
+	return s.base.Rotate()
+}
+
 // Size returns the size of the Stack.
 func (s *Stack) Size() int {
 	return s.base.Size()
+}
+
+// Empty returns true if a stack is empty.
+func (s *Stack) Empty() bool {
+	return s.base.Size() == 0
 }
 
 // Peek returns the element on top of the Stack.
@@ -114,14 +157,18 @@ func (s *Stack) Flush() error {
 // Update takes a date and updates UpdateAt and ReadAt
 // fields of the Stack.
 func (s *Stack) Update(t time.Time) {
+	s.dateMu.Lock()
 	s.UpdatedAt = t
 	s.ReadAt = t
+	s.dateMu.Unlock()
 }
 
 // Read takes a date and updates ReadAt field
 // of the Stack.
 func (s *Stack) Read(t time.Time) {
+	s.dateMu.Lock()
 	s.ReadAt = t
+	s.dateMu.Unlock()
 }
 
 // SetDatabase links the Stack with a given Database and
@@ -131,9 +178,20 @@ func (s *Stack) SetDatabase(db *Database) {
 	s.SetID()
 }
 
+// UUID returns the unique Stack ID providing thread safety.
+func (s *Stack) UUID() fmt.Stringer {
+	s.IDMu.RLock()
+	defer s.IDMu.RUnlock()
+
+	return s.ID
+}
+
 // SetID recalculates the id of the Stack based on its
 // Database name and its own name.
 func (s *Stack) SetID() {
+	s.IDMu.Lock()
+	defer s.IDMu.Unlock()
+
 	if s.Database != nil {
 		s.ID = uuid.New(s.Database.Name + s.Name)
 		return
@@ -153,7 +211,7 @@ func (s *Stack) SizeToJSON() []byte {
 // Status returns the status of the Stack  in json format.
 func (s *Stack) Status() StackStatus {
 	status := StackStatus{}
-	status.ID = s.ID.String()
+	status.ID = s.UUID().String()
 	status.Name = s.Name
 	status.Size = s.Size()
 	status.Peek = s.Peek()
@@ -175,7 +233,25 @@ func (element Element) ToJSON() ([]byte, error) {
 }
 
 // Decode decodes json data into an Element.
+// If the payload is nil, empty, or doesn't
+// follow a {"element":...} pattern, it will
+// return an error.
 func (element *Element) Decode(r io.Reader) error {
-	decoder := json.NewDecoder(r)
+	if r == nil {
+		return errors.New("payload is nil")
+	}
+
+	elementBuffer := new(bytes.Buffer)
+	elementBuffer.ReadFrom(r)
+
+	if len(elementBuffer.Bytes()) == 0 {
+		return errors.New("payload is empty")
+	}
+
+	if !bytes.HasPrefix(elementBuffer.Bytes(), []byte(`{"element"`)) {
+		return errors.New("payload is malformed, missing element key?")
+	}
+
+	decoder := json.NewDecoder(elementBuffer)
 	return decoder.Decode(element)
 }

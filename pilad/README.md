@@ -6,7 +6,8 @@ databases and stacks. It exposes a RESTful HTTP server that listens to requests
 in order to interact with the engine.
 
 > Note: pilad API does not come with a built-in `pretty` option. We encourage
-  to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal.
+> to use [`jq`](https://stedolan.github.io/jq/) to visualize JSON data on the terminal,
+> or advanced CLI HTTP clients like [HTTPie](https://httpie.org/).
 
 Endpoints
 ---------
@@ -15,7 +16,15 @@ Endpoints
 
 #### GET `/`
 
-Redirects to the `pilad` documentation site and returns `301 Moved Permanently`.
+Returns information about **piladb** and `200 OK`.
+
+#### GET `/_ping`
+
+Returns `pong` and `200 OK`.
+
+#### HEAD `/_ping`
+
+Returns  headers and `200 OK`.
 
 #### GET `/_status`
 
@@ -297,6 +306,38 @@ is used as default, the latter as fallback.
 
 Returns `410 GONE` if the database or stack do not exist.
 
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?empty`
+
+> EMPTY operation.
+
+Returns true if the stack identify by `$STACK_ID` in database `$DATABASE_ID` is empty,
+and `200 OK`.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+false
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
+#### GET `/databases/$DATABASE_ID/stacks/$STACK_ID?full`
+
+> FULL operation.
+
+Returns true if the stack identify by `$STACK_ID` in database `$DATABASE_ID` is full,
+and `200 OK`. Full means that the size of the Stack is equals or bigger to the `MAX_STACK_SIZE` config value, if set.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+false
+```
+
+Returns `410 GONE` if the database or stack do not exist.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID` + `{"element":$ELEMENT}`
 
 > PUSH operation.
@@ -312,6 +353,53 @@ is used as default, the latter as fallback.
   "element": "this is an element"
 }
 ```
+
+Returns `406 NOT ACCEPTABLE` if the stack is full.
+
+Returns `410 GONE` if the database or stack do not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the element.
+
+#### POST `/databases/$DATABASE_ID/stacks/$STACK_ID?base` + `{"element":$ELEMENT}`
+
+> BASE operation.
+
+Puts an `ELEMENT` on the bottom of the `$STACK_ID` stack of database `$DATABASE_ID`, and
+returns `200 OK`, and the based element.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "element": "this is an element"
+}
+```
+
+Returns `406 NOT ACCEPTABLE` if the stack is full.
+
+Returns `410 GONE` if the database or stack do not exist.
+
+Returns `400 BAD REQUEST` if there's an error serializing the element.
+
+#### POST `/databases/$DATABASE_ID/stacks/$STACK_ID?rotate`
+
+> ROTATE operation.
+
+Puts the bottommost element on the top of the `$STACK_ID` stack of database `$DATABASE_ID`,
+and returns `200 OK`, and the rotated element. The element next to the former bottommost
+element becomes the new one.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "element": "this is an element"
+}
+```
+
+Returns `204 NO CONTENT` if the stack is empty.
 
 Returns `410 GONE` if the database or stack do not exist.
 

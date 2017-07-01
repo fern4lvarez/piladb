@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	"github.com/fern4lvarez/piladb/config"
 	"github.com/fern4lvarez/piladb/pila"
 	"github.com/fern4lvarez/piladb/pkg/uuid"
-	"github.com/fern4lvarez/piladb/pkg/version"
 
 	"github.com/gorilla/mux"
 )
@@ -33,17 +33,24 @@ func NewConn() *Conn {
 	conn := &Conn{}
 	conn.Pila = pila.NewPila()
 	conn.Config = config.NewConfig()
-	conn.Status = NewStatus(version.Version(version.VERSION), time.Now().UTC(), MemStats())
+	conn.Status = NewStatus(v(), time.Now().UTC(), MemStats())
 	return conn
 }
 
 // Connection Handlers
 
-// rootHandler redirects to the pilad documentation site hosted on Github.
+// rootHandler shows information about piladb.
 func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
-	redirAddress := fmt.Sprintf("https://raw.githubusercontent.com/fern4lvarez/piladb/%s/pilad/README.md", version.CommitHash())
-	log.Println(r.Method, r.URL, http.StatusMovedPermanently, "Moved to", redirAddress)
-	http.Redirect(w, r, redirAddress, http.StatusMovedPermanently)
+	var links = []byte(`{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`)
+	w.Header().Set("Content-Type", "application/json")
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write(links)
+}
+
+// pingHandler writes pong.
+func (c *Conn) pingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Write([]byte("pong"))
 }
 
 // statusHandler writes the piladb status into the response.
@@ -244,11 +251,25 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.sizeStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["empty"]; ok {
+				c.emptyStackHandler(w, r, stack)
+				return
+			}
+			if _, ok := r.Form["full"]; ok {
+				c.fullStackHandler(w, r, stack)
+				return
+			}
 			c.statusStackHandler(w, r, stack)
 			return
 
 		case r.Method == "POST":
-			c.checkMaxStackSize(c.pushStackHandler)(w, r, stack)
+			_ = r.ParseForm()
+			if _, ok := r.Form["rotate"]; ok {
+				c.rotateStackHandler(w, r, stack)
+				return
+			}
+
+			c.checkMaxStackSize(c.addElementStackHandler)(w, r, stack)
 			return
 
 		case r.Method == "PUT":
@@ -313,15 +334,59 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	w.Write(stack.SizeToJSON())
 }
 
-// pushStackHandler adds an element into a Stack and returns 200 and the element.
-func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-	if r.Body == nil {
-		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"no element provided")
-		w.WriteHeader(http.StatusBadRequest)
+// emptyStackHandler checks if the Stack is empty.
+func (c *Conn) emptyStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
+	log.Println(r.Method, r.URL, http.StatusOK, stack.Empty())
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider a boolean
+	// valid for a JSON encoding.
+	emptyStackHandlerResponse, _ := json.Marshal(stack.Empty())
+
+	w.Write(emptyStackHandlerResponse)
+}
+
+// fullStackHandler checks if the Stack is full, based on the configuration value.
+func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Read(c.opDate)
+	isStackFull := c.isStackFull(stack) // caching to prevent re-lock
+	log.Println(r.Method, r.URL, http.StatusOK, isStackFull)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider a boolean
+	// valid for a JSON encoding.
+	fullStackHandlerResponse, _ := json.Marshal(isStackFull)
+
+	w.Write(fullStackHandlerResponse)
+}
+
+// rotateStackHandler rotates the bottommost element of the Stack
+// to the top.
+func (c *Conn) rotateStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	ok := stack.Rotate()
+	if !ok {
+		log.Println(r.Method, r.URL, http.StatusNoContent)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	stack.Update(c.opDate)
 
+	var element pila.Element
+	element.Value = stack.Peek()
+
+	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider our element
+	// suitable for a JSON encoding.
+	b, _ := element.ToJSON()
+	w.Write(b)
+}
+
+// addElementStackHandler adds an element into a Stack and returns 200 and the element.
+// It can be as a PUSH or a BASE operation.
+func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	var element pila.Element
 	err := element.Decode(r.Body)
 	if err != nil {
@@ -331,7 +396,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 		return
 	}
 
-	stack.Push(element.Value)
+	c.addElementStackHelper(r, stack, element)
 	stack.Update(c.opDate)
 
 	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
@@ -341,6 +406,28 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	// suitable for a JSON encoding.
 	b, _ := element.ToJSON()
 	w.Write(b)
+}
+
+// addElementStackHelper adds an element to a Stack as PUSH or BASE depending on the operation.
+func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element pila.Element) {
+	// BASE
+	_ = r.ParseForm()
+	if _, ok := r.Form["base"]; ok {
+		stack.Base(element.Value)
+		return
+	}
+
+	// Sweep + PUSH
+	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
+		if swept, ok := stack.SweepPush(element.Value); ok {
+			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
+		}
+		c.Config.Set("SWEEP_BEFORE_PUSH", false)
+		return
+	}
+
+	// PUSH
+	stack.Push(element.Value)
 }
 
 // popStackHandler extracts the peek element of a Stack, returns 200 and returns it.

@@ -9,11 +9,15 @@ import (
 
 type TestBaseStack struct{}
 
-func (s *TestBaseStack) Push(element interface{}) { return }
-func (s *TestBaseStack) Pop() interface{}         { return nil }
-func (s *TestBaseStack) Size() int                { return 0 }
-func (s *TestBaseStack) Peek() interface{}        { return nil }
-func (s *TestBaseStack) Flush()                   { return }
+func (s *TestBaseStack) Push(element interface{})                          { return }
+func (s *TestBaseStack) Pop() (interface{}, bool)                          { return nil, false }
+func (s *TestBaseStack) Base(element interface{})                          { return }
+func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
+func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
+func (s *TestBaseStack) Rotate() bool                                      { return false }
+func (s *TestBaseStack) Size() int                                         { return 0 }
+func (s *TestBaseStack) Peek() interface{}                                 { return nil }
+func (s *TestBaseStack) Flush()                                            { return }
 func (s *TestBaseStack) Block() bool              { return false }
 
 func TestNewStack(t *testing.T) {
@@ -94,7 +98,7 @@ func TestStackPush(t *testing.T) {
 	stack.Push(struct{ id string }{id: "test"})
 
 	if stack.Size() != 3 {
-		t.Errorf("stack.base.Size() is %d, expected %d", stack.base.Size(), 3)
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
 	}
 }
 
@@ -163,6 +167,111 @@ func TestStackPop_Error(t *testing.T) {
 	}
 }
 
+func TestStackBase(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Base(1)
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+	}
+
+	stack.Base(2)
+	stack.Base(struct{ id string }{id: "test"})
+
+	if stack.Size() != 3 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
+	}
+}
+
+func TestStackSweep(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+
+	element, ok := stack.Sweep()
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.Peek() != 8 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 8)
+	}
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
+	}
+}
+
+func TestStackSweep_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	_, ok := stack.Sweep()
+	if ok {
+		t.Error("stack.Sweep() is ok")
+	}
+}
+
+func TestStackSweepPush(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+
+	element, ok := stack.SweepPush("foo")
+	if !ok {
+		t.Errorf("stack.Sweep() not ok")
+	}
+	if element != "test" {
+		t.Errorf("element is %v, expected %v", element, "test")
+	}
+	if stack.Peek() != "foo" {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), "foo")
+	}
+	if stack.Size() != 2 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 2)
+	}
+}
+
+func TestStackSweepPush_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	_, ok := stack.SweepPush(8)
+	if ok {
+		t.Error("stack.SweepPush(8) is ok")
+	}
+}
+
+func TestStackRotate(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	for i := 0; i < 3; i++ {
+		stack.Push(i)
+	}
+
+	if !stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", false, true)
+	}
+
+	if stack.Peek() != 0 {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), 0)
+	}
+	if stack.Size() != 3 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
+	}
+}
+
+func TestStackRotate_False(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+
+	if stack.Rotate() {
+		t.Errorf("stack.Rotate() is %v, expected %v", true, false)
+	}
+
+	if stack.Peek() != nil {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), nil)
+	}
+	if stack.Size() != 0 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 0)
+	}
+}
+
 func TestStackSize(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	if stack.Size() != 0 {
@@ -192,6 +301,20 @@ func TestStackBlock(t *testing.T) {
 
 	if stack.Blocked != true {
 		t.Errorf("stack isn't blocked")
+  }
+}
+
+func TestStackEmpty(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	if !stack.Empty() {
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), true)
+	}
+
+	for i := 0; i < 2; i++ {
+		stack.Push(i)
+	}
+	if stack.Empty() {
+		t.Errorf("stack.Empty() is %v, expected %v", stack.Empty(), false)
 	}
 }
 
@@ -312,6 +435,34 @@ func TestStackSizeToJSON(t *testing.T) {
 	}
 }
 
+func TestStackRace(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Push(1) }()
+	go func() { stack.Pop() }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Size() }()
+	go func() { stack.Read(time.Now()) }()
+	go func() { stack.Peek() }()
+	go func() { stack.Flush() }()
+}
+
+func TestStackRace_UpdateRead(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Read(time.Now()) }()
+}
+
+func TestStackRace_ID(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { _ = stack.UUID() }()
+	go func() { stack.SetID() }()
+	go func() { _ = stack.UUID() }()
+	go func() { _ = stack.Status() }()
+}
+
 func TestElementJSON(t *testing.T) {
 	elements := []Element{
 		{Value: "foo"},
@@ -366,6 +517,7 @@ func TestElementDecode(t *testing.T) {
 		`{"element":3.14}`,
 		`{"element":"aGVsbG8="}`,
 		`{"element":{"one":1}}`,
+		`{"element":null}`,
 	}
 	expectedElements := []Element{
 		{Value: "foo"},
@@ -373,6 +525,7 @@ func TestElementDecode(t *testing.T) {
 		{Value: 3.14},
 		{Value: "aGVsbG8="},                         // does not decode into []byte
 		{Value: map[string]interface{}{"one": 1.0}}, // decode inner int into float
+		{Value: nil},
 	}
 
 	for i, elementReader := range elementReaders {
@@ -396,6 +549,7 @@ func TestElementDecode_Error(t *testing.T) {
 		` `,
 		`$`,
 		`%{}`,
+		`{"ement":"foo"}`,
 	}
 
 	for _, elementReader := range elementReaders {
@@ -405,5 +559,12 @@ func TestElementDecode_Error(t *testing.T) {
 		if err := element.Decode(r); err == nil {
 			t.Fatal("err is nil, expected error")
 		}
+	}
+}
+
+func TestElementDecode_Nil(t *testing.T) {
+	var element Element
+	if err := element.Decode(nil); err == nil {
+		t.Fatal("err is nil, expected error")
 	}
 }

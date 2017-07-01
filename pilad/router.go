@@ -15,6 +15,11 @@ func Router(conn *Conn) *mux.Router {
 	r.HandleFunc("/", conn.rootHandler).
 		Methods("GET")
 
+	// GET /_ping
+	// HEAD /_ping
+	r.HandleFunc("/_ping", conn.pingHandler).
+		Methods("GET", "HEAD")
+
 	// GET /_status
 	r.HandleFunc("/_status", conn.statusHandler).
 		Methods("GET")
@@ -45,8 +50,12 @@ func Router(conn *Conn) *mux.Router {
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?peek
 	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?size
+	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?empty
+	// GET /databases/$DATABASE_ID/stacks/$STACK_ID?full
 	// POST /databases/$DATABASE_ID/stacks/$STACK_ID + {element: value}
-	// PUT /databases/$DATABASE_ID/stacks/$STACK_ID?block
+	// POST /databases/$DATABASE_ID/stacks/$STACK_ID?base + {element: value}
+  // PUT /databases/$DATABASE_ID/stacks/$STACK_ID?block
+	// POST /databases/$DATABASE_ID/stacks/$STACK_ID?rotate
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID?flush
 	// DELETE /databases/$DATABASE_ID/stacks/$STACK_ID?full

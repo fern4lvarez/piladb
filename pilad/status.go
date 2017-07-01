@@ -50,10 +50,12 @@ func (s *Status) Update(now time.Time, mem *runtime.MemStats) {
 // ToJSON returns the Status into a JSON file in []byte
 // format.
 func (s *Status) ToJSON() []byte {
+	// Store date in UTC, show it in Local.
+	s.StartedAt = s.StartedAt.Local()
+
 	// Do not check error as the Status type does
 	// not contain types that could cause such case.
 	// See http://golang.org/src/encoding/json/encode.go?s=5438:5481#L125
-	s.StartedAt = s.StartedAt.Local()
 	b, _ := json.Marshal(s)
 	return b
 }
