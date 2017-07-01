@@ -164,7 +164,7 @@ func TestDatabasesHandler_GET(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"number_of_databases":1,"databases":[{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}]}`; string(databases) != expected {
+	if expected := `{"number_of_databases":1,"databases":[{"id":"64626840-b923-4221-d637-1397cfffa702","name":"db","number_of_stacks":0}]}`; string(databases) != expected {
 		t.Errorf("databases are %s, expected %s", string(databases), expected)
 	}
 }
@@ -237,8 +237,8 @@ func TestCreateDatabaseHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(databases) != `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}` {
-		t.Errorf("databases are %s, expected %s", string(databases), `{"id":"8cfa8cb55c92fa403369a13fd12a8e01","name":"db","number_of_stacks":0}`)
+	if string(databases) != `{"id":"64626840-b923-4221-d637-1397cfffa702","name":"db","number_of_stacks":0}` {
+		t.Errorf("databases are %s, expected %s", string(databases), `{"id":"64626840-b923-4221-d637-1397cfffa702","name":"db","number_of_stacks":0}`)
 	}
 }
 
@@ -324,7 +324,7 @@ func TestDatabaseHandler_GET(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["b92f53fa3884305ef798fd8c5d7609ad"]}`; string(database) != expected {
+	if expected := `{"id":"501214ca-0ade-f5f8-0efe-663e7c27267e","name":"mydb","number_of_stacks":1,"stacks":["7b6fee1b-9cdf-ba44-407e-7c171924dcf1"]}`; string(database) != expected {
 		t.Errorf("database is %v, expected %v", string(database), expected)
 	}
 }
@@ -368,7 +368,7 @@ func TestDatabaseHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := `{"id":"c13cec0e70876381c78c616ee2d809eb","name":"mydb","number_of_stacks":1,"stacks":["b92f53fa3884305ef798fd8c5d7609ad"]}`; string(database) != expected {
+	if expected := `{"id":"501214ca-0ade-f5f8-0efe-663e7c27267e","name":"mydb","number_of_stacks":1,"stacks":["7b6fee1b-9cdf-ba44-407e-7c171924dcf1"]}`; string(database) != expected {
 		t.Errorf("database is %v, expected %v", string(database), expected)
 	}
 }
@@ -488,7 +488,7 @@ func TestStacksHandler_GET(t *testing.T) {
 	inputOutput := []struct {
 		input, output string
 	}{
-		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-80df-cdc0-ddc77fc6397e","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-aa2a-3e81-3d5066246cb6","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
 			date.Format(now1.Local()), date.Format(after1.Local()), date.Format(after1.Local()),
 			date.Format(now2.Local()), date.Format(after2.Local()), date.Format(after2.Local()))},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
@@ -569,7 +569,7 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := fmt.Sprintf(`{"stacks":[{"id":"f0306fec639bd57fc2929c8b897b9b37","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"dde8f895aea2ffa5546336146b9384e7","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+	if expected := fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-80df-cdc0-ddc77fc6397e","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-aa2a-3e81-3d5066246cb6","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
 		date.Format(now1.Local()), date.Format(after1.Local()), date.Format(after1.Local()),
 		date.Format(now2.Local()), date.Format(after2.Local()), date.Format(after2.Local())); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
@@ -661,7 +661,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-9918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 
 	if string(stack) != expectedStack {
@@ -702,7 +702,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-9918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 
 	if string(stack) != expectedStack {
@@ -742,7 +742,7 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"bb4dabeeaa6e90108583ddbf49649427","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-9918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
