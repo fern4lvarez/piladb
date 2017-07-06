@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - Add `FULL` operation
 - Add `ROTATE` operation
 
+### Changed
+- pkg/uuid: Replace md5 with sha1 and be compliant to Version 5 of RFC 4122
+
 ## [0.1.4] - 2017-06-20
 
 ### Added
