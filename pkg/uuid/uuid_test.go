@@ -1,6 +1,7 @@
 package uuid
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
@@ -8,8 +9,8 @@ import (
 func TestNew(t *testing.T) {
 	s := "test"
 	u := New(s)
-	if u.String() != "1540300e31de262ee89774c014ac163d" {
-		t.Errorf("u is %v, expected %v", u, "1540300e31de262ee89774c014ac163d")
+	if u.String() != "343345ce-8555-5655-9b33-5945ace62f1c" {
+		t.Errorf("u is %v, expected %v", u, "343345ce-8555-5655-9b33-5945ace62f1c")
 	}
 
 	u2 := New(s)
@@ -20,14 +21,45 @@ func TestNew(t *testing.T) {
 }
 
 func TestUUIDString(t *testing.T) {
-	u := UUID("123e4567e89b12d3a456426655440000")
+	u := UUID("68dc78ce-5de1-11e7-907b-a6006ad3dba0")
 	s := u.String()
-	if s != "123e4567e89b12d3a456426655440000" {
-		t.Errorf("u.String() is %v, expected %v", s, "123e4567e89bi12d3a456426655440000")
+	if s != "68dc78ce-5de1-11e7-907b-a6006ad3dba0" {
+		t.Errorf("u.String() is %v, expected %v", s, "68dc78ce-5de1-11e7-907b-a6006ad3dba0")
 	}
 
 	s = fmt.Sprintf("%v", u)
-	if s != "123e4567e89b12d3a456426655440000" {
-		t.Errorf("u.String() is %v, expected %v", s, "123e4567e89b12d3a456426655440000")
+	if s != "68dc78ce-5de1-11e7-907b-a6006ad3dba0" {
+		t.Errorf("u.String() is %v, expected %v", s, "68dc78ce-5de1-11e7-907b-a6006ad3dba0")
+	}
+}
+
+func TestCanonical(t *testing.T) {
+	b, _ := hex.DecodeString("e494f6205de211e7907ba6006ad3dba0")
+	expectedUUID := "e494f620-5de2-51e7-907b-a6006ad3dba0"
+
+	s := Canonical(b)
+	if s != expectedUUID {
+		t.Errorf("Canonical UUID is %s, expected %s", s, expectedUUID)
+	}
+}
+
+func TestCanonical_Short(t *testing.T) {
+	b := []byte("abcdefgh")
+	expectedUUID := "00000000-0000-5000-a162-636465666768"
+
+	s := Canonical(b)
+	if s != expectedUUID {
+		t.Errorf("Canonical UUID is %s, expected %s", s, expectedUUID)
+	}
+}
+
+func TestCanonical_Long(t *testing.T) {
+	b, _ := hex.DecodeString("e494f6205de211e7907ba6006ad3dba0")
+	b = append(b, []byte("xxxxxxxxxxxxxxxxxx")...)
+	expectedUUID := "e494f620-5de2-51e7-907b-a6006ad3dba0"
+
+	s := Canonical(b)
+	if s != expectedUUID {
+		t.Errorf("Canonical UUID is %s, expected %s", s, expectedUUID)
 	}
 }
