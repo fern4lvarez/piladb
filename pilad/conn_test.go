@@ -1141,7 +1141,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 		}
 
 		if io.input.op == "full" {
-			if s := db.Stacks[uuid.UUID(io.input.stack)]; s != nil {
+			if s = db.Stacks[uuid.UUID(io.input.stack)]; s != nil {
 				t.Errorf("db contains %v, expected not to", io.input.stack)
 			}
 		} else {
