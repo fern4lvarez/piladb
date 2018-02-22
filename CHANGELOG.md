@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Test against new versions of Go: 1.9.x and 1.10
+
 ## [0.1.4] - 2017-06-20
 
 ### Added
