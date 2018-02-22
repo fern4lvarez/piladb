@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Replace `gvt` with `dep` for vendoring dependencies
+- Update dependencies
+- Add `vgo`'s `go.mod` file
 - Test against new versions of Go: 1.9.x and 1.10
 
 ## [0.1.4] - 2017-06-20
