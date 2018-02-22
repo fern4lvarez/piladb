@@ -24,6 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "v1.6.1"
 
 [[constraint]]
   branch = "master"
