@@ -15,6 +15,16 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - pkg/uuid: Replace md5 with sha1 and be compliant to Version 5 of RFC 4122
 
+## [0.1.5] - 2018-02-23
+
+### Added
+- Replace `gvt` with `dep` for vendoring dependencies
+- Add `vgo`'s `go.mod` file
+- Test against new versions of Go: 1.9.x and 1.10
+
+### Changed
+- Update dependencies
+
 ## [0.1.4] - 2017-06-20
 
 ### Added
@@ -67,7 +77,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - First release!
 
-[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/fern4lvarez/piladb/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/fern4lvarez/piladb/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/fern4lvarez/piladb/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/fern4lvarez/piladb/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/fern4lvarez/piladb/compare/v0.1.1...v0.1.2
