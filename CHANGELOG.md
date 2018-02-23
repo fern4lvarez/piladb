@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Update Dependencies section in the README file
+
 ## [0.1.5] - 2018-02-23
 
 ### Added
