@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - pkg/uuid: Replace md5 with sha1 and be compliant to Version 5 of RFC 4122
+- Update Dependencies section in the README file
 
 ## [0.1.5] - 2018-02-23
 

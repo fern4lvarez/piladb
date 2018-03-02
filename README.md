@@ -60,7 +60,7 @@ Clients
 Development
 -----------
 
-> You need Go installed. Version 1.6+ recommended.
+> You need Go installed. Version 1.6+ is mandatory.
 
 ```bash
 go get github.com/fern4lvarez/piladb/...
@@ -77,14 +77,12 @@ Dependencies
 **piladb** aims to minimize the amount of third party dependencies and to rely on
 the Go standard library as much as possible.
 
-Even though, it uses [`gvt`](https://github.com/FiloSottile/gvt) to vendor its few
-dependencies. If you use Go 1.6+, or Go 1.5 with `GO15VENDOREXPERIMENT=1` set,
-you're good to go, libraries in `vendor` directory will be used and everything will
-work as expected. You don't need to install, use or understand `gvt`.
+Even though, it uses [`dep`](https://golang.github.io/dep/) to vendor its few
+dependencies.
 
-If you are using a lower Go version, **piladb** will use either your current local
-version of the dependencies, or the latest one available. Things might break, so
-please consider updating to the latest version.
+**piladb** also provides a `go.mod` file, which turns this project into a Go module.
+To learn more about Go modules and the `vgo` prototype, please read the
+[Go & Versioning](https://research.swtch.com/vgo) series by Russ Cox.
 
 Code Coverage
 -------------
@@ -110,7 +108,7 @@ Credits
 -------
 
 **piladb** is developed by [Fernando Álvarez](https://www.twitter.com/fern4lvarez)
-and [≅oscillatingworks](https://www.oscillating.works) on a Dell XPS 13 laptop, running Ubuntu 14.04,
+and [≅oscillatingworks](https://www.oscillating.works) on a Dell XPS 13 laptop, running Ubuntu,
 and using [`vim-go`](https://github.com/fatih/vim-go) plugin within the `vim` editor,
 in Berlin and Madrid, with the support of Gali, Godín and other friends.
 
