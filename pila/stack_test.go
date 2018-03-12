@@ -10,7 +10,7 @@ import (
 type TestBaseStack struct{}
 
 func (s *TestBaseStack) Push(element interface{})                          { return }
-func (s *TestBaseStack) Pop() (interface{}, bool)                          { return nil, false }
+func (s *TestBaseStack) Pop() interface{}                                  { return nil }
 func (s *TestBaseStack) Base(element interface{})                          { return }
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
@@ -18,7 +18,7 @@ func (s *TestBaseStack) Rotate() bool                                      { ret
 func (s *TestBaseStack) Size() int                                         { return 0 }
 func (s *TestBaseStack) Peek() interface{}                                 { return nil }
 func (s *TestBaseStack) Flush()                                            { return }
-func (s *TestBaseStack) Block() bool              { return false }
+func (s *TestBaseStack) Block() bool                                       { return false }
 
 func TestNewStack(t *testing.T) {
 	now := time.Now()
@@ -102,17 +102,17 @@ func TestStackPush(t *testing.T) {
 	}
 }
 
-func TestBlockedStackPush(t *testing.T) {
+func TestStackPush_Blocked(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.Push(1)
 
 	if stack.Size() != 1 {
-		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 1)
 	}
 
 	stack.Block()
-	err := stack.Push(2)
 
+	err := stack.Push(2)
 	if err == nil {
 		t.Error("stack should be blocked and non-mutable operations are allowed")
 	}
@@ -139,7 +139,7 @@ func TestStackPop(t *testing.T) {
 	}
 }
 
-func TestBlockedStackPop(t *testing.T) {
+func TestStackPop_Blocked(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.Push(1)
 
@@ -148,10 +148,10 @@ func TestBlockedStackPop(t *testing.T) {
 	}
 
 	stack.Block()
-	_, err := stack.Pop()
 
+	_, err := stack.Pop()
 	if err == nil {
-		t.Error("stack should be blocked and non-mutable operations are allowed")
+		t.Error("err is nil, stack should not be blocked", err)
 	}
 
 	if stack.Size() != 1 {
@@ -169,17 +169,40 @@ func TestStackPop_Error(t *testing.T) {
 
 func TestStackBase(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
-	stack.Base(1)
+	_ = stack.Base(1)
 
 	if stack.Size() != 1 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 0)
 	}
 
-	stack.Base(2)
-	stack.Base(struct{ id string }{id: "test"})
+	_ = stack.Base(2)
+	_ = stack.Base(struct{ id string }{id: "test"})
 
 	if stack.Size() != 3 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 3)
+	}
+}
+
+func TestStackBase_Blocked(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	err := stack.Base(1)
+	if err != nil {
+		t.Errorf("err is %v, expected nil", err)
+	}
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.base.Size(), 1)
+	}
+
+	stack.Block()
+
+	err = stack.Base(2)
+	if err == nil {
+		t.Error("err is nil, stack should not be blocked", err)
+	}
+
+	if stack.Size() != 1 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
 	}
 }
 
@@ -188,9 +211,9 @@ func TestStackSweep(t *testing.T) {
 	stack.Push("test")
 	stack.Push(8)
 
-	element, ok := stack.Sweep()
-	if !ok {
-		t.Errorf("stack.Sweep() not ok")
+	element, err := stack.Sweep()
+	if err != nil {
+		t.Errorf("err is %v, expected nil", err)
 	}
 	if element != "test" {
 		t.Errorf("element is %v, expected %v", element, "test")
@@ -205,9 +228,21 @@ func TestStackSweep(t *testing.T) {
 
 func TestStackSweep_False(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
-	_, ok := stack.Sweep()
-	if ok {
-		t.Error("stack.Sweep() is ok")
+	if _, err := stack.Sweep(); err == nil {
+		t.Error("err is nil")
+	}
+}
+
+func TestStackSweep_Blocked(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push(1)
+
+	stack.Block()
+
+	if _, err := stack.Sweep(); err == nil {
+		t.Error("err is nil")
+	} else if err.Error() != "Stack is blocked" {
+		t.Errorf("err is %v, expected Stack is blocked", err)
 	}
 }
 
@@ -216,9 +251,9 @@ func TestStackSweepPush(t *testing.T) {
 	stack.Push("test")
 	stack.Push(8)
 
-	element, ok := stack.SweepPush("foo")
-	if !ok {
-		t.Errorf("stack.Sweep() not ok")
+	element, err := stack.SweepPush("foo")
+	if err != nil {
+		t.Errorf("err is %v, expected nil", err)
 	}
 	if element != "test" {
 		t.Errorf("element is %v, expected %v", element, "test")
@@ -233,9 +268,21 @@ func TestStackSweepPush(t *testing.T) {
 
 func TestStackSweepPush_False(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
-	_, ok := stack.SweepPush(8)
-	if ok {
-		t.Error("stack.SweepPush(8) is ok")
+	if _, err := stack.SweepPush(8); err == nil {
+		t.Error("err is nil")
+	}
+}
+
+func TestStackSweepPush_Blocked(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push(1)
+
+	stack.Block()
+
+	if _, err := stack.SweepPush(8); err == nil {
+		t.Error("err is nil")
+	} else if err.Error() != "Stack is blocked" {
+		t.Errorf("err is %v, expected Stack is blocked", err)
 	}
 }
 
@@ -245,8 +292,8 @@ func TestStackRotate(t *testing.T) {
 		stack.Push(i)
 	}
 
-	if !stack.Rotate() {
-		t.Errorf("stack.Rotate() is %v, expected %v", false, true)
+	if err := stack.Rotate(); err != nil {
+		t.Errorf("stack.Rotate() is %v, expected nil", err)
 	}
 
 	if stack.Peek() != 0 {
@@ -257,11 +304,11 @@ func TestStackRotate(t *testing.T) {
 	}
 }
 
-func TestStackRotate_False(t *testing.T) {
+func TestStackRotate_Empty(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 
-	if stack.Rotate() {
-		t.Errorf("stack.Rotate() is %v, expected %v", true, false)
+	if err := stack.Rotate(); err == nil {
+		t.Errorf("stack.Rotate() is %v, expected %v", err, "Empty")
 	}
 
 	if stack.Peek() != nil {
@@ -269,6 +316,25 @@ func TestStackRotate_False(t *testing.T) {
 	}
 	if stack.Size() != 0 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 0)
+	}
+}
+
+func TestStackRotate_Blocked(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push(1)
+	stack.Push("abc")
+
+	stack.Block()
+
+	if err := stack.Rotate(); err == nil {
+		t.Errorf("stack.Rotate() is %v, expected %v", err, "Blocked")
+	}
+
+	if stack.Peek() != "abc" {
+		t.Errorf("stack.Peek() is %v, expected %v", stack.Peek(), "abc")
+	}
+	if stack.Size() != 2 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 2)
 	}
 }
 
@@ -291,17 +357,6 @@ func TestStackSize(t *testing.T) {
 	if stack.Size() != 10 {
 		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 10)
 	}
-}
-
-func TestStackBlock(t *testing.T) {
-	stack := NewStack("test-stack", time.Now())
-	stack.Push("test")
-	stack.Push(8)
-	stack.Block()
-
-	if stack.Blocked != true {
-		t.Errorf("stack isn't blocked")
-  }
 }
 
 func TestStackEmpty(t *testing.T) {
@@ -344,7 +399,7 @@ func TestStackFlush(t *testing.T) {
 	}
 }
 
-func TestBlockedStackFlush(t *testing.T) {
+func TestStackFlush_Blocked(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.Push(1)
 
@@ -435,6 +490,41 @@ func TestStackSizeToJSON(t *testing.T) {
 	}
 }
 
+func TestStackBlock(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+	stack.Block()
+
+	if !stack.Blocked() {
+		t.Errorf("stack is not blocked")
+	}
+}
+
+func TestStackUnblock(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	stack.Push("test")
+	stack.Push(8)
+	stack.Unblock()
+
+	if stack.Blocked() {
+		t.Errorf("stack is blocked")
+	}
+}
+
+func TestStackBlocked(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	if stack.Blocked() {
+		t.Errorf("stack is blocked")
+	}
+
+	stack.Block()
+
+	if !stack.Blocked() {
+		t.Errorf("stack is not blocked")
+	}
+}
+
 func TestStackRace(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	go func() { stack.Push(1) }()
@@ -461,6 +551,23 @@ func TestStackRace_ID(t *testing.T) {
 	go func() { stack.SetID() }()
 	go func() { _ = stack.UUID() }()
 	go func() { _ = stack.Status() }()
+}
+
+func TestStackRace_Block(t *testing.T) {
+	stack := NewStack("test-stack", time.Now())
+	go func() { stack.Push(1) }()
+	go func() { stack.Pop() }()
+	go func() { stack.Block() }()
+	go func() { stack.Unblock() }()
+	go func() { stack.Update(time.Now()) }()
+	go func() { stack.Size() }()
+	go func() { stack.Unblock() }()
+	go func() { stack.Block() }()
+	go func() { stack.Read(time.Now()) }()
+	go func() { stack.Peek() }()
+	go func() { stack.Block() }()
+	go func() { stack.Unblock() }()
+	go func() { stack.Flush() }()
 }
 
 func TestElementJSON(t *testing.T) {
