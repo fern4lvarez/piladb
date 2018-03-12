@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Add `EMPTY` operation
 - Add `FULL` operation
 - Add `ROTATE` operation
+- Add `BLOCK` and `UNBLOCK` operations
 
 ## [0.1.4] - 2017-06-20
 
