@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/fern4lvarez/piladb/config"
@@ -12,6 +13,15 @@ import (
 	"github.com/fern4lvarez/piladb/pkg/uuid"
 
 	"github.com/gorilla/mux"
+)
+
+const (
+	// PUT represents the PUT HTTP method
+	PUT = "PUT"
+	// POST represents the POST HTTP method
+	POST = "POST"
+	// DELETE representes the DELETE HTTP method
+	DELETE = "DELETE"
 )
 
 // Conn represents the current piladb connection, containing
@@ -64,7 +74,7 @@ func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 // databasesHandler returns the information of the running databases.
 func (c *Conn) databasesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "PUT" {
+	if r.Method == PUT {
 		c.createDatabaseHandler(w, r)
 		return
 	}
@@ -118,7 +128,7 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 			return
 		}
 
-		if r.Method == "DELETE" {
+		if r.Method == DELETE {
 			_ = c.Pila.RemoveDatabase(db.ID)
 			log.Println(r.Method, r.URL, http.StatusNoContent)
 			w.WriteHeader(http.StatusNoContent)
@@ -152,7 +162,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 			return
 		}
 
-		if r.Method == "PUT" {
+		if r.Method == PUT {
 			c.createStackHandler(w, r, db.ID.String())
 			return
 		}
@@ -262,7 +272,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			c.statusStackHandler(w, r, stack)
 			return
 
-		case r.Method == "POST":
+		case r.Method == POST:
 			_ = r.ParseForm()
 			if _, ok := r.Form["rotate"]; ok {
 				c.rotateStackHandler(w, r, stack)
@@ -272,15 +282,22 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 			c.checkMaxStackSize(c.addElementStackHandler)(w, r, stack)
 			return
 
-		case r.Method == "PUT":
+		case r.Method == PUT:
 			_ = r.ParseForm()
 			if _, ok := r.Form["block"]; ok {
 				c.blockStackHandler(w, r, stack)
 				return
 			}
+			if _, ok := r.Form["unblock"]; ok {
+				c.unblockStackHandler(w, r, stack)
+				return
+			}
+
+			log.Println(r.Method, r.URL, http.StatusBadRequest, "block and unblock supported only")
+			w.WriteHeader(http.StatusBadRequest)
 			return
 
-		case r.Method == "DELETE":
+		case r.Method == DELETE:
 			_ = r.ParseForm()
 			if _, ok := r.Form["flush"]; ok {
 				c.flushStackHandler(w, r, stack)
@@ -290,6 +307,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 				c.deleteStackHandler(w, r, db, stack)
 				return
 			}
+
 			c.popStackHandler(w, r, stack)
 			return
 		}
@@ -364,10 +382,13 @@ func (c *Conn) fullStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 // rotateStackHandler rotates the bottommost element of the Stack
 // to the top.
 func (c *Conn) rotateStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
-	ok := stack.Rotate()
-	if !ok {
-		log.Println(r.Method, r.URL, http.StatusNoContent)
-		w.WriteHeader(http.StatusNoContent)
+	if err := stack.Rotate(); err != nil {
+		var status = http.StatusNoContent
+		if strings.Contains(err.Error(), "blocked") {
+			status = http.StatusLocked
+		}
+		log.Println(r.Method, r.URL, status)
+		w.WriteHeader(status)
 		return
 	}
 	stack.Update(c.opDate)
@@ -387,9 +408,16 @@ func (c *Conn) rotateStackHandler(w http.ResponseWriter, r *http.Request, stack 
 // addElementStackHandler adds an element into a Stack and returns 200 and the element.
 // It can be as a PUSH or a BASE operation.
 func (c *Conn) addElementStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	// All resulting operations in this function will attempt
+	// to mutate the Stack, so first rule out that is it not blocked.
+	if stack.Blocked() {
+		log.Println(r.Method, r.URL, http.StatusLocked)
+		w.WriteHeader(http.StatusLocked)
+		return
+	}
+
 	var element pila.Element
-	err := element.Decode(r.Body)
-	if err != nil {
+	if err := element.Decode(r.Body); err != nil {
 		log.Println(r.Method, r.URL, http.StatusBadRequest,
 			"error on decoding element:", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -419,7 +447,7 @@ func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element
 
 	// Sweep + PUSH
 	if sweepBeforePush := c.Config.Get("SWEEP_BEFORE_PUSH"); sweepBeforePush != nil && sweepBeforePush == true {
-		if swept, ok := stack.SweepPush(element.Value); ok {
+		if swept, err := stack.SweepPush(element.Value); err == nil {
 			log.Println(r.Method, r.URL, "XXX", "sweep base element:", swept)
 		}
 		c.Config.Set("SWEEP_BEFORE_PUSH", false)
@@ -434,8 +462,12 @@ func (c *Conn) addElementStackHelper(r *http.Request, stack *pila.Stack, element
 func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	value, err := stack.Pop()
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusNoContent)
-		w.WriteHeader(http.StatusNoContent)
+		var status = http.StatusNoContent
+		if strings.Contains(err.Error(), "blocked") {
+			status = http.StatusLocked
+		}
+		log.Println(r.Method, r.URL, status)
+		w.WriteHeader(status)
 		return
 	}
 	stack.Update(c.opDate)
@@ -454,6 +486,12 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 // flushStackHandler flushes the Stack, setting the size to 0 and emptying all
 // the content.
 func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	if stack.Blocked() {
+		log.Println(r.Method, r.URL, http.StatusLocked)
+		w.WriteHeader(http.StatusLocked)
+		return
+	}
+
 	stack.Flush()
 	stack.Update(c.opDate)
 
@@ -480,8 +518,28 @@ func (c *Conn) blockStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	w.Write(b)
 }
 
+// unblockStackHandler unblocks the Stack, allowing mutable operations in the stack.
+func (c *Conn) unblockStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+	stack.Unblock()
+	stack.Update(c.opDate)
+
+	log.Println(r.Method, r.URL, http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Do not check error as we consider that a blocked
+	// stack has no JSON encoding issues.
+	b, _ := stack.Status().ToJSON()
+	w.Write(b)
+}
+
 // deleteStackHandler deletes the Stack from a database.
 func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, database *pila.Database, stack *pila.Stack) {
+	if stack.Blocked() {
+		log.Println(r.Method, r.URL, http.StatusLocked)
+		w.WriteHeader(http.StatusLocked)
+		return
+	}
+
 	stack.Flush()
 
 	// Do not check output as we validated that

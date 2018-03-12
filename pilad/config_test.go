@@ -306,6 +306,52 @@ func TestCheckMaxStackSize(t *testing.T) {
 	}
 }
 
+func TestCheckMaxStackSize_Block(t *testing.T) {
+	s := pila.NewStack("stack", time.Now())
+	s.Push("foo")
+
+	db := pila.NewDatabase("mydb")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	f := func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	inputOutput := []struct {
+		input, output int
+	}{
+		{1, http.StatusLocked},
+	}
+
+	for _, io := range inputOutput {
+		conn.Config.Set(vars.MaxStackSize, io.input)
+		request, err := http.NewRequest("POST",
+			fmt.Sprintf("/databases/%s/stacks/%s",
+				db.ID.String(),
+				s.ID.String()),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.checkMaxStackSize(f)(response, request, s)
+
+		if response.Code != io.output {
+			t.Errorf("response code is %v, expected %v", response.Code, io.output)
+		}
+	}
+}
+
 func TestCheckMaxStackSize_PushWhenFull(t *testing.T) {
 	s := pila.NewStack("stack", time.Now())
 	s.Push("foo")
