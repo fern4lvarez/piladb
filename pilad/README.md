@@ -186,6 +186,7 @@ is used as default, the latter as fallback.
       "name":"stack1",
       "peek":"foo",
       "size":1,
+      "blocked": false,
       "created_at":"2016-12-08T17:45:50.668575679+01:00",
       "updated_at":"2016-12-08T18:21:270.813642732+01:00",
       "read_at":"2016-12-08T18:21:270.813642732+01:00"
@@ -195,6 +196,7 @@ is used as default, the latter as fallback.
       "name":"stack2",
       "peek":8,
       "size":2,
+      "blocked": false,
       "created_at": "2016-12-08T17:48:65.122475579+01:00",
       "updated_at":"2016-12-08T18:16:120.4267723134+01:00",
       "read_at":"2016-12-08T18:17:32.456823273254+01:00"
@@ -241,6 +243,7 @@ Creates a new $STACK_NAME stack belonging to database $DATABASE_ID.
   "peek": null,
   "name": "stack",
   "id": "714e49277eb730717e413b167b76ef78",
+  "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:45:50.668575679+01:00",
   "read_at": "2016-12-08T17:45:50.668575679+01:00"
@@ -266,6 +269,7 @@ is used as default, the latter as fallback.
   "peek": null,
   "name": "stack",
   "id": "714e49277eb730717e413b167b76ef78",
+  "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:45:50.668575679+01:00",
   "read_at":"2016-12-08T18:17:32.456823273254+01:00"
@@ -360,6 +364,8 @@ Returns `410 GONE` if the database or stack do not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the element.
 
+Returns `423 LOCKED` if the stack is blocked.
+
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID?base` + `{"element":$ELEMENT}`
 
 > BASE operation.
@@ -381,6 +387,8 @@ Returns `406 NOT ACCEPTABLE` if the stack is full.
 Returns `410 GONE` if the database or stack do not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the element.
+
+Returns `423 LOCKED` if the stack is blocked.
 
 #### POST `/databases/$DATABASE_ID/stacks/$STACK_ID?rotate`
 
@@ -405,6 +413,8 @@ Returns `410 GONE` if the database or stack do not exist.
 
 Returns `400 BAD REQUEST` if there's an error serializing the element.
 
+Returns `423 LOCKED` if the stack is blocked.
+
 #### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID`
 
 > POP operation.
@@ -425,6 +435,8 @@ Returns `204 NO CONTENT` if the stack is empty and no element was popped.
 
 Returns `410 GONE` if the database or stack do not exist.
 
+Returns `423 LOCKED` if the stack is blocked.
+
 #### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID?flush`
 
 > FLUSH operation.
@@ -441,6 +453,7 @@ is used as default, the latter as fallback.
   "peek": null,
   "name": "stack",
   "id": "714e49277eb730717e413b167b76ef78",
+  "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:46:23.133256135+01:00",
   "read_at": "2016-12-08T17:46:23.133256135+01:00"
@@ -448,6 +461,8 @@ is used as default, the latter as fallback.
 ```
 
 Returns `410 GONE` if the database or stack do not exist.
+
+Returns `423 LOCKED` if the stack is blocked.
 
 #### DELETE `/databases/$DATABASE_ID/stacks/$STACK_ID?full`
 
@@ -459,3 +474,55 @@ You can use either the ID or the Name of the stack and database, although the fo
 is used as default, the latter as fallback.
 
 Returns `410 GONE` if the database or stack do not exist.
+
+Returns `423 LOCKED` if the stack is blocked.
+
+#### PUT `/databases/$DATABASE_ID/stacks/$STACK_ID?block`
+
+> BLOCK operation.
+
+Blocks `$STACK_ID` stack of database `$DATABASE_ID` from mutable operations
+and returns  `200 OK` and the stack status.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "size": 0,
+  "peek": null,
+  "name": "stack",
+  "id": "714e49277eb730717e413b167b76ef78",
+  "blocked": true,
+  "created_at": "2016-12-08T17:45:50.668575679+01:00",
+  "updated_at": "2016-12-08T17:46:23.133256135+01:00",
+  "read_at": "2016-12-08T17:46:23.133256135+01:00"
+}
+```
+
+Returns `400 BAD REQUEST` if the operation parameter is not `block`.
+
+#### PUT `/databases/$DATABASE_ID/stacks/$STACK_ID?unblock`
+
+> UNBLOCK operation.
+
+Unblock `$STACK_ID` stack of database `$DATABASE_ID` from  mutable operations
+and returns  `200 OK` and the stack status.
+You can use either the ID or the Name of the stack and database, although the former
+is used as default, the latter as fallback.
+
+```json
+200 OK
+{
+  "size": 0,
+  "peek": null,
+  "name": "stack",
+  "id": "714e49277eb730717e413b167b76ef78",
+  "blocked": false,
+  "created_at": "2016-12-08T17:45:50.668575679+01:00",
+  "updated_at": "2016-12-08T17:46:23.133256135+01:00",
+  "read_at": "2016-12-08T17:46:23.133256135+01:00"
+}
+```
+
+Returns `400 BAD REQUEST` if the operation parameter is not `unblock`.
