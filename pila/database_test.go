@@ -9,8 +9,8 @@ import (
 func TestNewDatabase(t *testing.T) {
 	db := NewDatabase("test-1")
 
-	if db.ID.String() != "2b87e5d8b7d3d853514c8d0801fbcf46" {
-		t.Errorf("db.ID is %v, expected %v", db.ID, "2b87e5d8b7d3d853514c8d0801fbcf46")
+	if db.ID.String() != "485bab97-e873-5e1b-abe7-0283461fc53b" {
+		t.Errorf("db.ID is %v, expected %v", db.ID, "485bab97-e873-5e1b-abe7-0283461fc53b")
 	}
 	if db.Name != "test-1" {
 		t.Errorf("db.Name is %v, expected %v", db.Name, "test-1")
@@ -167,7 +167,7 @@ func TestDatabaseStatus(t *testing.T) {
 	s2ID := db.CreateStack("s2", time.Now())
 
 	expectedStatus := DatabaseStatus{
-		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",
+		ID:           "64626840-b923-5221-9637-1397cfffa702",
 		Name:         "db",
 		NumberStacks: 3,
 		Stacks:       []string{s0ID.String(), s2ID.String(), s1ID.String()},
@@ -182,7 +182,7 @@ func TestDatabaseStatus_Empty(t *testing.T) {
 	db := NewDatabase("db")
 
 	expectedStatus := DatabaseStatus{
-		ID:           "8cfa8cb55c92fa403369a13fd12a8e01",
+		ID:           "64626840-b923-5221-9637-1397cfffa702",
 		Name:         "db",
 		NumberStacks: 0,
 		Stacks:       []string{},

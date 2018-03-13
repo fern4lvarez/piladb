@@ -110,7 +110,7 @@ Returns `200 OK` and the status of the currently running databases.
     {
       "number_of_stacks": 0,
       "name": "db0",
-      "id": "714e49277eb730717e413b167b76ef78"
+      "id": "91010edc-36f6-55cc-9b10-f2648eb2b322"
     },
     {
       "number_of_stacks": 0,
@@ -138,7 +138,7 @@ is used as default, the latter as fallback.
 {
   "number_of_stacks": 0,
   "name": "db0",
-  "id": "714e49277eb730717e413b167b76ef78"
+  "id": "91010edc-36f6-55cc-9b10-f2648eb2b322"
 }
 ```
 
@@ -161,7 +161,7 @@ Returns `201 CREATED` and creates a new $DATABASE_NAME database.
 {
   "number_of_stacks": 0,
   "name": "db0",
-  "id": "714e49277eb730717e413b167b76ef78"
+  "id": "91010edc-36f6-55cc-9b10-f2648eb2b322"
 }
 ```
 
@@ -182,7 +182,7 @@ is used as default, the latter as fallback.
 {
   "stacks" : [
     {
-      "id":"f0306fec639bd57fc2929c8b897b9b37",
+      "id":"ef7199db-821c-50df-8dc0-ddc77fc6397e",
       "name":"stack1",
       "peek":"foo",
       "size":1,
@@ -192,7 +192,7 @@ is used as default, the latter as fallback.
       "read_at":"2016-12-08T18:21:270.813642732+01:00"
     },
     {
-      "id":"dde8f895aea2ffa5546336146b9384e7",
+      "id":"15860a24-e97c-5a2a-be81-3d5066246cb6",
       "name":"stack2",
       "peek":8,
       "size":2,
@@ -242,7 +242,7 @@ Creates a new $STACK_NAME stack belonging to database $DATABASE_ID.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78",
+  "id": "91010edc-36f6-55cc-9b10-f2648eb2b322",
   "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:45:50.668575679+01:00",
@@ -268,7 +268,7 @@ is used as default, the latter as fallback.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78",
+  "id": "91010edc-36f6-55cc-9b10-f2648eb2b322",
   "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:45:50.668575679+01:00",
@@ -452,7 +452,7 @@ is used as default, the latter as fallback.
   "size": 0,
   "peek": null,
   "name": "stack",
-  "id": "714e49277eb730717e413b167b76ef78",
+  "id": "91010edc-36f6-55cc-9b10-f2648eb2b322",
   "blocked": false,
   "created_at": "2016-12-08T17:45:50.668575679+01:00",
   "updated_at": "2016-12-08T17:46:23.133256135+01:00",
