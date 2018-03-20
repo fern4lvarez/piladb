@@ -72,12 +72,12 @@ func (s *Stack) Push(element interface{}) {
 // Pop removes and returns the element on top of the stack,
 // updating its head to the Frame underneath. If the stack was empty,
 // it returns false.
-func (s *Stack) Pop() interface{} {
+func (s *Stack) Pop() (interface{}, bool) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
 	if s.size == 0 {
-		return nil
+		return nil, false
 	}
 
 	element := s.head.data
@@ -90,7 +90,7 @@ func (s *Stack) Pop() interface{} {
 		s.tail.up = nil
 	}
 
-	return element
+	return element, true
 }
 
 // Base bases the stack on top of a new element, so

@@ -10,7 +10,7 @@ import (
 type TestBaseStack struct{}
 
 func (s *TestBaseStack) Push(element interface{})                          { return }
-func (s *TestBaseStack) Pop() interface{}                                  { return nil }
+func (s *TestBaseStack) Pop() (interface{}, bool)                          { return nil, false }
 func (s *TestBaseStack) Base(element interface{})                          { return }
 func (s *TestBaseStack) Sweep() (interface{}, bool)                        { return nil, false }
 func (s *TestBaseStack) SweepPush(element interface{}) (interface{}, bool) { return nil, false }
@@ -125,6 +125,7 @@ func TestStackPush_Blocked(t *testing.T) {
 func TestStackPop(t *testing.T) {
 	stack := NewStack("test-stack", time.Now())
 	stack.Push("test")
+	stack.Push(nil)
 	stack.Push(8)
 
 	element, err := stack.Pop()
@@ -134,8 +135,8 @@ func TestStackPop(t *testing.T) {
 	if element != 8 {
 		t.Errorf("element is %v, expected %v", element, 8)
 	}
-	if stack.Size() != 1 {
-		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 1)
+	if stack.Size() != 2 {
+		t.Errorf("stack.Size() is %d, expected %d", stack.Size(), 2)
 	}
 }
 

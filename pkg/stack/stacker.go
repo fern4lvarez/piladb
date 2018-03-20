@@ -7,7 +7,7 @@ type Stacker interface {
 	// Push an element into a Stack
 	Push(element interface{})
 	// Pop the topmost element of a stack
-	Pop() interface{}
+	Pop() (interface{}, bool)
 	// Base bases a new element at the bottom of the stack
 	Base(element interface{})
 	// Sweep the bottommost element of a stack

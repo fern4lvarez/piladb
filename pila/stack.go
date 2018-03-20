@@ -98,9 +98,8 @@ func (s *Stack) Pop() (interface{}, error) {
 		return nil, errors.New("Stack is blocked")
 	}
 
-	element := s.base.Pop()
-
-	if element != nil {
+	element, ok := s.base.Pop()
+	if ok {
 		return element, nil
 	}
 	return nil, errors.New("Stack is empty")

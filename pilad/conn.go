@@ -227,7 +227,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
-// the PUSH, POP, PEEK, SIZE and BLOCK methods, and the stack deletion.
+// the PUSH, POP, PEEK, SIZE, BLOCK and UNBLOCK methods, and the stack deletion.
 func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c.opDate = time.Now().UTC()
