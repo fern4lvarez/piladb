@@ -114,8 +114,8 @@ func TestStackPop(t *testing.T) {
 
 func TestStackPop_False(t *testing.T) {
 	stack := NewStack()
-	_, ok := stack.Pop()
-	if ok {
+
+	if _, ok := stack.Pop(); ok {
 		t.Error("stack.Pop() is ok")
 	}
 }

@@ -141,6 +141,12 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 // and execute the wrapped handler if check is validated.
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
+		if stack.Blocked() {
+			log.Println(r.Method, r.URL, http.StatusLocked)
+			w.WriteHeader(http.StatusLocked)
+			return
+		}
+
 		if c.isStackFull(stack) {
 			if c.Config.PushWhenFull() {
 				// set internal config value to share with

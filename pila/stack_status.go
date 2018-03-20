@@ -18,6 +18,7 @@ type StackStatus struct {
 	Name      string      `json:"name"`
 	Peek      interface{} `json:"peek"`
 	Size      int         `json:"size"`
+	Blocked   bool        `json:"blocked"`
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
 	ReadAt    time.Time   `json:"read_at"`

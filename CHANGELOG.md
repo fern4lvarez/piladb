@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Add `EMPTY` operation
 - Add `FULL` operation
 - Add `ROTATE` operation
+- Add `BLOCK` and `UNBLOCK` operations
 
 ### Changed
 - pkg/uuid: Replace md5 with sha1 and be compliant to Version 5 of RFC 4122

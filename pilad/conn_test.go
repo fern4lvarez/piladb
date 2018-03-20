@@ -488,7 +488,7 @@ func TestStacksHandler_GET(t *testing.T) {
 	inputOutput := []struct {
 		input, output string
 	}{
-		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-50df-8dc0-ddc77fc6397e","name":"stack1","peek":"foo","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-5a2a-be81-3d5066246cb6","name":"stack2","peek":8,"size":2,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+		{"/databases/db/stacks", fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-50df-8dc0-ddc77fc6397e","name":"stack1","peek":"foo","size":1,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-5a2a-be81-3d5066246cb6","name":"stack2","peek":8,"size":2,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
 			date.Format(now1.Local()), date.Format(after1.Local()), date.Format(after1.Local()),
 			date.Format(now2.Local()), date.Format(after2.Local()), date.Format(after2.Local()))},
 		{"/databases/db/stacks?kv", `{"stacks":{"stack1":"foo","stack2":8}}`},
@@ -569,7 +569,7 @@ func TestStacksHandler_GET_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected := fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-50df-8dc0-ddc77fc6397e","name":"stack1","peek":"bar","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-5a2a-be81-3d5066246cb6","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
+	if expected := fmt.Sprintf(`{"stacks":[{"id":"ef7199db-821c-50df-8dc0-ddc77fc6397e","name":"stack1","peek":"bar","size":1,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"},{"id":"15860a24-e97c-5a2a-be81-3d5066246cb6","name":"stack2","peek":"{\"a\":\"b\"}","size":1,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"}]}`,
 		date.Format(now1.Local()), date.Format(after1.Local()), date.Format(after1.Local()),
 		date.Format(now2.Local()), date.Format(after2.Local()), date.Format(after2.Local())); string(stacks) != expected {
 		t.Errorf("stacks are %s, expected %s", string(stacks), expected)
@@ -661,7 +661,7 @@ func TestStacksHandler_PUT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 
 	if string(stack) != expectedStack {
@@ -702,7 +702,7 @@ func TestStacksHandler_PUT_Name(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 
 	if string(stack) != expectedStack {
@@ -742,7 +742,7 @@ func TestCreateStackHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
+	expectedStack := fmt.Sprintf(`{"id":"34497edc-f8bc-5918-a7d0-a1e70d0023da","name":"test-stack","peek":null,"size":0,"blocked":false,"created_at":"%v","updated_at":"%v","read_at":"%v"}`,
 		date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()), date.Format(conn.opDate.Local()))
 	if string(stack) != expectedStack {
 		t.Errorf("stack is %s, expected %s", string(stack), expectedStack)
@@ -1035,6 +1035,122 @@ func TestStackHandler_POST(t *testing.T) {
 	}
 }
 
+func TestStackHandler_PUT(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+	conn.opDate = time.Now().UTC()
+
+	inputOutput := []struct {
+		input struct {
+			database, stack, op string
+		}
+		output struct {
+			code int
+		}
+	}{
+		{struct {
+			database, stack, op string
+		}{db.ID.String(), s.ID.String(), "block"},
+			struct {
+				code int
+			}{http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.Name, s.Name, "block"},
+			struct {
+				code int
+			}{http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.ID.String(), s.ID.String(), "unblock"},
+			struct {
+				code int
+			}{http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.Name, s.Name, "unblock"},
+			struct {
+				code int
+			}{http.StatusOK},
+		},
+		{struct {
+			database, stack, op string
+		}{db.ID.String(), s.ID.String(), ""},
+			struct {
+				code int
+			}{http.StatusBadRequest},
+		},
+		{struct {
+			database, stack, op string
+		}{db.Name, s.Name, ""},
+			struct {
+				code int
+			}{http.StatusBadRequest},
+		},
+	}
+
+	for _, io := range inputOutput {
+		request, err := http.NewRequest("PUT",
+			fmt.Sprintf("/databases/%s/stacks/%s?%s",
+				io.input.database,
+				io.input.stack,
+				io.input.op),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.Header.Set("Content-Type", "application/json")
+
+		response := httptest.NewRecorder()
+
+		params := map[string]string{
+			"database_id": io.input.database,
+			"stack_id":    io.input.stack,
+		}
+
+		stackHandle := conn.stackHandler(&params)
+		stackHandle.ServeHTTP(response, request)
+
+		if response.Code != io.output.code {
+			t.Errorf("response code is %v, expected %v", response.Code, io.output.code)
+		}
+
+		responseJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if io.input.op != "" {
+			s.Update(conn.opDate)
+			stackStatus := s.Status()
+
+			expectedStackStatusJSON, err := stackStatus.ToJSON()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(responseJSON) != string(expectedStackStatusJSON) {
+				t.Errorf("on op %s response is %s, expected %s", io.input.op, string(responseJSON), string(expectedStackStatusJSON))
+			}
+
+			if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+				t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+			}
+
+		}
+	}
+}
+
 func TestStackHandler_DELETE(t *testing.T) {
 	element := pila.Element{Value: "test-element"}
 	expectedElementJSON, _ := element.ToJSON()
@@ -1145,7 +1261,7 @@ func TestStackHandler_DELETE(t *testing.T) {
 				t.Errorf("db contains %v, expected not to", io.input.stack)
 			}
 		} else {
-			if peek, ok := db.Stacks[s.ID].Pop(); ok {
+			if peek, err := db.Stacks[s.ID].Pop(); err == nil {
 				t.Errorf("stack contains %v, expected to be empty", peek)
 			}
 
@@ -1633,8 +1749,8 @@ func TestRotateStackHandler(t *testing.T) {
 		t.Errorf("rotated as peek element is %v, expected %v", peekElement, expectedPeekElement.Value)
 	}
 
-	if bottomElement, ok := db.Stacks[s.ID].Sweep(); !ok {
-		t.Errorf("ok is %v, expected true", ok)
+	if bottomElement, errSweep := db.Stacks[s.ID].Sweep(); errSweep != nil {
+		t.Errorf("err is %v, expected nil", err)
 	} else if bottomElement != expectedBottomElement.Value {
 		t.Errorf("rotated as bottom element is %v, expected %v", bottomElement, expectedBottomElement.Value)
 	}
@@ -1693,6 +1809,47 @@ func TestRotateStackHandler_Empty(t *testing.T) {
 	}
 
 	if response.Code != http.StatusNoContent {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
+	}
+
+	if size := db.Stacks[s.ID].Size(); size != 0 {
+		t.Errorf("Stack size is %d, expected %d", size, 0)
+	}
+}
+
+func TestRotateStackHandler_Blocked(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s?rotate",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.rotateStackHandler(response, request, s)
+
+	if peekElement := db.Stacks[s.ID].Peek(); peekElement != nil {
+		t.Errorf("rotated as peek element is %v, expected %v", peekElement, nil)
+	}
+
+	if response.Code != http.StatusLocked {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
 	}
 
@@ -1857,6 +2014,43 @@ func TestAddElementStackHandler_PUSHSweepBefore(t *testing.T) {
 
 	if string(elementJSON) != string(expectedElementJSON) {
 		t.Errorf("added element is %v, expected %v", string(elementJSON), string(expectedElementJSON))
+	}
+}
+
+func TestAddElementStackHandler_Blocked(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	request, err := http.NewRequest("POST",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+
+	conn.addElementStackHandler(response, request, s)
+
+	if addedElement := db.Stacks[s.ID].Peek(); addedElement != nil {
+		t.Errorf("Pushed element is %v, expected nil", addedElement)
+	}
+
+	if response.Code != http.StatusLocked {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusLocked)
 	}
 }
 
@@ -2080,7 +2274,7 @@ func TestPopStackHandler(t *testing.T) {
 
 		conn.popStackHandler(response, request, s)
 
-		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+		if peek, err2 := db.Stacks[s.ID].Pop(); err2 == nil {
 			t.Errorf("stack contains %v, expected to be empty", peek)
 		}
 
@@ -2106,7 +2300,7 @@ func TestPopStackHandler(t *testing.T) {
 	}
 }
 
-func TestPopStackHandler_EmptyStack(t *testing.T) {
+func TestPopStackHandler_Empty(t *testing.T) {
 	s := pila.NewStack("stack", time.Now().UTC())
 
 	db := pila.NewDatabase("db")
@@ -2133,6 +2327,38 @@ func TestPopStackHandler_EmptyStack(t *testing.T) {
 
 	if response.Code != http.StatusNoContent {
 		t.Errorf("response code is %v, expected %v", response.Code, http.StatusNoContent)
+	}
+}
+
+func TestPopStackHandler_Blocked(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	request, err := http.NewRequest("DELETE",
+		fmt.Sprintf("/databases/%s/stacks/%s",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	conn.popStackHandler(response, request, s)
+
+	if response.Code != http.StatusLocked {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusLocked)
 	}
 }
 
@@ -2182,7 +2408,7 @@ func TestFlushStackHandler(t *testing.T) {
 
 		conn.flushStackHandler(response, request, s)
 
-		if peek, ok := db.Stacks[s.ID].Pop(); ok {
+		if peek, err2 := db.Stacks[s.ID].Pop(); err2 == nil {
 			t.Errorf("stack contains %v, expected to be empty", peek)
 		}
 
@@ -2211,6 +2437,106 @@ func TestFlushStackHandler(t *testing.T) {
 		s.Push("one")
 		s.Push("two")
 		s.Push("three")
+	}
+}
+
+func TestFlushStackHandler_Blocked(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	request, err := http.NewRequest("DELETE",
+		fmt.Sprintf("/databases/%s/stacks/%s?flush",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	conn.flushStackHandler(response, request, s)
+
+	if response.Code != http.StatusLocked {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusLocked)
+	}
+}
+
+func TestBlockStackHandler(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	expectedStackStatus := s.Status()
+	expectedStackStatus.Blocked = true
+
+	expectedStackStatusJSON, err := expectedStackStatus.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	varss := []map[string]string{
+		{
+			"database_id": db.ID.String(),
+			"stack_id":    s.ID.String(),
+		},
+		{
+			"database_id": db.Name,
+			"stack_id":    s.Name,
+		},
+	}
+
+	for _, vars := range varss {
+		request, err := http.NewRequest("PUT",
+			fmt.Sprintf("/databases/%s/stacks/%s?block",
+				vars["database_id"],
+				vars["stack_id"]),
+			nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response := httptest.NewRecorder()
+
+		conn.blockStackHandler(response, request, s)
+
+		if db.Stacks[s.ID].Blocked() != true {
+			t.Error("stack isn't blocked")
+		}
+
+		if contentType := response.Header().Get("Content-Type"); contentType != "application/json" {
+			t.Errorf("Content-Type is %v, expected %v", contentType, "application/json")
+		}
+
+		if response.Code != http.StatusOK {
+			t.Errorf("response code is %v, expected %v", response.Code, http.StatusOK)
+		}
+
+		stackStatusJSON, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(stackStatusJSON) != string(expectedStackStatusJSON) {
+			t.Errorf("stack status is %s, expected %s", string(stackStatusJSON), string(expectedStackStatusJSON))
+		}
 	}
 }
 
@@ -2265,6 +2591,38 @@ func TestDeleteStackHandler(t *testing.T) {
 		s = pila.NewStack("stack", time.Now().UTC())
 		_ = db.AddStack(s)
 		s.Push("one")
+	}
+}
+
+func TestDeleteStackHandler_Blocked(t *testing.T) {
+	s := pila.NewStack("stack", time.Now().UTC())
+
+	db := pila.NewDatabase("db")
+	_ = db.AddStack(s)
+
+	p := pila.NewPila()
+	_ = p.AddDatabase(db)
+
+	conn := NewConn()
+	conn.Pila = p
+
+	s.Block()
+
+	request, err := http.NewRequest("DELETE",
+		fmt.Sprintf("/databases/%s/stacks/%s?full",
+			db.ID.String(),
+			s.ID.String()),
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+
+	conn.deleteStackHandler(response, request, db, s)
+
+	if response.Code != http.StatusLocked {
+		t.Errorf("response code is %v, expected %v", response.Code, http.StatusLocked)
 	}
 }
 
