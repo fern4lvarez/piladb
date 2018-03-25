@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -35,7 +36,19 @@ type Conn struct {
 	// resources management.
 	Status *Status
 
+	// srv representes the http Server where the connection
+	// is running.
+	srv *http.Server
+	// opDate holds the date an ocurring
+	// operation was requested.
 	opDate time.Time
+	// idle is a channel that will make server
+	// idle until all connections are freed up.
+	// see pilad/shutdown.go
+	idle chan struct{}
+	// stop holds a signal to interrupt or terminate
+	// the server.
+	stop chan os.Signal
 }
 
 // NewConn creates and returns a new piladb connection.
@@ -44,6 +57,8 @@ func NewConn() *Conn {
 	conn.Pila = pila.NewPila()
 	conn.Config = config.NewConfig()
 	conn.Status = NewStatus(v(), time.Now().UTC(), MemStats())
+	conn.idle = make(chan struct{})
+	conn.stop = make(chan os.Signal, 1)
 	return conn
 }
 

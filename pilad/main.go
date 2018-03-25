@@ -5,8 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	"time"
 )
 
 func main() {
@@ -16,15 +14,7 @@ func main() {
 		return
 	}
 
-	conn := NewConn()
-	conn.buildConfig()
-	logo(conn)
-
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", conn.Config.Port()),
-		Handler:      Router(conn),
-		ReadTimeout:  conn.Config.ReadTimeout() * time.Second,
-		WriteTimeout: conn.Config.WriteTimeout() * time.Second,
+	if err := start(NewConn()); err != nil {
+		log.Println(err)
 	}
-	log.Fatal(srv.ListenAndServe())
 }
