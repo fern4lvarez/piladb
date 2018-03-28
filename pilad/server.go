@@ -34,9 +34,10 @@ func listenGracefulShutdown(conn *Conn) {
 	signal.Notify(conn.stop, os.Interrupt, syscall.SIGTERM)
 	<-conn.stop
 
-	log.Printf("Shutting down pilad and draining connections with a timeout of %s...", conn.srv.ReadTimeout)
+	shutdownTimeout := conn.Config.ShutdownTimeout() * time.Second
+	log.Printf("Shutting down pilad and draining connections with a timeout of %s...", shutdownTimeout)
 
-	ctx, cancel := context.WithTimeout(context.Background(), conn.srv.ReadTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	conn.srv.Shutdown(ctx)

@@ -28,6 +28,14 @@ const (
 	// of WriteTimeout.
 	WriteTimeoutDefault = 45
 
+	// ShutdownTimeout is the maximun duration
+	// allowed for remaining operations to finish
+	// before pilad is shutdown.
+	ShutdownTimeout = "SHUTDOWN_TIMEOUT"
+	// ShutdownTimeoutDefault represents the default value
+	// of ShutdownTimeout.
+	ShutdownTimeoutDefault = 15
+
 	// Port is the TCP port number where pilad
 	// is running. Port number range is 1025-65536.
 	Port = "PORT"
@@ -60,6 +68,8 @@ func DefaultInt(name string) int {
 		return ReadTimeoutDefault
 	case WriteTimeout:
 		return WriteTimeoutDefault
+	case ShutdownTimeout:
+		return ShutdownTimeoutDefault
 	case Port:
 		return PortDefault
 	}

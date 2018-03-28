@@ -30,6 +30,14 @@ func (c *Config) WriteTimeout() time.Duration {
 	return time.Duration(t)
 }
 
+// ShutdownTimeout returns the value of SHUTDOWN_TIMEOUT.
+// Type: time.Duration, Default: 15
+func (c *Config) ShutdownTimeout() time.Duration {
+	shutdownTimeout := c.Get(vars.ShutdownTimeout)
+	t := intValue(shutdownTimeout, vars.ShutdownTimeoutDefault)
+	return time.Duration(t)
+}
+
 // Port returns the value of PORT.
 // Type: int, Default: 1205
 func (c *Config) Port() int {

@@ -80,6 +80,30 @@ func TestWriteTimeout(t *testing.T) {
 	}
 }
 
+func TestShutdownTimeout(t *testing.T) {
+	c := NewConfig()
+
+	inputOutput := []struct {
+		input  interface{}
+		output time.Duration
+	}{
+		{8, 8},
+		{108.8, 108},
+		{"3", 3},
+		{-1, vars.ShutdownTimeoutDefault},
+		{"foo", vars.ShutdownTimeoutDefault},
+		{[]byte("foo"), vars.ShutdownTimeoutDefault},
+	}
+
+	for _, io := range inputOutput {
+		c.Set(vars.ShutdownTimeout, io.input)
+
+		if s := c.ShutdownTimeout(); s != io.output {
+			t.Errorf("ShutdownTimeout is %d, expected %d", s, io.output)
+		}
+	}
+}
+
 func TestPort(t *testing.T) {
 	c := NewConfig()
 
