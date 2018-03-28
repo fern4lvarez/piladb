@@ -21,7 +21,7 @@ const (
 	PUT = "PUT"
 	// POST represents the POST HTTP method
 	POST = "POST"
-	// DELETE representes the DELETE HTTP method
+	// DELETE represents the DELETE HTTP method
 	DELETE = "DELETE"
 )
 
@@ -36,10 +36,10 @@ type Conn struct {
 	// resources management.
 	Status *Status
 
-	// srv representes the http Server where the connection
+	// srv represents the http Server where the connection
 	// is running.
 	srv *http.Server
-	// opDate holds the date an ocurring
+	// opDate holds the date an on-going
 	// operation was requested.
 	opDate time.Time
 	// idle is a channel that will make server
