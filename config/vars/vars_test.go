@@ -19,6 +19,7 @@ func TestDefaultInt(t *testing.T) {
 		{MaxStackSize, MaxStackSizeDefault},
 		{ReadTimeout, ReadTimeoutDefault},
 		{WriteTimeout, WriteTimeoutDefault},
+		{ShutdownTimeout, ShutdownTimeoutDefault},
 		{Port, PortDefault},
 		{"foo", -1},
 	}

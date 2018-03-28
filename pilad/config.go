@@ -17,17 +17,18 @@ import (
 // They are only used to initialize the Connection
 // Config at pilad start-up.
 var (
-	maxStackSizeFlag                  int
-	readTimeoutFlag, writeTimeoutFlag int
-	portFlag                          int
-	pushWhenFullFlag                  bool
-	versionFlag                       bool
+	maxStackSizeFlag                                       int
+	readTimeoutFlag, writeTimeoutFlag, shutdownTimeoutFlag int
+	portFlag                                               int
+	pushWhenFullFlag                                       bool
+	versionFlag                                            bool
 )
 
 func init() {
 	flag.IntVar(&maxStackSizeFlag, "max-stack-size", vars.MaxStackSizeDefault, "Max size of Stacks")
 	flag.IntVar(&readTimeoutFlag, "read-timeout", vars.ReadTimeoutDefault, "Read request timeout")
 	flag.IntVar(&writeTimeoutFlag, "write-timeout", vars.WriteTimeoutDefault, "Write response timeout")
+	flag.IntVar(&shutdownTimeoutFlag, "shutdown-timeout", vars.ShutdownTimeoutDefault, "Graceful shutdown timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
 	flag.BoolVar(&pushWhenFullFlag, "push-when-full", vars.PushWhenFullDefault, "Allow push when Stack is full")
 	flag.BoolVar(&versionFlag, "v", false, "Version")
@@ -45,6 +46,7 @@ func (c *Conn) buildConfig() {
 		{maxStackSizeFlag, vars.MaxStackSize},
 		{readTimeoutFlag, vars.ReadTimeout},
 		{writeTimeoutFlag, vars.WriteTimeout},
+		{shutdownTimeoutFlag, vars.ShutdownTimeout},
 		{portFlag, vars.Port},
 		{pushWhenFullFlag, vars.PushWhenFull},
 	}
