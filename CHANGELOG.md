@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Test against Go version 1.10.x to be up-to-date with new releases
+
 ### Changed
 
 - Update Dependencies section in the README file
