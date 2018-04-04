@@ -153,3 +153,28 @@ func TestPushWhenFull(t *testing.T) {
 		}
 	}
 }
+
+func TestNoDonate(t *testing.T) {
+	c := NewConfig()
+
+	inputOutput := []struct {
+		input  interface{}
+		output bool
+	}{
+		{true, true},
+		{false, false},
+		{"true", true},
+		{"false", false},
+		{"foo", vars.NoDonateDefault},
+		{42, vars.NoDonateDefault},
+		{[]byte("true"), vars.NoDonateDefault},
+	}
+
+	for _, io := range inputOutput {
+		c.Set(vars.NoDonate, io.input)
+
+		if s := c.NoDonate(); s != io.output {
+			t.Errorf("NoDonate is %v, expected %v", s, io.output)
+		}
+	}
+}

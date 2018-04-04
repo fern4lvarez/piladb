@@ -50,6 +50,13 @@ const (
 	// PushWhenFullDefault represents the default value
 	// of PushWhenFull.
 	PushWhenFullDefault = false
+
+	// NoDonate disables the donation request message
+	// on pilad startup.
+	NoDonate = "NO_DONATE"
+	// NoDonateDefault represents the default value
+	// of NoDonate.
+	NoDonateDefault = false
 )
 
 // Env returns the environment variable name

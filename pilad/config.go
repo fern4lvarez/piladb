@@ -20,7 +20,7 @@ var (
 	maxStackSizeFlag                                       int
 	readTimeoutFlag, writeTimeoutFlag, shutdownTimeoutFlag int
 	portFlag                                               int
-	pushWhenFullFlag                                       bool
+	pushWhenFullFlag, noDonateFlag                         bool
 	versionFlag                                            bool
 )
 
@@ -31,6 +31,7 @@ func init() {
 	flag.IntVar(&shutdownTimeoutFlag, "shutdown-timeout", vars.ShutdownTimeoutDefault, "Graceful shutdown timeout")
 	flag.IntVar(&portFlag, "port", vars.PortDefault, "Port number")
 	flag.BoolVar(&pushWhenFullFlag, "push-when-full", vars.PushWhenFullDefault, "Allow push when Stack is full")
+	flag.BoolVar(&noDonateFlag, "no-donate", vars.NoDonateDefault, "Disable donation request on startup")
 	flag.BoolVar(&versionFlag, "v", false, "Version")
 }
 
@@ -49,6 +50,7 @@ func (c *Conn) buildConfig() {
 		{shutdownTimeoutFlag, vars.ShutdownTimeout},
 		{portFlag, vars.Port},
 		{pushWhenFullFlag, vars.PushWhenFull},
+		{noDonateFlag, vars.NoDonate},
 	}
 
 	for _, fk := range flagKeys {
