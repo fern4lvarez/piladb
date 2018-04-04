@@ -13,11 +13,12 @@ All notable changes to this project will be documented in this file.
 - Add `FULL` operation
 - Add `ROTATE` operation
 - Add `BLOCK` and `UNBLOCK` operations
-- Test against Go version 1.10.x to be up-to-date with new releases
+- Add opt-out request for donation on server startup
 
 ### Changed
 - pkg/uuid: Replace md5 with sha1 and be compliant to Version 5 of RFC 4122
 - Update Dependencies section in the README file
+- Test against Go version 1.10.x to be up-to-date with new releases
 
 ## [0.1.5] - 2018-02-23
 
