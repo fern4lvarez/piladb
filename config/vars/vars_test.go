@@ -37,6 +37,7 @@ func TestDefaultBool(t *testing.T) {
 		output bool
 	}{
 		{PushWhenFull, PushWhenFullDefault},
+		{NoDonate, NoDonateDefault},
 		{"foo", false},
 	}
 

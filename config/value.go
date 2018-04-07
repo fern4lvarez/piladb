@@ -50,6 +50,13 @@ func (c *Config) Port() int {
 	return t
 }
 
+// NoDonate returns the value of NO_DONATE.
+// Type: bool, Default: false
+func (c *Config) NoDonate() bool {
+	noDonate := c.Get(vars.NoDonate)
+	return boolValue(noDonate, vars.NoDonateDefault)
+}
+
 // PushWhenFull returns the value of PUSH_WHEN_FULL.
 // Type: bool, Default: false
 func (c *Config) PushWhenFull() bool {
