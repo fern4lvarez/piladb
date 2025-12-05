@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -42,13 +42,13 @@ func NewConn() *Conn {
 func (c *Conn) rootHandler(w http.ResponseWriter, r *http.Request) {
 	var links = []byte(`{"thank you":"for using piladb","www":"https://www.piladb.org","code":"https://github.com/fern4lvarez/piladb","docs":"https://docs.piladb.org"}`)
 	w.Header().Set("Content-Type", "application/json")
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Write(links)
 }
 
 // pingHandler writes pong.
 func (c *Conn) pingHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Write([]byte("pong"))
 }
 
@@ -57,7 +57,7 @@ func (c *Conn) statusHandler(w http.ResponseWriter, r *http.Request) {
 	c.Status.Update(time.Now().UTC(), MemStats())
 
 	w.Header().Set("Content-Type", "application/json")
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Write(c.Status.ToJSON())
 }
 
@@ -69,7 +69,7 @@ func (c *Conn) databasesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Write(c.Pila.Status().ToJSON())
 }
 
@@ -78,7 +78,7 @@ func (c *Conn) databasesHandler(w http.ResponseWriter, r *http.Request) {
 func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	if name == "" {
-		log.Println(r.Method, r.URL, http.StatusBadRequest, "missing name")
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest, "error", "missing name")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -86,13 +86,13 @@ func (c *Conn) createDatabaseHandler(w http.ResponseWriter, r *http.Request) {
 	db := pila.NewDatabase(name)
 	err := c.Pila.AddDatabase(db)
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusConflict, err)
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusConflict, "error", err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	log.Println(r.Method, r.URL, http.StatusCreated)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusCreated)
 	w.WriteHeader(http.StatusCreated)
 	w.Write(db.Status().ToJSON())
 }
@@ -119,13 +119,13 @@ func (c *Conn) databaseHandler(databaseID string) http.Handler {
 
 		if r.Method == "DELETE" {
 			_ = c.Pila.RemoveDatabase(db.ID)
-			log.Println(r.Method, r.URL, http.StatusNoContent)
+			slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusNoContent)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		log.Println(r.Method, r.URL, http.StatusOK)
+		slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 		w.Write(db.Status().ToJSON())
 	})
 }
@@ -166,15 +166,15 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 
 		res, err := status.ToJSON()
 		if err != nil {
-			log.Println(r.Method, r.URL, http.StatusBadRequest,
-				"error on response serialization:", err)
+			slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+				"error", "response serialization failed", "details", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(res)
-		log.Println(r.Method, r.URL, http.StatusOK)
+		slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 
 	})
 }
@@ -184,7 +184,7 @@ func (c *Conn) stacksHandler(databaseID string) http.Handler {
 func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databaseID string) {
 	name := r.FormValue("name")
 	if name == "" {
-		log.Println(r.Method, r.URL, http.StatusBadRequest, "missing name")
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest, "error", "missing name")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -198,7 +198,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 	stack := pila.NewStack(name, c.opDate)
 	err := db.AddStack(stack)
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusConflict, err)
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusConflict, "error", err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
@@ -212,7 +212,7 @@ func (c *Conn) createStackHandler(w http.ResponseWriter, r *http.Request, databa
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(res)
-	log.Println(r.Method, r.URL, http.StatusCreated)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusCreated)
 }
 
 // stackHandler handles operations on a single stack of a database. It holds
@@ -276,7 +276,7 @@ func (c *Conn) stackHandler(params *map[string]string) http.Handler {
 // statusStackHandler returns the status of the Stack.
 func (c *Conn) statusStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Read(c.opDate)
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider that a flushed
@@ -291,7 +291,7 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	element.Value = stack.Peek()
 	stack.Read(c.opDate)
 
-	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK, "value", element.Value)
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider our element
@@ -303,7 +303,7 @@ func (c *Conn) peekStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 // sizeStackHandler returns the size of the Stack.
 func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	stack.Read(c.opDate)
-	log.Println(r.Method, r.URL, http.StatusOK, stack.Size())
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK, "size", stack.Size())
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider the size
@@ -314,8 +314,8 @@ func (c *Conn) sizeStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 // pushStackHandler adds an element into a Stack and returns 200 and the element.
 func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	if r.Body == nil {
-		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"no element provided")
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+			"error", "no element provided")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -323,8 +323,8 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	var element pila.Element
 	err := element.Decode(r.Body)
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"error on decoding element:", err)
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+			"error", "element decode failed", "details", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -332,7 +332,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 	stack.Push(element.Value)
 	stack.Update(c.opDate)
 
-	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK, "value", element.Value)
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider our element
@@ -345,7 +345,7 @@ func (c *Conn) pushStackHandler(w http.ResponseWriter, r *http.Request, stack *p
 func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 	value, ok := stack.Pop()
 	if !ok {
-		log.Println(r.Method, r.URL, http.StatusNoContent)
+		slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusNoContent)
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -353,7 +353,7 @@ func (c *Conn) popStackHandler(w http.ResponseWriter, r *http.Request, stack *pi
 
 	element := pila.Element{Value: value}
 
-	log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK, "value", element.Value)
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider our element
@@ -368,7 +368,7 @@ func (c *Conn) flushStackHandler(w http.ResponseWriter, r *http.Request, stack *
 	stack.Flush()
 	stack.Update(c.opDate)
 
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
 	// Do not check error as we consider that a flushed
@@ -385,21 +385,21 @@ func (c *Conn) deleteStackHandler(w http.ResponseWriter, r *http.Request, databa
 	// stack always exists.
 	_ = database.RemoveStack(stack.ID)
 
-	log.Println(r.Method, r.URL, http.StatusNoContent)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusNoContent)
 	w.WriteHeader(http.StatusNoContent)
 	return
 }
 
 // notFoundHandler logs and returns a 404 NotFound response.
 func (c *Conn) notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, r.URL, http.StatusNotFound)
+	slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusNotFound)
 	http.NotFound(w, r)
 }
 
 // goneHandler logs and returns a 410 Gone response with information
 // about the missing resource.
 func (c *Conn) goneHandler(w http.ResponseWriter, r *http.Request, message string) {
-	log.Println(r.Method, r.URL,
-		http.StatusGone, message)
+	slog.Warn("request", "method", r.Method, "url", r.URL.String(),
+		"status", http.StatusGone, "message", message)
 	w.WriteHeader(http.StatusGone)
 }

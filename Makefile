@@ -1,32 +1,26 @@
-.PHONY: vet lint
+.PHONY: default all test testv race vet build clean
 
-default: vet get test
+default: vet test
 
-all: vet lint get test
-
-get:
-	go get ./...
+all: vet test build
 
 test:
-	go list ./... | grep -v /vendor/ | xargs -L1 go test -cover
+	go test -cover ./...
 
 testv:
-	go list ./... | grep -v /vendor/ | xargs -L1 go test -v -cover
+	go test -v -cover ./...
 
 race:
-	go list ./... | grep -v /vendor/ | xargs -L1 go test -race
+	go test -race ./...
 
 vet:
-	go list ./... | grep -v /vendor/ | xargs -L1 go vet
+	go vet ./...
 
-lint:
-	go list ./... | grep -v /vendor/ | xargs -L1 golint
+build:
+	go build -o bin/pilad ./pilad
 
-pilad:	get
-	$(GOPATH)/bin/pilad
+clean:
+	rm -rf bin/ coverage.txt
 
-gox:	get
-	gox -osarch="linux/amd64 darwin/amd64" -output "dist/{{.OS}}/{{.Arch}}/$(git rev-parse HEAD)/{{.Dir}}" ./pilad
-
-release:
-	docker run --rm --name="piladb_release" -v "$(PWD)":/gopath/src/github.com/fern4lvarez/piladb -w /gopath/src/github.com/fern4lvarez/piladb tcnksm/gox:latest make gox
+coverage:
+	go test -coverprofile=coverage.txt -covermode=atomic ./...

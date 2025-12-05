@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -67,15 +67,15 @@ type stackHandlerFunc func(w http.ResponseWriter, r *http.Request, stack *pila.S
 func (c *Conn) configHandler(w http.ResponseWriter, r *http.Request) {
 	res, err := c.Config.Values.StacksKV().ToJSON()
 	if err != nil {
-		log.Println(r.Method, r.URL, http.StatusBadRequest,
-			"error on response serialization:", err)
+		slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+			"error", "response serialization failed", "details", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
-	log.Println(r.Method, r.URL, http.StatusOK)
+	slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK)
 }
 
 // configKeyHandler handles a config value.
@@ -103,15 +103,15 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 		}
 		if r.Method == "POST" {
 			if r.Body == nil {
-				log.Println(r.Method, r.URL, http.StatusBadRequest,
-					"no element provided")
+				slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+					"error", "no element provided")
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			err := element.Decode(r.Body)
 			if err != nil {
-				log.Println(r.Method, r.URL, http.StatusBadRequest,
-					"error on decoding element:", err)
+				slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+					"error", "element decode failed", "details", err)
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
@@ -119,13 +119,13 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 			c.Config.Set(vars["key"], element.Value)
 		}
 
-		log.Println(r.Method, r.URL, http.StatusOK, element.Value)
+		slog.Info("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusOK, "value", element.Value)
 		w.Header().Set("Content-Type", "application/json")
 
 		b, err := element.ToJSON()
 		if err != nil {
-			log.Println(r.Method, r.URL, http.StatusBadRequest,
-				"error on decoding element:", err)
+			slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusBadRequest,
+				"error", "element encode failed", "details", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -138,7 +138,8 @@ func (c *Conn) configKeyHandler(configKey string) http.Handler {
 func (c *Conn) checkMaxStackSize(handler stackHandlerFunc) stackHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, stack *pila.Stack) {
 		if s := c.Config.MaxStackSize(); stack.Size() >= s && s != -1 {
-			log.Println(r.Method, r.URL, http.StatusNotAcceptable, vars.MaxStackSize, "value reached")
+			slog.Warn("request", "method", r.Method, "url", r.URL.String(), "status", http.StatusNotAcceptable,
+				"error", "max_stack_size reached", "max_stack_size", vars.MaxStackSize)
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
 		}
