@@ -1,4 +1,4 @@
-piladb [![Build Status](https://travis-ci.org/fern4lvarez/piladb.svg?branch=master)](https://travis-ci.org/fern4lvarez/piladb) [![GoDoc](https://godoc.org/github.com/fern4lvarez/piladb?status.svg)](https://godoc.org/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb) [![codecov](https://codecov.io/gh/fern4lvarez/piladb/branch/master/graph/badge.svg)](https://codecov.io/gh/fern4lvarez/piladb) [![osw](https://img.shields.io/badge/%E2%89%85osw-supported-blue.svg)](http://oscillating.works)
+piladb [![Go Reference](https://pkg.go.dev/badge/github.com/fern4lvarez/piladb.svg)](https://pkg.go.dev/github.com/fern4lvarez/piladb) [![Go Report Card](https://goreportcard.com/badge/github.com/fern4lvarez/piladb)](https://goreportcard.com/report/github.com/fern4lvarez/piladb)
 ======
 
 ![Logo](http://i.imgur.com/tjQbm56.png)
@@ -21,13 +21,15 @@ Features
 * Manage elements in JSON-compatible data types: strings, numbers, arrays, objects, etc.
 * Totally configurable using a REST API, or CLI parameters.
 * In-memory store.
+* Graceful shutdown support.
+* Structured logging using Go's `log/slog` package.
 * Written in Go, i.e. binaries are self-contained and distributable.
 
 Documentation
 -------------
 
 * [Main documentation page](http://docs.piladb.org).
-* [Go `pila` package documentation](https://godoc.org/github.com/fern4lvarez/piladb/pila).
+* [Go `pila` package documentation](https://pkg.go.dev/github.com/fern4lvarez/piladb/pila).
 * [`pilad`'s RESTful API documentation](pilad/).
 
 Install
@@ -39,11 +41,11 @@ page.
 
 ### From Source Code
 
-> You need Go installed. Version 1.6+ recommended.
+> You need Go 1.21 or later installed.
 
 ```bash
-go get github.com/fern4lvarez/piladb/...
-cd $GOPATH/src/github.com/fern4lvarez/piladb
+git clone https://github.com/fern4lvarez/piladb.git
+cd piladb
 make pilad
 ```
 
@@ -60,11 +62,11 @@ Clients
 Development
 -----------
 
-> You need Go installed. Version 1.6+ is mandatory.
+> You need Go 1.21 or later installed.
 
 ```bash
-go get github.com/fern4lvarez/piladb/...
-cd $GOPATH/src/github.com/fern4lvarez/piladb
+git clone https://github.com/fern4lvarez/piladb.git
+cd piladb
 make all
 ```
 
@@ -77,12 +79,11 @@ Dependencies
 **piladb** aims to minimize the amount of third party dependencies and to rely on
 the Go standard library as much as possible.
 
-Even though, it uses [`dep`](https://golang.github.io/dep/) to vendor its few
-dependencies.
+**piladb** uses [Go modules](https://go.dev/doc/modules/managing-dependencies) for dependency management.
 
-**piladb** also provides a `go.mod` file, which turns this project into a Go module.
-To learn more about Go modules and the `vgo` prototype, please read the
-[Go & Versioning](https://research.swtch.com/vgo) series by Russ Cox.
+Current dependencies:
+* [`gorilla/mux`](https://github.com/gorilla/mux) - HTTP router
+* [`mitchellh/go-homedir`](https://github.com/mitchellh/go-homedir) - Home directory detection
 
 Code Coverage
 -------------
